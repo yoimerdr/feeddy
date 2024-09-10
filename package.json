@@ -1,0 +1,20 @@
+{
+  "scripts": {
+    "build:ts": "rollup -c",
+    "build": "tsc -b",
+    "clean": "tsc -b --clean",
+    "dev:ts": "npm run build:ts -- -w",
+    "run": "npx ts-node src/index.ts"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^26.0.1",
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-terser": "^0.4.4",
+    "@rollup/plugin-typescript": "^11.1.6",
+    "rollup-plugin-dts": "^6.1.1",
+    "tslib": "^2.6.3"
+  },
+  "dependencies": {
+
+  }
+}
