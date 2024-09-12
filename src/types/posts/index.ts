@@ -130,8 +130,10 @@ export interface Posts {
   createsThumbnail(source: PostEntry | PostEntrySummary | RawPostEntry | RawPostEntrySummary, size: ImageSize<number> | number, ratio?: number | string): string;
 
   /**
-   * Retrieves the related posts.
-   * @param options The related posts options.
+   * Retrieves the posts with the given categories.
+   *
+   * All posts are retrieved, but it is sliced by the value of the `max-results` parameter.
+   * @param options The request options.
    */
   withCategories(options: WithCategoriesPostsOptions): void;
 }

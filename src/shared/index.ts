@@ -6,6 +6,9 @@ import {IllegalArgumentError} from "../../lib/jstls/src/core/exceptions";
 import {entries} from "../../lib/jstls/src/core/objects/factory";
 import {each} from "../../lib/jstls/src/core/iterable";
 
+/**
+ * The blogger feed routes.
+ */
 export const routes: Routes = {
 
   /**

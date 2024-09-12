@@ -77,7 +77,7 @@ export function withCategories(options: WithCategoriesPostsOptions) {
   const feed = feedOptions(options.feed);
   const params = SearchParams.from(feed.params);
 
-  const builder = letValue(queryBuilder(), (it) => (options.every ? it.and : it.or)());
+  const builder = letValue(queryBuilder(), (it) => apply((options.every ? it.and : it.or), it));
 
   SearchParamsBuilder.from(params)
     .query(

@@ -7,7 +7,7 @@ import {string} from "../../../lib/jstls/src/core/objects/handlers";
 
 function paramIndex(this: SearchParamsBuilder, index: Maybe<number | string>, action: 'replace' | 'add' | 'subtract') {
   let current = this.__params__.start();
-  index = this.__params__.start(index!);
+  index = string(index).toInt()! >> 0;
 
   current = action === 'add' ? current + index : (action === 'subtract' ? current - index : index);
   this.__params__.start(current);
@@ -156,7 +156,7 @@ export class SearchParamsBuilder {
   paginated(page: Maybe<number | string>): this {
     if (isDefined(page)) {
       const max = this.__params__.max();
-      this.start(string(page).toInt()!.coerceAtLeast(0) * max + 1);
+      this.start((string(page).toInt()! - 1).coerceAtLeast(0) * max + 1);
     }
     return this;
   }

@@ -13,6 +13,7 @@ import {RawFeed} from "./types/feeds/raw";
 import {Feed} from "./types/feeds";
 import {Posts} from "./types/posts";
 import {QueryStringBuilder, queryBuilder} from "./search/query/builder";
+import {Search} from "./types/search";
 
 arrayExtensions({
   isEmpty,
@@ -32,23 +33,23 @@ stringExtensions({
   toInt
 })
 
-export interface Search {
-  query: typeof queryBuilder;
-  QueryStringBuilder: typeof QueryStringBuilder;
-  params: typeof paramsBuilder;
-  SearchParamsBuilder: typeof SearchParamsBuilder;
-}
 
 readonlys(<RawFeed>rawGet, {
   all: rawAll
 })
 
+/**
+ * The handler to make requests to the blogger feed API.
+ */
 export const feed = <Feed>get;
 readonlys(feed, {
   all,
   raw: rawGet,
 });
 
+/**
+ * The handler for search on blogger feed.
+ */
 export const search: Search = {
   query: queryBuilder,
   QueryStringBuilder,
@@ -62,7 +63,7 @@ readonlys(<Posts>posts, {
 })
 
 
-export interface Feeddy {
+interface Feeddy {
   buildUrl: typeof buildUrl;
   routes: Routes;
   feed: Feed;
