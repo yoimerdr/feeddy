@@ -1,0 +1,52 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "customCss": "code-styles.css",
+  "name": "feeddy",
+  "lang": "en",
+  "entryPoints": [
+    "./src/index.ts",
+    "./src/types/feeds/*",
+    "./src/types/posts/*",
+    "./src/types/search/*"
+
+  ],
+  "categorizeByGroup": false,
+  "searchCategoryBoosts": {
+    "Component": 2,
+    "Model": 1.2
+  },
+  "searchGroupBoosts": {
+    "Classes": 1.5
+  },
+  "highlightLanguages": [
+    "typescript",
+    "javascript",
+    "bash",
+    "html",
+    "tsx",
+    "css",
+    "json",
+    "jsonc",
+    "python",
+    "yaml"
+  ],
+  "markdownItOptions": {
+    "html": true
+  },
+  "includeVersion": true,
+  "plugin": [
+    "@mxssfd/typedoc-theme"
+  ],
+  "theme": "my-theme",
+  "sort": [
+    "static-first",
+    "kind",
+    "enum-value-ascending"
+  ],
+  "out": "./docs",
+  "navigationLinks": {
+    "GitHub": "https://github.com/yoimerdr/feeddy"
+  },
+  "hideGenerator": true,
+  "hideParameterTypesInTitle": true
+}

@@ -1,20 +1,23 @@
 {
+  "name": "feeddy",
+  "version": "1.0",
   "scripts": {
     "build:ts": "rollup -c",
     "build": "tsc -b",
     "clean": "tsc -b --clean",
     "dev:ts": "npm run build:ts -- -w",
-    "run": "npx ts-node src/index.ts"
+    "run": "npx ts-node src/index.ts",
+    "docs": "npx typedoc --plugin @mxssfd/typedoc-theme --plugin typedoc-plugin-extras --favicon favicon.ico"
   },
   "devDependencies": {
+    "@mxssfd/typedoc-theme": "^1.1.6",
     "@rollup/plugin-commonjs": "^26.0.1",
     "@rollup/plugin-node-resolve": "^15.2.3",
     "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-typescript": "^11.1.6",
     "rollup-plugin-dts": "^6.1.1",
-    "tslib": "^2.6.3"
-  },
-  "dependencies": {
-
+    "tslib": "^2.6.3",
+    "typedoc": "^0.26.7",
+    "typedoc-plugin-extras": "^3.1.0"
   }
 }
