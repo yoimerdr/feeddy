@@ -8,11 +8,11 @@ import {arrayExtensions, extend} from "../lib/jstls/src/core/extensions/array";
 import {isEmpty, isNotEmpty} from "../lib/jstls/src/core/extensions/shared/iterables";
 import {coerceAtLeast, coerceAtMost, coerceIn, numberExtensions} from "../lib/jstls/src/core/extensions/number";
 import {stringExtensions, toInt} from "../lib/jstls/src/core/extensions/string";
-import { readonlys } from "../lib/jstls/src/core/definer";
+import {readonlys} from "../lib/jstls/src/core/definer";
 import {RawFeed} from "./types/feeds/raw";
 import {Feed} from "./types/feeds";
 import {Posts} from "./types/posts";
-import {QueryStringBuilder, queryBuilder} from "./search/query/builder";
+import {queryBuilder, QueryStringBuilder} from "./search/query/builder";
 import {Search} from "./types/search";
 
 arrayExtensions({

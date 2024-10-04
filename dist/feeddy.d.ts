@@ -17,7 +17,7 @@ type ImageSize<U = string> = {
  */
 type LinkRel = 'alternate' | 'next' | 'hub' | 'self' | 'edit' | 'http://schemas.google.com/g/2005#feed';
 
-interface FeedOptions {
+interface BaseFeedOptions {
   /**
    * The blog's URL.
    */
@@ -34,19 +34,40 @@ interface FeedOptions {
   params: Partial<RequestFeedParams>;
 }
 
-interface FeedOptionsSummary extends FeedOptions {
+type FeedOptions = {
+  /**
+   * The blog's URL.
+   */
+  blogUrl: string;
+  /**
+   * The route of the blog's feed.
+   *
+   * The possible values are 'full' or 'summary'.
+   */
+  route: FeedRoute;
+  /**
+   * The parameters for the feed request.
+   */
+  params: Partial<RequestFeedParams>;
+};
+
+interface BaseFeedOptionsSummary extends BaseFeedOptions {
   /**
    * The summary route of the blog's feed.
    */
   route: 'summary';
 }
 
-interface FeedOptionsFull extends FeedOptions {
+type FeedOptionsSummary = BaseFeedOptionsSummary | Omit<BaseFeedOptionsSummary, "route" | "params">;
+
+interface BaseFeedOptionsFull extends BaseFeedOptions {
   /**
    * The full route of the blog's feed.
    */
   route: 'full';
 }
+
+type FeedOptionsFull = BaseFeedOptionsFull | Omit<BaseFeedOptionsFull, "params">;
 
 interface Routes {
   /**
@@ -336,46 +357,27 @@ type RawBlogSummary = RawBlog & {
 
 interface RawFeed {
   /**
-   * Makes a get request to the <b>default</b> blogger feed API using the fetch API.
-   * @param options The request options.
-   */
-  (options: Partial<FeedOptionsFull>): Promise<RawBlog>;
-
-  /**
    * Makes a get request to the <b>summary</b> blogger feed API using the fetch API.
    * @param options The request options.
    */
-  (options: Partial<FeedOptionsSummary>): Promise<RawBlogSummary>;
+  (options: FeedOptionsSummary): Promise<RawBlogSummary>;
 
   /**
    * Makes a get request to the <b>default</b> blogger feed API using the fetch API.
    * @param options The request options.
    */
-  (options: Partial<FeedOptions>): Promise<RawBlog>;
-
-  /**
-   * Makes a recursive get request to the <b>default</b> blogger feed API using the fetch API
-   * for retrieves all the possible results.
-   *
-   * - The JSON retrieved will be that of the last request with some modified values.
-   * - This is incompatible with the <b>q</b> (query string) param.
-   *
-   * @param options The request options.
-   * @see {rawGet}
-   */
-  all(options: Partial<FeedOptionsFull>): Promise<RawBlog>;
+  (options: FeedOptionsFull): Promise<RawBlog>;
 
   /**
    * Makes a recursive get request to the <b>summary</b> blogger feed API using the fetch API
    * for retrieves all the possible results.
    *
    * - The JSON retrieved will be that of the last request with some modified values.
-   * - This is incompatible with the <b>q</b> (query string) param.
    *
    * @param options The request options.
    * @see {rawGet}
    */
-  all(options: Partial<FeedOptionsSummary>): Promise<RawBlogSummary>;
+  all(options: FeedOptionsSummary): Promise<RawBlogSummary>;
 
   /**
    * Makes a recursive get request to the <b>default</b> blogger feed API using the fetch API
@@ -386,7 +388,7 @@ interface RawFeed {
    * @param options The request options.
    * @see {rawGet}
    */
-  all(options: Partial<FeedOptions>): Promise<RawBlog>;
+  all(options: FeedOptionsFull): Promise<RawBlog>;
 }
 
 type Text = string;
@@ -556,32 +558,14 @@ interface Feed {
    * - Transforms some fields of the retrieved JSON to be native types instead of objects.
    * @param options The request options.
    */
-  (options: Partial<FeedOptionsFull>): Promise<Blog>;
-
-  /**
-   * Makes a get request to the <b>summary</b> blogger feed API using the fetch API.
-   * - Transforms some fields of the retrieved JSON to be native types instead of objects.
-   * @param options The request options.
-   */
-  (options: Partial<FeedOptionsSummary>): Promise<BlogSummary>;
+  (options: FeedOptionsSummary): Promise<BlogSummary>;
 
   /**
    * Makes a get request to the <b>default</b> blogger feed API using the fetch API.
    * - Transforms some fields of the retrieved JSON to be native types instead of objects.
    * @param options The request options.
    */
-  (options: Partial<FeedOptions>): Promise<Blog>;
-
-  /**
-   * Makes a recursive get request to the <b>default</b> blogger feed API using the fetch API
-   * for retrieves all the possible results.
-   *
-   * - Transforms some fields of the retrieved JSON to be native types instead of objects.
-   * - The JSON retrieved will be that of the last request with some modified values.
-   *
-   * @param options The request options.
-   */
-  all(options: Partial<FeedOptionsFull>): Promise<Blog>;
+  (options: FeedOptionsFull): Promise<Blog>;
 
   /**
    * Makes a recursive get request to the <b>summary</b> blogger feed API using the fetch API
@@ -592,7 +576,7 @@ interface Feed {
    *
    * @param options The request options.
    */
-  all(options: Partial<FeedOptionsSummary>): Promise<BlogSummary>;
+  all(options: FeedOptionsSummary): Promise<BlogSummary>;
 
   /**
    * Makes a recursive get request to the <b>default</b> blogger feed API using the fetch API
@@ -603,7 +587,7 @@ interface Feed {
    *
    * @param options The request options.
    */
-  all(options: Partial<FeedOptions>): Promise<Blog>;
+  all(options: FeedOptionsFull): Promise<Blog>;
 
   /**
    * The handler to make requests to the blogger feed API directly.
@@ -611,11 +595,11 @@ interface Feed {
   readonly raw: RawFeed;
 }
 
-interface InnerFeedOptions {
+interface InnerFeedOptions<F = FeedOptions> {
   /**
    * The blog's feed options.
    */
-  feed: FeedOptions;
+  feed: F;
 }
 
 interface PaginatePostsHandler {
@@ -631,7 +615,7 @@ interface PaginatePostsHandler {
   page(this: PaginatePostsHandler, page: number): void;
 }
 
-interface PaginatePostsOptions extends InnerFeedOptions {
+interface PaginatePostsOptions<E = PostEntry, B = Blog, F = FeedOptions> extends InnerFeedOptions<F> {
   /**
    * Callback triggered after the first request to the feed is performed.
    * @param handler The paginate handler.
@@ -644,10 +628,13 @@ interface PaginatePostsOptions extends InnerFeedOptions {
    * @param posts The posts retrieved from the feed.
    * @param blog The retrieved blog.
    */
-  onPosts(posts: PostEntry[], blog: Blog): void;
+  onPosts(posts: E[], blog: B): void;
 }
 
-interface WithCategoriesPostEntry {
+type PaginatePostsOptionsFull = PaginatePostsOptions<PostEntry, Blog, FeedOptionsFull>;
+type PaginatePostsOptionsSummary = PaginatePostsOptions<PostEntrySummary, BlogSummary, FeedOptionsSummary>;
+
+interface WithCategoriesPostEntry<E = PostEntry> {
   /**
    * Number of categories to which the current {@link post} relates.
    */
@@ -655,10 +642,12 @@ interface WithCategoriesPostEntry {
   /**
    * The post resource.
    */
-  readonly post: PostEntry;
+  readonly post: E;
 }
 
-interface WithCategoriesPostsOptions extends InnerFeedOptions {
+type WithCategoriesPostEntrySummary = WithCategoriesPostEntry<PostEntrySummary>;
+
+interface WithCategoriesPostsOptions<E = PostEntry, B = Blog, F = FeedOptions> extends InnerFeedOptions<F> {
   /**
    * The categories of the posts to be retrieved.
    */
@@ -673,15 +662,24 @@ interface WithCategoriesPostsOptions extends InnerFeedOptions {
    * @param posts The retrieved posts.
    * @param blog The retrieved blog.
    */
-  onPosts(posts: WithCategoriesPostEntry[], blog: Blog): void;
+  onPosts(posts: E[], blog: B): void;
 }
+
+type WithCategoriesPostsOptionsFull = WithCategoriesPostsOptions<PostEntry, Blog, FeedOptionsFull>;
+type WithCategoriesPostsOptionsSummary = WithCategoriesPostsOptions<WithCategoriesPostEntrySummary, BlogSummary, FeedOptionsSummary>;
 
 interface Posts {
   /**
-   * Paginate the blog.
+   * Paginate the blog using the <b>summary</b> route.
    * @param options The paginate options. All properties must be defined.
    */
-  (options: PaginatePostsOptions): void;
+  (options: PaginatePostsOptionsSummary): void;
+
+  /**
+   * Paginate the blog using the <b>default</b> route.
+   * @param options The paginate options. All properties must be defined.
+   */
+  (options: PaginatePostsOptionsFull): void;
 
   /**
    * Creates the thumbnail url of a post.
@@ -693,12 +691,20 @@ interface Posts {
   createsThumbnail(source: PostEntry | PostEntrySummary | RawPostEntry | RawPostEntrySummary, size: ImageSize<number> | number, ratio?: number | string): string;
 
   /**
-   * Retrieves the posts with the given categories.
+   * Retrieves the posts from the <b>summary</b> with the given categories.
    *
    * All posts are retrieved, but it is sliced by the value of the `max-results` parameter.
    * @param options The request options.
    */
-  withCategories(options: WithCategoriesPostsOptions): void;
+  withCategories(options: WithCategoriesPostsOptionsSummary): void;
+
+  /**
+   * Retrieves the posts from the <b>default</b> route with the given categories.
+   *
+   * All posts are retrieved, but it is sliced by the value of the `max-results` parameter.
+   * @param options The request options.
+   */
+  withCategories(options: WithCategoriesPostsOptionsFull): void;
 }
 
 interface NumberExtensions {
@@ -1407,6 +1413,12 @@ interface Search {
   SearchParamsBuilder: typeof SearchParamsBuilder;
 }
 
+/**
+ * Builds a request url according the given options.
+ * @param options The request options.
+ */
+declare function buildUrl(options: Partial<FeedOptions>): URL;
+
 interface Feeddy {
   buildUrl: typeof buildUrl;
   routes: Routes;
@@ -1415,6 +1427,4 @@ interface Feeddy {
   posts: Posts;
 }
 
-declare var feeddy: Feeddy;
-
-
+declare var feeddy: Feeddy

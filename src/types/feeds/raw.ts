@@ -1,4 +1,4 @@
-import {FeedOptions, FeedOptionsFull, FeedOptionsSummary, ImageSize, LinkRel} from "./shared";
+import {FeedOptionsFull, FeedOptionsSummary, ImageSize, LinkRel} from "./shared";
 
 /**
  * A string on blog's feed.
@@ -284,46 +284,27 @@ export type RawBlogSummary = RawBlog & {
 export interface RawFeed {
 
   /**
-   * Makes a get request to the <b>default</b> blogger feed API using the fetch API.
-   * @param options The request options.
-   */
-  (options: Partial<FeedOptionsFull>): Promise<RawBlog>;
-
-  /**
    * Makes a get request to the <b>summary</b> blogger feed API using the fetch API.
    * @param options The request options.
    */
-  (options: Partial<FeedOptionsSummary>): Promise<RawBlogSummary>;
+  (options: FeedOptionsSummary): Promise<RawBlogSummary>;
 
   /**
    * Makes a get request to the <b>default</b> blogger feed API using the fetch API.
    * @param options The request options.
    */
-  (options: Partial<FeedOptions>): Promise<RawBlog>;
-
-  /**
-   * Makes a recursive get request to the <b>default</b> blogger feed API using the fetch API
-   * for retrieves all the possible results.
-   *
-   * - The JSON retrieved will be that of the last request with some modified values.
-   * - This is incompatible with the <b>q</b> (query string) param.
-   *
-   * @param options The request options.
-   * @see {rawGet}
-   */
-  all(options: Partial<FeedOptionsFull>): Promise<RawBlog>;
+  (options: FeedOptionsFull): Promise<RawBlog>;
 
   /**
    * Makes a recursive get request to the <b>summary</b> blogger feed API using the fetch API
    * for retrieves all the possible results.
    *
    * - The JSON retrieved will be that of the last request with some modified values.
-   * - This is incompatible with the <b>q</b> (query string) param.
    *
    * @param options The request options.
    * @see {rawGet}
    */
-  all(options: Partial<FeedOptionsSummary>): Promise<RawBlogSummary>;
+  all(options: FeedOptionsSummary): Promise<RawBlogSummary>;
 
   /**
    * Makes a recursive get request to the <b>default</b> blogger feed API using the fetch API
@@ -334,5 +315,5 @@ export interface RawFeed {
    * @param options The request options.
    * @see {rawGet}
    */
-  all(options: Partial<FeedOptions>): Promise<RawBlog>;
+  all(options: FeedOptionsFull): Promise<RawBlog>;
 }

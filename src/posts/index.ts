@@ -1,8 +1,16 @@
-import {PaginatePostsHandler, PaginatePostsOptions, WithCategoriesPostsOptions} from "../types/posts";
+import {
+  PaginatePostsHandler,
+  PaginatePostsOptions,
+  PaginatePostsOptionsFull,
+  PaginatePostsOptionsSummary,
+  WithCategoriesPostsOptions,
+  WithCategoriesPostsOptionsFull,
+  WithCategoriesPostsOptionsSummary
+} from "../types/posts";
 import {FeedOptions, ImageSize} from "../types/feeds/shared";
 import {SearchParams, SearchParamsBuilder} from "../search";
 import {all, get} from "../feeds";
-import {PostEntry, PostEntrySummary} from "../types/feeds";
+import {Blog, BlogSummary, PostEntry, PostEntrySummary} from "../types/feeds";
 import {RawPostEntry, RawPostEntrySummary} from "../types/feeds/raw";
 import {feedOptions} from "../feeds/raw";
 import {getDefined, getIf, requireObject} from "../../lib/jstls/src/core/objects/validators";
@@ -15,7 +23,9 @@ import {apply} from "../../lib/jstls/src/core/functions/apply";
 
 export const thumbnailSizeExpression: string = 's72-c';
 
-export function posts(options: PaginatePostsOptions) {
+export function posts(options: PaginatePostsOptionsSummary): void;
+export function posts(options: PaginatePostsOptionsFull): void;
+export function posts(options: PaginatePostsOptions<PostEntry | PostEntrySummary, Blog, any>) {
   requireObject(options, 'options');
   options.feed = getIf(options.feed, isObject, () => (<FeedOptions>{}));
   const params = SearchParams.from(options.feed.params);
@@ -68,7 +78,9 @@ export function postThumbnail(source: PostEntry | PostEntrySummary | RawPostEntr
     .replace(`=${thumbnailSizeExpression}`, `=${expression}`);
 }
 
-export function withCategories(options: WithCategoriesPostsOptions) {
+export function withCategories(options: WithCategoriesPostsOptionsSummary): void;
+export function withCategories(options: WithCategoriesPostsOptionsFull): void;
+export function withCategories(options: WithCategoriesPostsOptions<any, any, any>) {
   const categories: string[] = options.categories;
 
   if (categories.isEmpty())

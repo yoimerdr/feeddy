@@ -1,5 +1,5 @@
-import {QueryStringBuilder, queryBuilder} from "../../search/query/builder";
-import {SearchParamsBuilder, paramsBuilder} from "../../search";
+import {queryBuilder, QueryStringBuilder} from "../../search/query/builder";
+import {paramsBuilder, SearchParamsBuilder} from "../../search";
 
 export type {QueryStringBuilder};
 export type {SearchParamsBuilder};

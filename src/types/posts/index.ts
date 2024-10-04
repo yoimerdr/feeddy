@@ -1,13 +1,13 @@
-import {Blog, PostEntry, PostEntrySummary} from "../feeds";
-import {FeedOptions, FeedOptionsSummary, ImageSize} from "../feeds/shared";
+import {Blog, BlogSummary, PostEntry, PostEntrySummary} from "../feeds";
+import {FeedOptions, FeedOptionsFull, FeedOptionsSummary, ImageSize} from "../feeds/shared";
 import {RawPostEntry, RawPostEntrySummary} from "../feeds/raw";
 
-export interface InnerFeedOptions {
+export interface InnerFeedOptions<F = FeedOptions> {
 
   /**
    * The blog's feed options.
    */
-  feed: FeedOptions;
+  feed: F;
 }
 
 export interface PaginatePostsHandler {
@@ -24,7 +24,7 @@ export interface PaginatePostsHandler {
   page(this: PaginatePostsHandler, page: number): void;
 }
 
-export interface PaginatePostsOptions extends InnerFeedOptions {
+export interface PaginatePostsOptions<E = PostEntry, B = Blog, F = FeedOptions> extends InnerFeedOptions<F> {
 
   /**
    * Callback triggered after the first request to the feed is performed.
@@ -38,25 +38,14 @@ export interface PaginatePostsOptions extends InnerFeedOptions {
    * @param posts The posts retrieved from the feed.
    * @param blog The retrieved blog.
    */
-  onPosts(posts: PostEntry[], blog: Blog): void;
+  onPosts(posts: E[], blog: B): void;
 }
 
-export type PaginatePostsOptionsSummary = PaginatePostsOptions & {
+export type PaginatePostsOptionsFull = PaginatePostsOptions<PostEntry, Blog, FeedOptionsFull>
 
-  /**
-   * The blog's feed options.
-   */
-  feed: FeedOptionsSummary;
+export type PaginatePostsOptionsSummary = PaginatePostsOptions<PostEntrySummary, BlogSummary, FeedOptionsSummary>
 
-  /**
-   * Callback triggered after the {@link PaginatePostsHandler.page} request is performed.
-   * @param posts The posts retrieved from the feed.
-   * @param blog The retrieved blog.
-   */
-  onPosts(posts: PostEntrySummary[], blog: Blog): void;
-}
-
-export interface WithCategoriesPostEntry {
+export interface WithCategoriesPostEntry<E = PostEntry> {
 
   /**
    * Number of categories to which the current {@link post} relates.
@@ -66,18 +55,12 @@ export interface WithCategoriesPostEntry {
   /**
    * The post resource.
    */
-  readonly post: PostEntry;
+  readonly post: E;
 }
 
-export type WithCategoriesPostEntrySummary = WithCategoriesPostEntry & {
+export type WithCategoriesPostEntrySummary = WithCategoriesPostEntry<PostEntrySummary>
 
-  /**
-   * The post resource.
-   */
-  readonly post: PostEntrySummary;
-}
-
-export interface WithCategoriesPostsOptions extends InnerFeedOptions {
+export interface WithCategoriesPostsOptions<E = PostEntry, B = Blog, F = FeedOptions> extends InnerFeedOptions<F> {
 
   /**
    * The categories of the posts to be retrieved.
@@ -94,31 +77,27 @@ export interface WithCategoriesPostsOptions extends InnerFeedOptions {
    * @param posts The retrieved posts.
    * @param blog The retrieved blog.
    */
-  onPosts(posts: WithCategoriesPostEntry[], blog: Blog): void;
+  onPosts(posts: E[], blog: B): void;
 }
 
+export type WithCategoriesPostsOptionsFull = WithCategoriesPostsOptions<PostEntry, Blog, FeedOptionsFull>
 
-export type WithCategoriesPostsOptionsSummary = WithCategoriesPostsOptions & {
-
-  /**
-   * The blog's feed options.
-   */
-  feed: FeedOptionsSummary;
-
-  /**
-   * Callback triggered after the request to the feed is performed.
-   * @param posts The retrieved posts.
-   * @param blog The retrieved blog.
-   */
-  onPosts(posts: WithCategoriesPostEntrySummary[], blog: Blog): void;
-}
+export type WithCategoriesPostsOptionsSummary =
+  WithCategoriesPostsOptions<WithCategoriesPostEntrySummary, BlogSummary, FeedOptionsSummary>
 
 export interface Posts {
+
   /**
-   * Paginate the blog.
+   * Paginate the blog using the <b>summary</b> route.
    * @param options The paginate options. All properties must be defined.
    */
-  (options: PaginatePostsOptions): void;
+  (options: PaginatePostsOptionsSummary): void;
+
+  /**
+   * Paginate the blog using the <b>default</b> route.
+   * @param options The paginate options. All properties must be defined.
+   */
+  (options: PaginatePostsOptionsFull): void;
 
   /**
    * Creates the thumbnail url of a post.
@@ -130,10 +109,20 @@ export interface Posts {
   createsThumbnail(source: PostEntry | PostEntrySummary | RawPostEntry | RawPostEntrySummary, size: ImageSize<number> | number, ratio?: number | string): string;
 
   /**
-   * Retrieves the posts with the given categories.
+   * Retrieves the posts from the <b>summary</b> with the given categories.
    *
    * All posts are retrieved, but it is sliced by the value of the `max-results` parameter.
    * @param options The request options.
    */
-  withCategories(options: WithCategoriesPostsOptions): void;
+  withCategories(options: WithCategoriesPostsOptionsSummary): void;
+
+  /**
+   * Retrieves the posts from the <b>default</b> route with the given categories.
+   *
+   * All posts are retrieved, but it is sliced by the value of the `max-results` parameter.
+   * @param options The request options.
+   */
+  withCategories(options: WithCategoriesPostsOptionsFull): void;
+
+
 }

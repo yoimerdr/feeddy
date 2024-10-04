@@ -24,7 +24,7 @@ export type QueryOperator = 'OR' | 'AND';
  */
 export type LinkRel = 'alternate' | 'next' | 'hub' | 'self' | 'edit' | 'http://schemas.google.com/g/2005#feed'
 
-export interface FeedOptions {
+interface BaseFeedOptions {
 
   /**
    * The blog's URL.
@@ -44,7 +44,27 @@ export interface FeedOptions {
   params: Partial<RequestFeedParams>;
 }
 
-export interface FeedOptionsSummary extends FeedOptions {
+export type FeedOptions = {
+  /**
+   * The blog's URL.
+   */
+  blogUrl: string;
+
+  /**
+   * The route of the blog's feed.
+   *
+   * The possible values are 'full' or 'summary'.
+   */
+  route: FeedRoute;
+
+  /**
+   * The parameters for the feed request.
+   */
+  params: Partial<RequestFeedParams>;
+}
+
+
+interface BaseFeedOptionsSummary extends BaseFeedOptions {
 
   /**
    * The summary route of the blog's feed.
@@ -52,13 +72,18 @@ export interface FeedOptionsSummary extends FeedOptions {
   route: 'summary';
 }
 
-export interface FeedOptionsFull extends FeedOptions {
+export type FeedOptionsSummary = BaseFeedOptionsSummary | Omit<BaseFeedOptionsSummary, "route" | "params">;
+
+
+export interface BaseFeedOptionsFull extends BaseFeedOptions {
 
   /**
    * The full route of the blog's feed.
    */
   route: 'full';
 }
+
+export type FeedOptionsFull = BaseFeedOptionsFull | Omit<BaseFeedOptionsFull, "params">
 
 export interface Routes {
 
@@ -115,7 +140,7 @@ export interface RequestFeedParams {
    * The sort order applied to results.
    */
   orderby: OrderBy;
-  
+
   /**
    * The full-text query string.
    */

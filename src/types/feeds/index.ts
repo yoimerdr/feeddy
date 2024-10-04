@@ -1,5 +1,5 @@
 import {RawAuthorImage, RawFeed, RawLink, RawPostLink} from "./raw";
-import {FeedOptions, FeedOptionsFull, FeedOptionsSummary, ImageSize} from "./shared";
+import {FeedOptionsFull, FeedOptionsSummary, ImageSize} from "./shared";
 
 export type Text = string;
 
@@ -201,32 +201,14 @@ export interface Feed {
    * - Transforms some fields of the retrieved JSON to be native types instead of objects.
    * @param options The request options.
    */
-  (options: Partial<FeedOptionsFull>): Promise<Blog>;
-
-  /**
-   * Makes a get request to the <b>summary</b> blogger feed API using the fetch API.
-   * - Transforms some fields of the retrieved JSON to be native types instead of objects.
-   * @param options The request options.
-   */
-  (options: Partial<FeedOptionsSummary>): Promise<BlogSummary>;
+  (options: FeedOptionsSummary): Promise<BlogSummary>;
 
   /**
    * Makes a get request to the <b>default</b> blogger feed API using the fetch API.
    * - Transforms some fields of the retrieved JSON to be native types instead of objects.
    * @param options The request options.
    */
-  (options: Partial<FeedOptions>): Promise<Blog>;
-
-  /**
-   * Makes a recursive get request to the <b>default</b> blogger feed API using the fetch API
-   * for retrieves all the possible results.
-   *
-   * - Transforms some fields of the retrieved JSON to be native types instead of objects.
-   * - The JSON retrieved will be that of the last request with some modified values.
-   *
-   * @param options The request options.
-   */
-  all(options: Partial<FeedOptionsFull>): Promise<Blog>;
+  (options: FeedOptionsFull): Promise<Blog>;
 
   /**
    * Makes a recursive get request to the <b>summary</b> blogger feed API using the fetch API
@@ -237,7 +219,7 @@ export interface Feed {
    *
    * @param options The request options.
    */
-  all(options: Partial<FeedOptionsSummary>): Promise<BlogSummary>;
+  all(options: FeedOptionsSummary): Promise<BlogSummary>;
 
   /**
    * Makes a recursive get request to the <b>default</b> blogger feed API using the fetch API
@@ -248,12 +230,10 @@ export interface Feed {
    *
    * @param options The request options.
    */
-  all(options: Partial<FeedOptions>): Promise<Blog>;
+  all(options: FeedOptionsFull): Promise<Blog>;
 
   /**
    * The handler to make requests to the blogger feed API directly.
    */
   readonly raw: RawFeed
 }
-
-
