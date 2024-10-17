@@ -6,8 +6,7 @@ import {getDefined} from "../../../lib/jstls/src/core/objects/validators";
 import {assign} from "../../../lib/jstls/src/core/objects/factory";
 import {KeyableObject} from "../../../lib/jstls/src/types/core/objects";
 import {readonlys} from "../../../lib/jstls/src/core/definer";
-import {each} from "../../../lib/jstls/src/core/iterable";
-import {QueryStringBuilder} from "../query/builder";
+import {each} from "../../../lib/jstls/src/core/iterable/each";
 
 function minimumsOne(max: Maybe<string | number>): number {
   max = string(max).toInt();

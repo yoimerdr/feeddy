@@ -4,7 +4,7 @@ import {requireDefined} from "../../lib/jstls/src/core/objects/validators";
 import {isDefined} from "../../lib/jstls/src/core/objects/types";
 import {IllegalArgumentError} from "../../lib/jstls/src/core/exceptions";
 import {entries} from "../../lib/jstls/src/core/objects/factory";
-import {each} from "../../lib/jstls/src/core/iterable";
+import {each} from "../../lib/jstls/src/core/iterable/each";
 
 /**
  * The blogger feed routes.

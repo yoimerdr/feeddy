@@ -2,8 +2,8 @@ import {SearchParams} from "./params";
 import {OrderBy, RequestFeedParams} from "../../types/feeds/shared";
 import {Maybe, MaybeString} from "../../../lib/jstls/src/types/core";
 import {isDefined} from "../../../lib/jstls/src/core/objects/types";
-import {call} from "../../../lib/jstls/src/core/utils/functions/call";
 import {string} from "../../../lib/jstls/src/core/objects/handlers";
+import {call} from "../../../lib/jstls/src/core/functions/call";
 
 function paramIndex(this: SearchParamsBuilder, index: Maybe<number | string>, action: 'replace' | 'add' | 'subtract') {
   let current = this.__params__.start();
