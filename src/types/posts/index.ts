@@ -10,7 +10,7 @@ export interface InnerFeedOptions<F = FeedOptions> {
   feed: F;
 }
 
-export interface PaginatePostsHandler {
+interface PaginatePostsHandler<E = PostEntry, B = Blog> {
 
   /**
    * The total number of blog posts.
@@ -21,29 +21,20 @@ export interface PaginatePostsHandler {
    * Performs a request to retrieve the posts from the specified page.
    * @param page The page number.
    */
-  page(this: PaginatePostsHandler, page: number): void;
+  page(this: PaginatePostsHandler, page: number): Promise<PaginatePostsPageResult<E, B>>;
 }
 
-export interface PaginatePostsOptions<E = PostEntry, B = Blog, F = FeedOptions> extends InnerFeedOptions<F> {
-
-  /**
-   * Callback triggered after the first request to the feed is performed.
-   * @param handler The paginate handler.
-   * @see {SearchParamsBuilder.paginated}
-   */
-  onTotal(handler: PaginatePostsHandler): void;
-
-  /**
-   * Callback triggered after the {@link PaginatePostsHandler.page} request is performed.
-   * @param posts The posts retrieved from the feed.
-   * @param blog The retrieved blog.
-   */
-  onPosts(posts: E[], blog: B): void;
+interface PaginatePostsPageResult<E = PostEntry, B = Blog, > {
+  posts: E[],
+  blog: B;
 }
 
-export type PaginatePostsOptionsFull = PaginatePostsOptions<PostEntry, Blog, FeedOptionsFull>
+export type PaginatePostsOptions = InnerFeedOptions<FeedOptionsFull>;
 
-export type PaginatePostsOptionsSummary = PaginatePostsOptions<PostEntrySummary, BlogSummary, FeedOptionsSummary>
+export type PaginatePostsOptionsSummary = InnerFeedOptions<FeedOptionsSummary>;
+
+export type PaginatePostsResult = PaginatePostsHandler;
+export type PaginatePostsSummaryResult = PaginatePostsHandler<PostEntrySummary, BlogSummary>;
 
 export interface WithCategoriesPostEntry<E = PostEntry> {
 
@@ -60,7 +51,7 @@ export interface WithCategoriesPostEntry<E = PostEntry> {
 
 export type WithCategoriesPostEntrySummary = WithCategoriesPostEntry<PostEntrySummary>
 
-export interface WithCategoriesPostsOptions<E = PostEntry, B = Blog, F = FeedOptions> extends InnerFeedOptions<F> {
+export interface WithCategoriesPostsOptions<F = FeedOptionsFull> extends InnerFeedOptions<F> {
 
   /**
    * The categories of the posts to be retrieved.
@@ -72,18 +63,14 @@ export interface WithCategoriesPostsOptions<E = PostEntry, B = Blog, F = FeedOpt
    */
   every?: boolean;
 
-  /**
-   * Callback triggered after the request to the feed is performed.
-   * @param posts The retrieved posts.
-   * @param blog The retrieved blog.
-   */
-  onPosts(posts: E[], blog: B): void;
 }
 
-export type WithCategoriesPostsOptionsFull = WithCategoriesPostsOptions<PostEntry, Blog, FeedOptionsFull>
 
-export type WithCategoriesPostsOptionsSummary =
-  WithCategoriesPostsOptions<WithCategoriesPostEntrySummary, BlogSummary, FeedOptionsSummary>
+export type WithCategoriesPostsOptionsSummary = WithCategoriesPostsOptions<FeedOptionsSummary>;
+
+export type WithCategoriesPostsResult = PaginatePostsPageResult;
+export type WithCategoriesPostsResultSummary = PaginatePostsPageResult<PostEntrySummary, BlogSummary>;
+
 
 export interface Posts {
 
@@ -91,13 +78,13 @@ export interface Posts {
    * Paginate the blog using the <b>summary</b> route.
    * @param options The paginate options. All properties must be defined.
    */
-  (options: PaginatePostsOptionsSummary): void;
+  (options: PaginatePostsOptionsSummary): Promise<PaginatePostsSummaryResult>;
 
   /**
    * Paginate the blog using the <b>default</b> route.
    * @param options The paginate options. All properties must be defined.
    */
-  (options: PaginatePostsOptionsFull): void;
+  (options: PaginatePostsOptions): Promise<PaginatePostsResult>;
 
   /**
    * Creates the thumbnail url of a post.
@@ -114,7 +101,7 @@ export interface Posts {
    * All posts are retrieved, but it is sliced by the value of the `max-results` parameter.
    * @param options The request options.
    */
-  withCategories(options: WithCategoriesPostsOptionsSummary): void;
+  withCategories(options: WithCategoriesPostsOptionsSummary): Promise<WithCategoriesPostsResultSummary>;
 
   /**
    * Retrieves the posts from the <b>default</b> route with the given categories.
@@ -122,7 +109,5 @@ export interface Posts {
    * All posts are retrieved, but it is sliced by the value of the `max-results` parameter.
    * @param options The request options.
    */
-  withCategories(options: WithCategoriesPostsOptionsFull): void;
-
-
+  withCategories(options: WithCategoriesPostsOptions): Promise<WithCategoriesPostsResult>;
 }

@@ -1,16 +1,13 @@
 import {
-  PaginatePostsHandler,
   PaginatePostsOptions,
-  PaginatePostsOptionsFull,
-  PaginatePostsOptionsSummary,
+  PaginatePostsOptionsSummary, PaginatePostsResult, PaginatePostsSummaryResult,
   WithCategoriesPostsOptions,
-  WithCategoriesPostsOptionsFull,
-  WithCategoriesPostsOptionsSummary
+  WithCategoriesPostsOptionsSummary, WithCategoriesPostsResult, WithCategoriesPostsResultSummary
 } from "../types/posts";
 import {FeedOptions, ImageSize} from "../types/feeds/shared";
 import {SearchParams, SearchParamsBuilder} from "../search";
 import {all, get} from "../feeds";
-import {Blog, BlogSummary, PostEntry, PostEntrySummary} from "../types/feeds";
+import {PostEntry, PostEntrySummary} from "../types/feeds";
 import {RawPostEntry, RawPostEntrySummary} from "../types/feeds/raw";
 import {feedOptions} from "../feeds/raw";
 import {getDefined, getIf, requireObject} from "../../lib/jstls/src/core/objects/validators";
@@ -23,37 +20,30 @@ import {apply} from "../../lib/jstls/src/core/functions/apply";
 
 export const thumbnailSizeExpression: string = 's72-c';
 
-export function posts(options: PaginatePostsOptionsSummary): void;
-export function posts(options: PaginatePostsOptionsFull): void;
-export function posts(options: PaginatePostsOptions<PostEntry | PostEntrySummary, Blog, any>) {
+export function posts(options: PaginatePostsOptions): Promise<PaginatePostsResult>;
+export function posts(options: PaginatePostsOptionsSummary): Promise<PaginatePostsSummaryResult>;
+export function posts(options: KeyableObject): Promise<KeyableObject> {
   requireObject(options, 'options');
   options.feed = getIf(options.feed, isObject, () => (<FeedOptions>{}));
   const params = SearchParams.from(options.feed.params);
 
-  function changePage(this: PaginatePostsHandler, page: number) {
+  function changePage(this: PaginatePostsResult, page: number) {
     options.feed.params = SearchParamsBuilder.from(params)
       .paginated(page)
       .build();
 
-    get(options.feed)
-      .then(blog => {
-        if (!isDefined(blog))
-          return;
-
-        options.onPosts(blog!.feed.entry, blog!)
-      })
+    return get(options.feed)
+      .then(blog => ({
+        posts: isDefined(blog) ? blog!.feed.entry : [],
+        blog
+      }));
   }
 
-  (params.query() ? all : get)(options.feed)
-    .then(blog => {
-      if (blog.feed.openSearch$totalResults > 0) {
-        options.onTotal(Object.freeze({
-          total: blog.feed.openSearch$totalResults,
-          page: changePage
-        }));
-      }
-    })
-    .catch(console.error)
+  return (params.query() ? all : get)(options.feed)
+    .then(blog => Object.freeze({
+      total: blog.feed.openSearch$totalResults,
+      page: changePage
+    }))
 }
 
 function toFormatSize(size: ImageSize<number> | number | string): string {
@@ -78,13 +68,13 @@ export function postThumbnail(source: PostEntry | PostEntrySummary | RawPostEntr
     .replace(`=${thumbnailSizeExpression}`, `=${expression}`);
 }
 
-export function withCategories(options: WithCategoriesPostsOptionsSummary): void;
-export function withCategories(options: WithCategoriesPostsOptionsFull): void;
-export function withCategories(options: WithCategoriesPostsOptions<any, any, any>) {
+export function withCategories(options: WithCategoriesPostsOptions): Promise<WithCategoriesPostsResult>;
+export function withCategories(options: WithCategoriesPostsOptionsSummary): Promise<WithCategoriesPostsResultSummary>;
+export function withCategories(options: KeyableObject): Promise<KeyableObject | void> {
   const categories: string[] = options.categories;
 
   if (categories.isEmpty())
-    return;
+    return new Promise((_, reject) => reject("The categories are empty."));
 
   const feed = feedOptions(options.feed);
   const params = SearchParams.from(feed.params);
@@ -98,14 +88,13 @@ export function withCategories(options: WithCategoriesPostsOptions<any, any, any
     );
 
 
-  all(feed)
-    .then(blog => {
-      options.onPosts(
-        blog.feed.entry
-          .map(post => ({count: post.category.filter(it => categories.indexOf(it) >= 0).length, post}))
-          .sort((a, b) => b.count - a.count)
-          .slice(0, params.max()),
-        blog
-      );
-    })
+  return all(feed)
+    .then(blog => Object.freeze({
+      posts: blog.feed.entry
+        .map(post => ({count: post.category.filter(it => categories.indexOf(it) >= 0).length, post}))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, params.max()),
+      blog
+    }))
+
 }
