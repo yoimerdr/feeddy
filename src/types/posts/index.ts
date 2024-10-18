@@ -68,8 +68,8 @@ export interface WithCategoriesPostsOptions<F = FeedOptionsFull> extends InnerFe
 
 export type WithCategoriesPostsOptionsSummary = WithCategoriesPostsOptions<FeedOptionsSummary>;
 
-export type WithCategoriesPostsResult = PaginatePostsPageResult;
-export type WithCategoriesPostsResultSummary = PaginatePostsPageResult<PostEntrySummary, BlogSummary>;
+export type WithCategoriesPostsResult = PaginatePostsPageResult<WithCategoriesPostEntry>;
+export type WithCategoriesPostsResultSummary = PaginatePostsPageResult<WithCategoriesPostEntrySummary, BlogSummary>;
 
 
 export interface Posts {

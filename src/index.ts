@@ -1,7 +1,5 @@
 import {Posts} from "./types/posts";
-import {NumberExtensions} from "../lib/jstls/src/types/core/extensions/number";
-import {StringExtensions} from "../lib/jstls/src/types/core/extensions/string";
-import {ArrayExtensions} from "../lib/jstls/src/types/core/extensions/array";
+import {MaybeNumber} from "../lib/jstls/src/types/core";
 
 export * from "./module";
 /**
@@ -10,15 +8,56 @@ export * from "./module";
 export declare const posts: Posts;
 
 declare global {
-  interface Number extends Pick<NumberExtensions, "coerceAtLeast" | "coerceIn"> {
+  interface Number {
+    /**
+     * Restricts the number to be at least the given minimum.
+     *
+     * @param {number} minimum - The minimum value.
+     * @returns {number} The coerced number, which is the largest of the original number or the minimum.
+     */
+    coerceAtLeast(minimum: number): number
 
+    /**
+     * Restricts the number to be within the given range [minimum, maximum].
+     *
+     * @param {number} minimum - The minimum value.
+     * @param {number} maximum - The maximum value.
+     * @returns {number} The coerced number, which will be within the range [minimum, maximum].
+     */
+    coerceIn(minimum: number, maximum: number): number
   }
 
-  interface String extends Pick<StringExtensions, "toInt" | "isEmpty" | "isNotEmpty"> {
+  interface String {
+    /**
+     * Checks if the string is empty
+     * @returns {boolean} true if string is empty; otherwise false
+     */
+    isEmpty(): boolean;
 
+    /**
+     * Checks if the string is not empty
+     * @returns {boolean} true if string is not empty; otherwise false
+     */
+    isNotEmpty(): boolean;
+
+    toInt(radix?: number): MaybeNumber;
   }
 
-  interface Array<T> extends Pick<ArrayExtensions<T>, "isEmpty" | "isNotEmpty"> {
+  interface Array<T> {
+
+    /**
+     * Check if array is empty
+     *
+     * @returns {boolean} true if array is empty; otherwise false
+     */
+    isEmpty(): boolean
+
+    /**
+     * Check if array is not empty
+     * @returns {boolean} true if array is not empty; otherwise false
+     */
+    isNotEmpty(): boolean
+
     /**
      * Extend current array pushing each element from source array
      * @template T
