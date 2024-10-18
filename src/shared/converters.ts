@@ -44,7 +44,7 @@ export function rawPostToPost(post: RawPostEntry | RawPostEntrySummary): PostEnt
 export function rawPostToPost(post: RawPostEntry | RawPostEntrySummary): PostEntry | PostEntrySummary {
   if (!isObject(post))
     return {} as PostEntry;
-
+  const {media$thumbnail: thumb} = post;
   const base: KeyableObject = {
     id: rawTextToText(post.id),
     author: post.author.map(rawAuthorToAuthor),
@@ -52,9 +52,9 @@ export function rawPostToPost(post: RawPostEntry | RawPostEntrySummary): PostEnt
     link: post.link,
     category: rawCategoryToCategory(post.category),
     media$thumbnail: {
-      width: post.media$thumbnail.width.toInt(),
-      height: post.media$thumbnail.height.toInt(),
-      url: post.media$thumbnail.url
+      width: thumb.width.toInt(),
+      height: thumb.height.toInt(),
+      url: thumb.url
     },
     updated: rawTextToText(post.updated),
     published: rawTextToText(post.published)

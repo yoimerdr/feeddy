@@ -2,15 +2,18 @@ import {SearchParams} from "./params";
 import {OrderBy, RequestFeedParams} from "../../types/feeds/shared";
 import {Maybe, MaybeString} from "../../../lib/jstls/src/types/core";
 import {isDefined} from "../../../lib/jstls/src/core/objects/types";
-import {string} from "../../../lib/jstls/src/core/objects/handlers";
+import {get, string} from "../../../lib/jstls/src/core/objects/handlers";
 import {call} from "../../../lib/jstls/src/core/functions/call";
+import {uid} from "../../../lib/jstls/src/core/polyfills/symbol";
+import {KeyableObject} from "../../../lib/jstls/src/types/core/objects";
 
 function paramIndex(this: SearchParamsBuilder, index: Maybe<number | string>, action: 'replace' | 'add' | 'subtract') {
-  let current = this.__params__.start();
+  const params = get(this, searchParamsSymbol) as SearchParams;
+  let current = params.start();
   index = string(index).toInt()! >> 0;
 
   current = action === 'add' ? current + index : (action === 'subtract' ? current - index : index);
-  this.__params__.start(current);
+  params.start(current);
 }
 
 function paramDate(this: SearchParams,
@@ -24,12 +27,13 @@ function paramDate(this: SearchParams,
     call(atMost, this, max);
 }
 
+const searchParamsSymbol = uid("SearchParamsBuilder#params")
+
 export class SearchParamsBuilder {
-  protected readonly __params__!: SearchParams;
 
   private constructor(source: Partial<RequestFeedParams> | SearchParams) {
     if (source instanceof SearchParams)
-      this.__params__ = source;
+      (this as KeyableObject)[searchParamsSymbol] = source;
     else return SearchParamsBuilder.from(source)
   }
 
@@ -61,7 +65,7 @@ export class SearchParamsBuilder {
    * @param max The max value. The minimum value is 1.
    */
   max(max: Maybe<number | string>): this {
-    this.__params__.max(max!)
+    get(this, searchParamsSymbol).max(max!)
     return this;
   };
 
@@ -155,7 +159,7 @@ export class SearchParamsBuilder {
    */
   paginated(page: Maybe<number | string>): this {
     if (isDefined(page)) {
-      const max = this.__params__.max();
+      const max = get(this, searchParamsSymbol).max();
       this.start((string(page).toInt()! - 1).coerceAtLeast(0) * max + 1);
     }
     return this;
@@ -171,7 +175,8 @@ export class SearchParamsBuilder {
    * @param max The max publication date value.
    */
   published(min: MaybeString, max?: MaybeString): this {
-    call(paramDate, this.__params__, min, max, this.__params__.publishedAtLeast, this.__params__.publishedAtMost)
+    const params = get(this, searchParamsSymbol) as SearchParams;
+    call(paramDate, params, min, max, params.publishedAtLeast, params.publishedAtMost)
     return this;
   }
 
@@ -185,8 +190,9 @@ export class SearchParamsBuilder {
    * @see {published}
    */
   publishedAtLeast(min: MaybeString): this {
-    call(paramDate, this.__params__, min, undefined,
-      this.__params__.publishedAtLeast, this.__params__.publishedAtMost,
+    const params = get(this, searchParamsSymbol) as SearchParams;
+    call(paramDate, params, min, undefined,
+      params.publishedAtLeast, params.publishedAtMost,
       false, true)
     return this;
   }
@@ -201,8 +207,9 @@ export class SearchParamsBuilder {
    * @see {published}
    */
   publishedAtMost(max: MaybeString): this {
-    call(paramDate, this.__params__, undefined, max,
-      this.__params__.publishedAtLeast, this.__params__.publishedAtMost, true)
+    const params = get(this, searchParamsSymbol) as SearchParams;
+    call(paramDate, params, undefined, max,
+      params.publishedAtLeast, params.publishedAtMost, true)
     return this;
   }
 
@@ -216,7 +223,8 @@ export class SearchParamsBuilder {
    * @param max The max updated date value.
    */
   updated(min: MaybeString, max?: MaybeString): this {
-    call(paramDate, this.__params__, min, max, this.__params__.updatedAtLeast, this.__params__.updatedAtMost)
+    const params = get(this, searchParamsSymbol) as SearchParams;
+    call(paramDate, params, min, max, params.updatedAtLeast, params.updatedAtMost)
     return this;
   }
 
@@ -230,8 +238,9 @@ export class SearchParamsBuilder {
    * @see {updated}
    */
   updatedAtLeast(min: MaybeString): this {
-    call(paramDate, this.__params__, min, undefined,
-      this.__params__.updatedAtLeast, this.__params__.updatedAtMost,
+    const params = get(this, searchParamsSymbol) as SearchParams;
+    call(paramDate, params, min, undefined,
+      params.updatedAtLeast, params.updatedAtMost,
       false, true)
     return this;
   }
@@ -246,8 +255,9 @@ export class SearchParamsBuilder {
    * @see {updated}
    */
   updatedAtMost(max: MaybeString): this {
-    call(paramDate, this.__params__, undefined, max,
-      this.__params__.updatedAtLeast, this.__params__.updatedAtMost, true)
+    const params = get(this, searchParamsSymbol) as SearchParams;
+    call(paramDate, params, undefined, max,
+      params.updatedAtLeast, params.updatedAtMost, true)
     return this;
   }
 
@@ -257,7 +267,7 @@ export class SearchParamsBuilder {
    * @param order The sort order.
    */
   order(order: Maybe<OrderBy>): this {
-    this.__params__.orderby(order!)
+    get(this, searchParamsSymbol).orderby(order!)
     return this;
   }
 
@@ -280,7 +290,7 @@ export class SearchParamsBuilder {
    * @see {QueryStringBuilder}
    */
   query(query: MaybeString): this {
-    this.__params__.query(query!);
+    get(this, searchParamsSymbol).query(query!);
     return this;
   }
 
@@ -289,10 +299,9 @@ export class SearchParamsBuilder {
    * @param copy If true, return a copy of the created params.
    */
   build(copy?: boolean): Partial<RequestFeedParams> {
-    if (copy)
-      return SearchParamsBuilder.from(this.__params__.source, true)
-        .build();
-    return this.__params__.source;
+    const params = get(this, searchParamsSymbol) as SearchParams;
+    return copy ? SearchParamsBuilder.from(params.source, true)
+      .build() : params.source;
   }
 }
 
