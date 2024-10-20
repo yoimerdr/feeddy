@@ -612,27 +612,46 @@ interface PaginatePostsHandler {
    * Performs a request to retrieve the posts from the specified page.
    * @param page The page number.
    */
-  page(this: PaginatePostsHandler, page: number): void;
+  page(this: PaginatePostsHandler, page: number): Promise<PaginatePostsPageResult>;
 }
 
-interface PaginatePostsOptions<E = PostEntry, B = Blog, F = FeedOptions> extends InnerFeedOptions<F> {
+interface PaginatePostsSummaryHandler {
   /**
-   * Callback triggered after the first request to the feed is performed.
-   * @param handler The paginate handler.
-   * @see {SearchParamsBuilder.paginated}
+   * The total number of blog posts.
    */
-  onTotal(handler: PaginatePostsHandler): void;
+  readonly total: number;
 
   /**
-   * Callback triggered after the {@link PaginatePostsHandler.page} request is performed.
-   * @param posts The posts retrieved from the feed.
-   * @param blog The retrieved blog.
+   * Performs a request to retrieve the posts from the specified page.
+   * @param page The page number.
    */
-  onPosts(posts: E[], blog: B): void;
+  page(this: PaginatePostsSummaryHandler, page: number): Promise<PaginatePostsPageSummaryResult>;
 }
 
-type PaginatePostsOptionsFull = PaginatePostsOptions<PostEntry, Blog, FeedOptionsFull>;
-type PaginatePostsOptionsSummary = PaginatePostsOptions<PostEntrySummary, BlogSummary, FeedOptionsSummary>;
+interface PaginatePostsPageResult {
+  /**
+   * The retrieved posts.
+   */
+  posts: PostEntry[];
+  /**
+   * The retrieved blog's feed.
+   */
+  blog: Blog;
+}
+
+interface PaginatePostsPageSummaryResult {
+  /**
+   * The retrieved posts.
+   */
+  posts: PostEntrySummary[];
+  /**
+   * The retrieved blog's feed.
+   */
+  blog: BlogSummary;
+}
+
+type PaginatePostsOptions = InnerFeedOptions<FeedOptionsFull>;
+type PaginatePostsOptionsSummary = InnerFeedOptions<FeedOptionsSummary>;
 
 interface WithCategoriesPostEntry<E = PostEntry> {
   /**
@@ -647,7 +666,7 @@ interface WithCategoriesPostEntry<E = PostEntry> {
 
 type WithCategoriesPostEntrySummary = WithCategoriesPostEntry<PostEntrySummary>;
 
-interface WithCategoriesPostsOptions<E = PostEntry, B = Blog, F = FeedOptions> extends InnerFeedOptions<F> {
+interface WithCategoriesPostsOptions<F = FeedOptionsFull> extends InnerFeedOptions<F> {
   /**
    * The categories of the posts to be retrieved.
    */
@@ -656,30 +675,44 @@ interface WithCategoriesPostsOptions<E = PostEntry, B = Blog, F = FeedOptions> e
    * If true, the retrieved posts will be have all the categories.
    */
   every?: boolean;
-
-  /**
-   * Callback triggered after the request to the feed is performed.
-   * @param posts The retrieved posts.
-   * @param blog The retrieved blog.
-   */
-  onPosts(posts: E[], blog: B): void;
 }
 
-type WithCategoriesPostsOptionsFull = WithCategoriesPostsOptions<PostEntry, Blog, FeedOptionsFull>;
-type WithCategoriesPostsOptionsSummary = WithCategoriesPostsOptions<WithCategoriesPostEntrySummary, BlogSummary, FeedOptionsSummary>;
+type WithCategoriesPostsOptionsSummary = WithCategoriesPostsOptions<FeedOptionsSummary>;
+
+interface WithCategoriesPostsResult {
+  /**
+   * The retrieved posts.
+   */
+  posts: WithCategoriesPostEntry[];
+  /**
+   * The retrieved blog's feed.
+   */
+  blog: Blog;
+}
+
+interface WithCategoriesPostsResultSummary {
+  /**
+   * The retrieved posts.
+   */
+  posts: WithCategoriesPostEntrySummary[];
+  /**
+   * The retrieved blog's feed.
+   */
+  blog: BlogSummary;
+}
 
 interface Posts {
   /**
    * Paginate the blog using the <b>summary</b> route.
    * @param options The paginate options. All properties must be defined.
    */
-  (options: PaginatePostsOptionsSummary): void;
+  (options: PaginatePostsOptionsSummary): Promise<PaginatePostsSummaryHandler>;
 
   /**
    * Paginate the blog using the <b>default</b> route.
    * @param options The paginate options. All properties must be defined.
    */
-  (options: PaginatePostsOptionsFull): void;
+  (options: PaginatePostsOptions): Promise<PaginatePostsHandler>;
 
   /**
    * Creates the thumbnail url of a post.
@@ -696,7 +729,7 @@ interface Posts {
    * All posts are retrieved, but it is sliced by the value of the `max-results` parameter.
    * @param options The request options.
    */
-  withCategories(options: WithCategoriesPostsOptionsSummary): void;
+  withCategories(options: WithCategoriesPostsOptionsSummary): Promise<WithCategoriesPostsResultSummary>;
 
   /**
    * Retrieves the posts from the <b>default</b> route with the given categories.
@@ -704,150 +737,7 @@ interface Posts {
    * All posts are retrieved, but it is sliced by the value of the `max-results` parameter.
    * @param options The request options.
    */
-  withCategories(options: WithCategoriesPostsOptionsFull): void;
-}
-
-interface NumberExtensions {
-  /**
-   * Restricts the number to be at most the given maximum.
-   *
-   * @param {number} maximum - The maximum value.
-   * @returns {number} The coerced number, which is the smallest of the original number or the maximum.
-   */
-  coerceAtMost(maximum: number): number;
-
-  /**
-   * Restricts the number to be at least the given minimum.
-   *
-   * @param {number} minimum - The minimum value.
-   * @returns {number} The coerced number, which is the largest of the original number or the minimum.
-   */
-  coerceAtLeast(minimum: number): number;
-
-  /**
-   * Restricts the number to be within the given range [minimum, maximum].
-   *
-   * @param {number} minimum - The minimum value.
-   * @param {number} maximum - The maximum value.
-   * @returns {number} The coerced number, which will be within the range [minimum, maximum].
-   */
-  coerceIn(minimum: number, maximum: number): number;
-
-  /**
-   * Checks if the number is within the inclusive range [minimum, maximum].
-   *
-   * @param {number} minimum - The minimum value.
-   * @param {number} maximum - The maximum value.
-   * @returns {boolean} True if the number is within the inclusive range [minimum, maximum], false otherwise.
-   */
-  isFromTo(minimum: number, maximum: number): boolean;
-
-  /**
-   * Checks if the number is within the inclusive-exclusive range [minimum, maximum].
-   *
-   * @param {number} minimum - The minimum value.
-   * @param {number} maximum - The maximum value.
-   * @returns {boolean} True if the number is within the inclusive-exclusive range [minimum, maximum], false otherwise.
-   */
-  isFromUntil(minimum: number, maximum: number): boolean;
-}
-
-interface NumberWithExtensions extends Number, NumberExtensions {
-}
-
-interface StringExtensions {
-  /**
-   * Checks if the string is empty
-   * @returns {boolean} true if string is empty; otherwise false
-   */
-  isEmpty(): boolean;
-
-  /**
-   * Checks if the string is not empty
-   * @returns {boolean} true if string is not empty; otherwise false
-   */
-  isNotEmpty(): boolean;
-
-  toInt(radix?: number): MaybeNumber;
-
-  toFloat(): MaybeNumber;
-}
-
-interface StringWithExtensions extends String, StringExtensions {
-}
-
-type CountsCompareFn<T, A, R> = (this: R, target: T, current: T, index: number, arr: A) => boolean;
-
-interface ArrayExtensions<T> {
-  /**
-   * Gets the first element of the array
-   * @returns {T} The first element if array is not empty.
-   * @template T
-   * @throws {IllegalAccessError} If the array {@link isEmpty}
-   */
-  first(): T;
-
-  /**
-   * Gets the first element of the array
-   * @template T
-   * @returns {Maybe<T>} The first element if array is not empty; otherwise undefined
-   */
-  firstOrNull(): Maybe<T>;
-
-  /**
-   * Counts how many value occurrences exist in the array.
-   *
-   * The default compare fn check if that values are equal with === operator.
-   *
-   * @param value The value for counts.
-   * @param compare The compare fn. It must return true if you want to count the current item.
-   * @param thisArg The this compare fn arg.
-   * @returns {number} The number of occurrences
-   *
-   * @throws IllegalArgumentError If the param value is undefined.
-   */
-  counts<R>(value: T, compare?: CountsCompareFn<T, this, R>, thisArg?: R): number;
-
-  /**
-   * Check if array is empty
-   *
-   * @returns {boolean} true if array is empty; otherwise false
-   */
-  isEmpty(): boolean;
-
-  /**
-   * Check if array is not empty
-   * @returns {boolean} true if array is not empty; otherwise false
-   */
-  isNotEmpty(): boolean;
-
-  filterDefined(): NonNullable<T>[];
-
-  /**
-   * Extend current array pushing each element from source array
-   * @template T
-   *
-   * @param {T[]} source An array with elements for extend current array.
-   */
-  extends(source: T[]): this;
-
-  /**
-   * Gets the last element of the array
-   * @returns {Maybe<T>} The first element if array is not empty.
-   * @template T
-   * @throws {IllegalAccessError} If the array {@link isEmpty}
-   */
-  last(): T;
-
-  /**
-   * Gets the last element of the array
-   * @template T
-   * @returns {Maybe<T>} The first element if array is not empty; otherwise undefined
-   */
-  lastOrNull(): Maybe<T>;
-}
-
-interface ArrayWithExtensions<T> extends Array<T>, ArrayExtensions<T> {
+  withCategories(options: WithCategoriesPostsOptions): Promise<WithCategoriesPostsResult>;
 }
 
 type Nullables = undefined | null;
@@ -856,35 +746,9 @@ type Nullables = undefined | null;
  */
 type Maybe<Ty> = Ty | Nullables;
 /**
- * Refers to a null or undefined type number.
- */
-type MaybeNumber = Maybe<number>;
-/**
  * Refers to a null or undefined type string.
  */
 type MaybeString = Maybe<string>;
-declare global {
-  interface Number extends NumberExtensions {
-  }
-
-  interface String extends StringExtensions {
-  }
-
-  interface Array<T> extends ArrayExtensions<T> {
-  }
-
-  interface ArrayConstructor {
-    readonly prototype: ArrayWithExtensions<any>;
-  }
-
-  interface StringConstructor {
-    readonly prototype: StringWithExtensions;
-  }
-
-  interface NumberConstructor {
-    readonly prototype: NumberWithExtensions;
-  }
-}
 
 /**
  * @class
@@ -1202,8 +1066,6 @@ declare class SearchParams {
 }
 
 declare class SearchParamsBuilder {
-  protected readonly __params__: SearchParams;
-
   private constructor();
 
   /**
@@ -1419,6 +1281,24 @@ interface Search {
  */
 declare function buildUrl(options: Partial<FeedOptions>): URL;
 
+/**
+ * The handler to make requests to the blogger feed API.
+ */
+declare const feed: Feed;
+
+/**
+ * The handler to paginate the blogger feed posts.
+ */
+declare const posts: Posts;
+/**
+ * The helper to build the query and search parameters for a request to the blog's feed.
+ */
+declare const search: Search;
+/**
+ * The helper to know some of the sub routes of the blog feed. All are relatives.
+ */
+declare const routes: Routes;
+
 interface Feeddy {
   buildUrl: typeof buildUrl;
   routes: Routes;
@@ -1427,4 +1307,4 @@ interface Feeddy {
   posts: Posts;
 }
 
-declare var feeddy: Feeddy
+declare const feeddy: Feeddy;

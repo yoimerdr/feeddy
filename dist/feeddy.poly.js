@@ -1,6 +1,10 @@
 var feeddy = (function (exports) {
     'use strict';
 
+    function keys(object) {
+        return Object.keys(object);
+    }
+
     function typeIs(value, type) {
         var typeOf = typeof value;
         return (Array.isArray(type) ? type : [type])
@@ -21,19 +25,66 @@ var feeddy = (function (exports) {
     function isNumber(value) {
         return typeIs(value, "number") && !isNaN(value);
     }
+    function isString(value) {
+        return typeIs(value, "string");
+    }
+
+    function bind(fn, thisArg) {
+        return fn.bind(thisArg);
+    }
 
     function apply(fn, thisArg, args) {
         return fn.apply(thisArg, arguments[2]);
     }
 
-    function letValue(value, fn, thisArg) {
-        return apply(fn, thisArg, [value]);
+    function protoapply(cls, key, instance, args) {
+        return apply(cls.prototype[key], instance, arguments[3]);
     }
-    function string(value, nullableString) {
-        if (isDefined(value))
-            return value.toString();
-        nullableString = isFunction(nullableString) ? nullableString : function () { return ""; };
-        return nullableString();
+
+    function each(source, callbackfn, thisArg) {
+        if (isFunction(source['forEach'])) {
+            callbackfn = bind(callbackfn, thisArg);
+            var index_1 = 0;
+            source.forEach(function (value) {
+                callbackfn(value, index_1, source);
+                index_1++;
+            });
+        }
+        else
+            protoapply((Array), "forEach", source, [callbackfn, thisArg]);
+    }
+
+    function multiple(target, descriptors, definer) {
+        each(keys(descriptors), function (key) { return definer(target, key, descriptors[key]); });
+    }
+
+    function hasOwn(target, key) {
+        return protoapply(Object, "hasOwnProperty", target, [key]);
+    }
+
+    function prop(target, key, descriptor) {
+        if (!hasOwn(target, key))
+            Object.defineProperty(target, key, descriptor);
+    }
+
+    function _value(target, key, value, writable) {
+        prop(target, key, {
+            enumerable: false,
+            value: value,
+            writable: writable
+        });
+    }
+    function readonly(target, key, value) {
+        _value(target, key, value, false);
+    }
+    function readonlys(target, values) {
+        multiple(target, values, readonly);
+    }
+    function writeable(target, key, value) {
+        _value(target, key, value, true);
+    }
+    function writeables(target, values) {
+        multiple(target, values, writeable);
     }
 
     /******************************************************************************
@@ -100,6 +151,13 @@ var feeddy = (function (exports) {
         return RequiredArgumentError;
     })(IllegalArgumentError));
 
+    function isEmpty() {
+        return this.length === 0;
+    }
+    function isNotEmpty() {
+        return !apply(isEmpty, this);
+    }
+
     function getDefined(value, builder, thisArg) {
         return isDefined(value) ? value : getIf(value, isDefined, builder, thisArg);
     }
@@ -131,38 +189,250 @@ var feeddy = (function (exports) {
             throw new IllegalArgumentError("The ".concat(name, " argument must be a ").concat(type));
         return value;
     }
+    function requireFunction(value, name) {
+        return requiredWithType(value, "function", name);
+    }
     function requireObject(value, name) {
         return requiredWithType(value, 'object', name);
     }
 
-    function keys(object) {
-        return Object.keys(object);
+    function slice(source, startIndex, endIndex) {
+        return protoapply((Array), "slice", source, [startIndex, endIndex]);
     }
 
-    function protoapply(cls, key, instance, args) {
-        return apply(cls.prototype[key], instance, arguments[3]);
+    function extend(source) {
+        requireIf(source, isObject, "The source must be an indexable object.");
+        apply(this.push, this, source);
+        return this;
     }
 
-    function hasOwn(target, key) {
-        return protoapply(Object, "hasOwnProperty", target, [key]);
+    function get$1(object, key) {
+        return object[key];
+    }
+    function set(object, key, value) {
+        object[key] = value;
+        return object[key];
+    }
+    function setTo(object, key, target) {
+        var result = false;
+        if (!Array.isArray(key))
+            key = [key];
+        each(key, function (key) {
+            result = (hasOwn(object, key) ? (set(target, key, get$1(object, key)), true) : false);
+        });
+        return result;
     }
 
-    function bind(fn, thisArg) {
-        return fn.bind(thisArg);
+    function fetch$1(input, init) {
+        if (typeof XMLHttpRequest === "undefined")
+            throw new ReferenceError('This fetch polyfills requires XMLHttpRequest. You must call this on the browser.');
+        return new Promise(function (resolve, reject) {
+            var xhr = new XMLHttpRequest();
+            var isPlainUrl = isString(input);
+            var options = {
+                url: isPlainUrl ? input : "",
+                method: "GET",
+                headers: {},
+                body: null
+            };
+            var assignKeys = ["url", "method", "headers"];
+            if (!isPlainUrl)
+                setTo(input, apply((extend), assignKeys, [["url"]]), options);
+            if (init)
+                setTo(init, assignKeys, options);
+            function createResponse() {
+                var init = {};
+                setTo(this, ["status", "statusText"], init);
+                init.headers = this.getAllResponseHeaders()
+                    .split('\r\n')
+                    .reduce(function (acc, current) {
+                    var _a = current.split(': '), name = _a[0], value = _a[1];
+                    if (name && value)
+                        acc[name] = value;
+                    return acc;
+                }, {});
+                var response = new Response(this.response, init);
+                readonly(response, 'url', this.responseURL);
+                return response;
+            }
+            xhr.onload = function (ev) {
+                resolve(apply(createResponse, this));
+            };
+            xhr.onerror = function (ev) {
+                reject(apply(createResponse, this));
+            };
+            each(keys(options.headers), function (key) {
+                this.setRequestHeader(key, options.headers[key]);
+            }, xhr);
+            xhr.open(options.method, options.url, true);
+            xhr.send(options.body);
+        });
     }
 
-    function each(source, callbackfn, thisArg) {
-        if (isFunction(source['forEach'])) {
-            callbackfn = bind(callbackfn, thisArg);
-            var index_1 = 0;
-            source.forEach(function (value) {
-                callbackfn(value, index_1, source);
-                index_1++;
-            });
+    function loop(fn, length, start, step) {
+        start = start || 0;
+        step = getDefined(step, function () { return 1; });
+        var condition = step < 0 ? function (index) { return index > length; } : function (index) { return index < length; };
+        for (var i = start; condition(i); i += step) {
+            if (fn(i))
+                break;
         }
-        else
-            protoapply((Array), "forEach", source, [callbackfn, thisArg]);
     }
+
+    function letValue(value, fn, thisArg) {
+        return apply(fn, thisArg, [value]);
+    }
+    function string(value, nullableString) {
+        if (isDefined(value))
+            return value.toString();
+        nullableString = isFunction(nullableString) ? nullableString : function () { return ""; };
+        return nullableString();
+    }
+
+    var id = 0;
+    var postfix = Math.random();
+    function uid(key) {
+        return "Symbol('".concat(string(key), "')_").concat(apply(1.0.toString, ++id + postfix, [36]));
+    }
+
+    var promiseState = uid("Promise#state");
+    var promiseResult = uid("Promise#result");
+    var promiseCalls = uid("Promise#calls");
+    function resolveOrReject(state, value, index) {
+        if (get$1(this, promiseState) !== "pending")
+            return;
+        if (value && isFunction(value.then)) {
+            var rej = bind(reject, this);
+            var res = bind(resolve, this);
+            if (value === this)
+                rej(new TypeError("Chaining cycle detected for promise."));
+            else
+                value.then(res, rej);
+            return;
+        }
+        set(this, promiseState, state);
+        set(this, promiseResult, value);
+        if (!hasOwn(this, promiseCalls))
+            return;
+        var calls = get$1(this, promiseCalls);
+        if (calls.length === 1)
+            calls[0](value);
+        else
+            calls[index](value);
+    }
+    function resolve(value) {
+        apply(resolveOrReject, this, ["fulfilled", value, 0]);
+    }
+    function reject(reason) {
+        apply(resolveOrReject, this, ["rejected", reason, 1]);
+    }
+    function resolverPromise(resolve, reject, resolver) {
+        return function (result) {
+            setTimeout(function () {
+                if (isFunction(resolver)) {
+                    try {
+                        resolve(resolver(result));
+                    }
+                    catch (e) {
+                        reject(e);
+                    }
+                }
+                else
+                    resolve(result);
+            }, 0);
+        };
+    }
+    function finallyPromise(target, resolve, reject, final, first) {
+        return function () {
+            setTimeout(function () {
+                if (first)
+                    final();
+                resolve(target);
+                if (!first)
+                    final();
+            }, 0);
+        };
+    }
+    var Promise$1 = (function () {
+        function Promise(executor) {
+            requireFunction(executor);
+            writeable(this, promiseState, 'pending');
+            var rej = bind(reject, this);
+            try {
+                executor(bind(resolve, this), rej);
+            }
+            catch (e) {
+                rej(e);
+            }
+        }
+        Promise.prototype.toString = function () {
+            return "Promise { <".concat(get$1(this, promiseState), "> }");
+        };
+        Promise.resolve = function (value) {
+            return new Promise(function (resolve) { return resolve(value); });
+        };
+        Promise.reject = function (reason) {
+            return new Promise(function (_, reject) { return reject(reason); });
+        };
+        Promise.all = function (values) {
+            return new Promise(function (resolve, reject) {
+                var count = 0;
+                var len = values.length;
+                var results = [];
+                loop(function (index) {
+                    var promise = values[index];
+                    Promise.resolve(promise)
+                        .then(function (result) {
+                        results[index] = result;
+                        count++;
+                        if (count === len)
+                            resolve(results);
+                    }, function (reason) {
+                        reject(reason);
+                    });
+                }, len);
+                if (count === 0)
+                    resolve(results);
+            });
+        };
+        Promise.prototype.finally = function (onFinally) {
+            var _this = this;
+            return new Promise(function (resolve, reject) {
+                switch (get$1(_this, promiseState)) {
+                    case "pending":
+                        set(_this, promiseCalls, [finallyPromise(_this, resolve, reject, onFinally)]);
+                        break;
+                    case "fulfilled":
+                    case "rejected":
+                        finallyPromise(_this, resolve, reject, onFinally, true)();
+                        break;
+                }
+            });
+        };
+        Promise.prototype.catch = function (onrejected) {
+            return this.then(null, onrejected);
+        };
+        Promise.prototype.then = function (onfulfilled, onrejected) {
+            var _this = this;
+            return new Promise(function (resolve, reject) {
+                var res = resolverPromise(resolve, reject, onfulfilled);
+                var rej = resolverPromise(reject, reject, onrejected);
+                var result = get$1(_this, promiseResult);
+                switch (get$1(_this, promiseState)) {
+                    case "pending":
+                        set(_this, promiseCalls, [res, rej]);
+                        break;
+                    case "fulfilled":
+                        res(result);
+                        break;
+                    case "rejected":
+                        rej(result);
+                        break;
+                }
+            });
+        };
+        return Promise;
+    }());
 
     function _assign(target, source, mode, noObject) {
         if (!isDefined(source))
@@ -216,48 +486,8 @@ var feeddy = (function (exports) {
         return entry;
     }
 
-    function multiple(target, descriptors, definer) {
-        each(keys(descriptors), function (key) { return definer(target, key, descriptors[key]); });
-    }
-
-    function prop(target, key, descriptor) {
-        if (!hasOwn(target, key))
-            Object.defineProperty(target, key, descriptor);
-    }
-
-    function _value(target, key, value, writable) {
-        prop(target, key, {
-            enumerable: false,
-            value: value,
-            writable: writable
-        });
-    }
-    function readonly(target, key, value) {
-        _value(target, key, value, false);
-    }
-    function readonlys(target, values) {
-        multiple(target, values, readonly);
-    }
-    function writeable(target, key, value) {
-        _value(target, key, value, true);
-    }
-    function writeables(target, values) {
-        multiple(target, values, writeable);
-    }
-
-    function slice(source, startIndex, endIndex) {
-        return protoapply((Array), "slice", source, [startIndex, endIndex]);
-    }
-
     function call(fn, thisArg) {
         return fn.apply(thisArg, slice(arguments, 2));
-    }
-
-    function isEmpty() {
-        return this.length === 0;
-    }
-    function isNotEmpty() {
-        return !apply(isEmpty, this);
     }
 
     function toInt(radix) {
@@ -365,20 +595,6 @@ var feeddy = (function (exports) {
         };
         return SearchParams;
     }());
-
-    var id = 0;
-    var postfix = Math.random();
-    function uid(key) {
-        return "Symbol('".concat(string(key), "')_").concat(apply(1.0.toString, ++id + postfix, [36]));
-    }
-
-    function get$1(object, key) {
-        return object[key];
-    }
-    function set(object, key, value) {
-        object[key] = value;
-        return object[key];
-    }
 
     function paramIndex(index, action) {
         var params = get$1(this, searchParamsSymbol);
@@ -525,12 +741,6 @@ var feeddy = (function (exports) {
             fetchUrl.searchParams.set(param.key, param.value);
         });
         return fetchUrl;
-    }
-
-    function extend(source) {
-        requireIf(source, isObject, "The source must be an indexable object.");
-        apply(this.push, this, source);
-        return this;
     }
 
     function _rawGet(options, all) {
@@ -863,6 +1073,12 @@ var feeddy = (function (exports) {
         withCategories: withCategories
     });
 
+    writeables(window, {
+        fetch: fetch$1,
+        Promise: Promise$1,
+        SimplePromise: Promise$1
+    });
+
     exports.buildUrl = buildUrl;
     exports.feed = feed;
     exports.posts = posts;
@@ -872,4 +1088,4 @@ var feeddy = (function (exports) {
     return exports;
 
 })({});
-//# sourceMappingURL=feeddy.js.map
+//# sourceMappingURL=feeddy.poly.js.map
