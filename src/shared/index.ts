@@ -5,6 +5,8 @@ import {isDefined} from "../../lib/jstls/src/core/objects/types";
 import {IllegalArgumentError} from "../../lib/jstls/src/core/exceptions";
 import {entries} from "../../lib/jstls/src/core/objects/factory";
 import {each} from "../../lib/jstls/src/core/iterable/each";
+import {apply} from "../../lib/jstls/src/core/functions/apply";
+import {coerceIn} from "../../lib/jstls/src/core/extensions/number";
 
 /**
  * The blogger feed routes.
@@ -46,7 +48,7 @@ export function buildUrl(options: Partial<FeedOptions>): URL {
 
   const params = SearchParams.from(options.params);
   params.alt("json");
-  params.max(params.max().coerceIn(1, SearchParamsBuilder.maxResults));
+  params.max(apply(coerceIn, params.max(), [1, SearchParamsBuilder.maxResults]));
   each(entries(params.toDefined()), param => {
     fetchUrl.searchParams.set(<string>param.key, <string>param.value)
   });

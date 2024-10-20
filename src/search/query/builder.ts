@@ -1,12 +1,14 @@
 import {uid} from "../../../lib/jstls/src/core/polyfills/symbol";
 import {KeyableObject} from "../../../lib/jstls/src/types/core/objects";
 import {rep} from "./representation";
-import {get, string} from "../../../lib/jstls/src/core/objects/handlers";
+import {string} from "../../../lib/jstls/src/core/objects/handlers";
+import {get, set} from "../../../lib/jstls/src/core/objects/handlers/getset";
 import {getDefined} from "../../../lib/jstls/src/core/objects/validators";
 import {slice} from "../../../lib/jstls/src/core/iterable";
 import {apply} from "../../../lib/jstls/src/core/functions/apply";
 import {MaybeString} from "../../../lib/jstls/src/types/core";
 import {writeables} from "../../../lib/jstls/src/core/definer";
+import {isEmpty, isNotEmpty} from "../../../lib/jstls/src/core/extensions/shared/iterables";
 
 const querySymbol = uid('QueryStringBuilder#Query');
 const excludeSymbol = uid('QueryStringBuilder#Exclude');
@@ -19,25 +21,25 @@ function buildQuery(terms: string | string[], sep: string, startQuote: string, e
     return buildQuery([terms], sep, startQuote, endQuote);
   endQuote = getDefined(endQuote, () => startQuote);
   terms = terms.map(it => string(it))
-    .filter(it => it.isNotEmpty());
-  return terms.isEmpty() ? '' : `${startQuote}${terms.join(sep)}${endQuote}`
+    .filter(it => apply(isNotEmpty, it));
+  return apply(isEmpty, terms) ? '' : `${startQuote}${terms.join(sep)}${endQuote}`
 }
 
 function appendQuery(this: QueryStringBuilder, args: ArrayLike<any>, name?: string) {
-  if(args.length === 0)
+  if (args.length === 0)
     return;
 
   const quote = rep.quote(get(this, exactSymbol));
   const op = rep.operator(get(this, operatorSymbol));
   const xc = get(this, excludeSymbol) ? rep.exclude() : '';
   name = string(name);
-  name = name.isNotEmpty() ? name + ':' : '';
+  name = apply(isNotEmpty, name) ? name + ':' : '';
 
-  let current = get(this, querySymbol);
+  let current: string = get(this, querySymbol);
 
   const query = buildQuery(slice(args), quote + op + xc + name + quote, xc + name + quote, quote);
 
-  if (current.isNotEmpty())
+  if (apply(isNotEmpty, current))
     current += op;
 
   current += query;
@@ -77,7 +79,7 @@ export class QueryStringBuilder {
    * @see {or}
    */
   and(): this {
-    (this as KeyableObject)[operatorSymbol] = 'AND'
+    set(this, operatorSymbol, 'AND');
     return this;
   }
 
@@ -94,7 +96,7 @@ export class QueryStringBuilder {
    * @see {and}
    */
   or(): this {
-    (this as KeyableObject)[operatorSymbol] = 'OR';
+    set(this, operatorSymbol, 'OR');
     return this;
   }
 
@@ -113,7 +115,7 @@ export class QueryStringBuilder {
    * @see {noExact}
    */
   exact(): this {
-    (this as KeyableObject)[exactSymbol] = true;
+    set(this, exactSymbol, true);
     return this;
   }
 
@@ -133,7 +135,7 @@ export class QueryStringBuilder {
    * @see {exact}
    */
   noExact(): this {
-    (this as KeyableObject)[exactSymbol] = false;
+    set(this, exactSymbol, false);
     return this;
   }
 
@@ -152,7 +154,7 @@ export class QueryStringBuilder {
    * @see {noExclude}
    */
   exclude(): this {
-    (this as KeyableObject)[excludeSymbol] = true;
+    set(this, excludeSymbol, true);
     return this;
   }
 
@@ -173,7 +175,7 @@ export class QueryStringBuilder {
    * @see {exclude}
    */
   noExclude(): this {
-    (this as KeyableObject)[excludeSymbol] = false;
+    set(this, excludeSymbol, false);
     return this;
   }
 
@@ -229,7 +231,7 @@ export class QueryStringBuilder {
    */
   build(): MaybeString {
     const query: string = get(this, querySymbol);
-    return query.isEmpty() ? undefined : query;
+    return apply(isEmpty, query) ? undefined : query;
   }
 }
 

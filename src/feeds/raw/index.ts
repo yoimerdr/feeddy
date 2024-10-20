@@ -4,6 +4,10 @@ import {buildUrl} from "../../shared";
 import {SearchParams, SearchParamsBuilder} from "../../search";
 import {getDefined} from "../../../lib/jstls/src/core/objects/validators";
 import {deepAssign} from "../../../lib/jstls/src/core/objects/factory";
+import {apply} from "../../../lib/jstls/src/core/functions/apply";
+import {extend} from "../../../lib/jstls/src/core/extensions/array";
+import {isNotEmpty} from "../../../lib/jstls/src/core/extensions/shared/iterables";
+import {string} from "../../../lib/jstls/src/core/objects/handlers";
 
 function _rawGet(options: Partial<FeedOptions>, all?: boolean): Promise<RawBlog> {
   options = feedOptions(options);
@@ -22,20 +26,25 @@ function _rawGet(options: Partial<FeedOptions>, all?: boolean): Promise<RawBlog>
     return fetch(url)
       .then(res => res.json())
       .then((blog: RawBlog) => {
-        const entry = getDefined(blog.feed.entry, () => []);
-        const feed = blog.feed;
-        entries.extends(entry);
-        if (entry.isNotEmpty() && entry.length >= SearchParamsBuilder.maxResults && ((all && entry.length >= SearchParamsBuilder.maxResults) || (!all && entry.length < max))) {
+        const {feed} = blog;
+        const entry = getDefined(feed.entry, () => []);
+
+        apply(extend<RawPostEntry>, entries, [entry])
+
+        const {length} = entry;
+        const {maxResults} = SearchParamsBuilder;
+
+        if (apply(isNotEmpty, entry) && length >= maxResults && ((all && length >= maxResults) || (!all && length < max))) {
           if (!all)
-            max -= entry.length;
-          params.start(params.start() + entry.length)
+            max -= length;
+          params.start(params.start() + length)
           params.max(max);
           return request(buildUrl(options), max);
         }
         feed.entry = entries;
         if (params.max() !== entries.length)
-          feed.openSearch$itemsPerPage.$t = feed.openSearch$totalResults.$t = entries.length.toString();
-        feed.openSearch$startIndex.$t = startIndex.toString();
+          feed.openSearch$itemsPerPage.$t = feed.openSearch$totalResults.$t = string(entries.length);
+        feed.openSearch$startIndex.$t = string(startIndex);
         return blog;
       });
   }

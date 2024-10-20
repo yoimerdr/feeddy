@@ -1,8 +1,12 @@
 import {
+  PaginatePostsHandler,
   PaginatePostsOptions,
-  PaginatePostsOptionsSummary, PaginatePostsResult, PaginatePostsSummaryResult,
+  PaginatePostsOptionsSummary,
+  PaginatePostsSummaryHandler,
   WithCategoriesPostsOptions,
-  WithCategoriesPostsOptionsSummary, WithCategoriesPostsResult, WithCategoriesPostsResultSummary
+  WithCategoriesPostsOptionsSummary,
+  WithCategoriesPostsResult,
+  WithCategoriesPostsResultSummary
 } from "../types/posts";
 import {FeedOptions, ImageSize} from "../types/feeds/shared";
 import {SearchParams, SearchParamsBuilder} from "../search";
@@ -17,29 +21,32 @@ import {parseSize} from "../../lib/jstls/src/core/geometry/size/size";
 import {KeyableObject} from "../../lib/jstls/src/types/core/objects";
 import {queryBuilder} from "../search/query/builder";
 import {apply} from "../../lib/jstls/src/core/functions/apply";
+import {isEmpty} from "../../lib/jstls/src/core/extensions/shared/iterables";
+import {PromiseConstructor} from "../../lib/jstls/src/types/core/polyfills";
 
 export const thumbnailSizeExpression: string = 's72-c';
 
-export function posts(options: PaginatePostsOptions): Promise<PaginatePostsResult>;
-export function posts(options: PaginatePostsOptionsSummary): Promise<PaginatePostsSummaryResult>;
+export function posts(options: PaginatePostsOptions): Promise<PaginatePostsHandler>;
+export function posts(options: PaginatePostsOptionsSummary): Promise<PaginatePostsSummaryHandler>;
 export function posts(options: KeyableObject): Promise<KeyableObject> {
   requireObject(options, 'options');
   options.feed = getIf(options.feed, isObject, () => (<FeedOptions>{}));
-  const params = SearchParams.from(options.feed.params);
+  const {feed} = options;
+  const params = SearchParams.from(feed.params);
 
-  function changePage(this: PaginatePostsResult, page: number) {
-    options.feed.params = SearchParamsBuilder.from(params)
+  function changePage(this: PaginatePostsHandler, page: number) {
+    feed.params = SearchParamsBuilder.from(params)
       .paginated(page)
       .build();
 
-    return get(options.feed)
-      .then(blog => ({
+    return get(feed)
+      .then(blog => Object.freeze({
         posts: isDefined(blog) ? blog!.feed.entry : [],
         blog
       }));
   }
 
-  return (params.query() ? all : get)(options.feed)
+  return (params.query() ? all : get)(feed)
     .then(blog => Object.freeze({
       total: blog.feed.openSearch$totalResults,
       page: changePage
@@ -68,12 +75,14 @@ export function postThumbnail(source: PostEntry | PostEntrySummary | RawPostEntr
     .replace(`=${thumbnailSizeExpression}`, `=${expression}`);
 }
 
+declare const Promise: PromiseConstructor;
+
 export function withCategories(options: WithCategoriesPostsOptions): Promise<WithCategoriesPostsResult>;
 export function withCategories(options: WithCategoriesPostsOptionsSummary): Promise<WithCategoriesPostsResultSummary>;
 export function withCategories(options: KeyableObject): Promise<KeyableObject | void> {
   const categories: string[] = options.categories;
 
-  if (categories.isEmpty())
+  if (apply(isEmpty, categories))
     return new Promise((_, reject) => reject("The categories are empty."));
 
   const feed = feedOptions(options.feed);

@@ -1,16 +1,21 @@
 import {OrderBy, RequestFeedParams} from "../../types/feeds/shared";
 import {Keys, Maybe, MaybeString, Nullables} from "../../../lib/jstls/src/types/core";
-import {keys, string} from "../../../lib/jstls/src/core/objects/handlers";
+import {string} from "../../../lib/jstls/src/core/objects/handlers";
 import {isDefined} from "../../../lib/jstls/src/core/objects/types";
 import {getDefined} from "../../../lib/jstls/src/core/objects/validators";
 import {assign} from "../../../lib/jstls/src/core/objects/factory";
 import {KeyableObject} from "../../../lib/jstls/src/types/core/objects";
 import {readonlys} from "../../../lib/jstls/src/core/definer";
 import {each} from "../../../lib/jstls/src/core/iterable/each";
+import {call} from "../../../lib/jstls/src/core/functions/call";
+import {toInt} from "../../../lib/jstls/src/core/extensions/string";
+import {apply} from "../../../lib/jstls/src/core/functions/apply";
+import {coerceAtLeast} from "../../../lib/jstls/src/core/extensions/number";
+import {keys} from "../../../lib/jstls/src/core/objects/handlers/properties";
 
 function minimumsOne(max: Maybe<string | number>): number {
-  max = string(max).toInt();
-  return isDefined(max) ? max!.coerceAtLeast(1) : 1;
+  max = call(toInt, string(max));
+  return isDefined(max) ? apply(coerceAtLeast, max!, [1]) : 1;
 }
 
 function validDate(date: MaybeString): string {
@@ -75,8 +80,9 @@ export class SearchParams {
   max(max: string | number): number;
 
   max(max?: Maybe<string | number>): number {
-    updateProperty(arguments, this.source, 'max-results', minimumsOne, true);
-    return this.source["max-results"] as number;
+    const {source} = this;
+    updateProperty(arguments, source, 'max-results', minimumsOne, true);
+    return source["max-results"] as number;
   }
 
   /**
@@ -93,8 +99,9 @@ export class SearchParams {
   start(index: string | number): number;
 
   start(index?: Maybe<string | number>): number {
-    updateProperty(arguments, this.source, 'start-index', minimumsOne, true);
-    return this.source["start-index"] as number;
+    const {source} = this;
+    updateProperty(arguments, source, 'start-index', minimumsOne, true);
+    return source["start-index"] as number;
   }
 
   /**
@@ -118,8 +125,9 @@ export class SearchParams {
   publishedAtLeast(min: Nullables): Nullables;
 
   publishedAtLeast(min?: MaybeString): MaybeString {
-    updateProperty(arguments, this.source, 'published-min', validDate)
-    return this.source["published-min"];
+    const {source} = this;
+    updateProperty(arguments, source, 'published-min', validDate)
+    return source["published-min"];
   }
 
   /**
@@ -142,8 +150,9 @@ export class SearchParams {
   publishedAtMost(max: string): string;
 
   publishedAtMost(max?: MaybeString): MaybeString {
-    updateProperty(arguments, this.source, 'published-max', validDate)
-    return this.source["published-max"];
+    const {source} = this;
+    updateProperty(arguments, source, 'published-max', validDate)
+    return source["published-max"];
   }
 
   /**
@@ -166,8 +175,9 @@ export class SearchParams {
   updatedAtLeast(min: Nullables): Nullables;
 
   updatedAtLeast(min?: MaybeString): MaybeString {
-    updateProperty(arguments, this.source, 'updated-min', validDate)
-    return this.source["updated-min"];
+    const {source} = this;
+    updateProperty(arguments, source, 'updated-min', validDate)
+    return source["updated-min"];
   }
 
   /**
@@ -190,8 +200,9 @@ export class SearchParams {
   updatedAtMost(max: Nullables): Nullables;
 
   updatedAtMost(max?: MaybeString): MaybeString {
-    updateProperty(arguments, this.source, 'updated-max', validDate)
-    return this.source["updated-max"];
+    const {source} = this;
+    updateProperty(arguments, source, 'updated-max', validDate)
+    return source["updated-max"];
   }
 
   /**
@@ -218,7 +229,7 @@ export class SearchParams {
   orderby<O extends OrderBy>(order?: Maybe<O>): O {
     order = (order === 'updated' || order === 'starttime' || order === 'lastmodified') ? order : 'lastmodified' as O;
     this.source["orderby"] = order;
-    return order
+    return order;
   }
 
   /**
@@ -242,8 +253,9 @@ export class SearchParams {
   query(query: Nullables): Nullables;
 
   query(query?: MaybeString): MaybeString {
-    updateProperty(arguments, this.source, 'q')
-    return this.source["q"];
+    const {source} = this;
+    updateProperty(arguments, source, 'q')
+    return source["q"];
   }
 
   alt(type: 'json' | 'rss') {

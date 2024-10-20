@@ -10,7 +10,7 @@ export interface InnerFeedOptions<F = FeedOptions> {
   feed: F;
 }
 
-interface PaginatePostsHandler<E = PostEntry, B = Blog> {
+export interface PaginatePostsHandler {
 
   /**
    * The total number of blog posts.
@@ -21,20 +21,49 @@ interface PaginatePostsHandler<E = PostEntry, B = Blog> {
    * Performs a request to retrieve the posts from the specified page.
    * @param page The page number.
    */
-  page(this: PaginatePostsHandler, page: number): Promise<PaginatePostsPageResult<E, B>>;
+  page(this: PaginatePostsHandler, page: number): Promise<PaginatePostsPageResult>;
 }
 
-interface PaginatePostsPageResult<E = PostEntry, B = Blog, > {
-  posts: E[],
-  blog: B;
+export interface PaginatePostsSummaryHandler {
+
+  /**
+   * The total number of blog posts.
+   */
+  readonly total: number;
+
+  /**
+   * Performs a request to retrieve the posts from the specified page.
+   * @param page The page number.
+   */
+  page(this: PaginatePostsSummaryHandler, page: number): Promise<PaginatePostsPageSummaryResult>;
+}
+
+export interface PaginatePostsPageResult {
+  /**
+   * The retrieved posts.
+   */
+  posts: PostEntry[],
+  /**
+   * The retrieved blog's feed.
+   */
+  blog: Blog;
+}
+
+export interface PaginatePostsPageSummaryResult {
+  /**
+   * The retrieved posts.
+   */
+  posts: PostEntrySummary[];
+  /**
+   * The retrieved blog's feed.
+   */
+  blog: BlogSummary;
 }
 
 export type PaginatePostsOptions = InnerFeedOptions<FeedOptionsFull>;
 
 export type PaginatePostsOptionsSummary = InnerFeedOptions<FeedOptionsSummary>;
 
-export type PaginatePostsResult = PaginatePostsHandler;
-export type PaginatePostsSummaryResult = PaginatePostsHandler<PostEntrySummary, BlogSummary>;
 
 export interface WithCategoriesPostEntry<E = PostEntry> {
 
@@ -68,8 +97,27 @@ export interface WithCategoriesPostsOptions<F = FeedOptionsFull> extends InnerFe
 
 export type WithCategoriesPostsOptionsSummary = WithCategoriesPostsOptions<FeedOptionsSummary>;
 
-export type WithCategoriesPostsResult = PaginatePostsPageResult<WithCategoriesPostEntry>;
-export type WithCategoriesPostsResultSummary = PaginatePostsPageResult<WithCategoriesPostEntrySummary, BlogSummary>;
+export interface WithCategoriesPostsResult {
+  /**
+   * The retrieved posts.
+   */
+  posts: WithCategoriesPostEntry[],
+  /**
+   * The retrieved blog's feed.
+   */
+  blog: Blog;
+}
+
+export interface WithCategoriesPostsResultSummary {
+  /**
+   * The retrieved posts.
+   */
+  posts: WithCategoriesPostEntrySummary[],
+  /**
+   * The retrieved blog's feed.
+   */
+  blog: BlogSummary;
+}
 
 
 export interface Posts {
@@ -78,13 +126,13 @@ export interface Posts {
    * Paginate the blog using the <b>summary</b> route.
    * @param options The paginate options. All properties must be defined.
    */
-  (options: PaginatePostsOptionsSummary): Promise<PaginatePostsSummaryResult>;
+  (options: PaginatePostsOptionsSummary): Promise<PaginatePostsSummaryHandler>;
 
   /**
    * Paginate the blog using the <b>default</b> route.
    * @param options The paginate options. All properties must be defined.
    */
-  (options: PaginatePostsOptions): Promise<PaginatePostsResult>;
+  (options: PaginatePostsOptions): Promise<PaginatePostsHandler>;
 
   /**
    * Creates the thumbnail url of a post.

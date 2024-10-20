@@ -12,13 +12,15 @@ import {string} from "../../lib/jstls/src/core/objects/handlers";
 import {KeyableObject} from "../../lib/jstls/src/types/core/objects";
 import {IllegalArgumentError} from "../../lib/jstls/src/core/exceptions";
 import {isObject} from "../../lib/jstls/src/core/objects/types";
+import {toInt} from "../../lib/jstls/src/core/extensions/string";
+import {apply} from "../../lib/jstls/src/core/functions/apply";
 
 export function rawTextToText(text: RawText): Text {
   return isObject(text) ? string(text.$t) : '';
 }
 
 export function rawTextToNumber(text: RawText): number {
-  return rawTextToText(text).toInt()!;
+  return apply(toInt, rawTextToText(text))!;
 }
 
 export function rawTextToBoolean(text: RawText): boolean {
@@ -52,8 +54,8 @@ export function rawPostToPost(post: RawPostEntry | RawPostEntrySummary): PostEnt
     link: post.link,
     category: rawCategoryToCategory(post.category),
     media$thumbnail: {
-      width: thumb.width.toInt(),
-      height: thumb.height.toInt(),
+      width: apply(toInt, thumb.width),
+      height: apply(toInt, thumb.height),
       url: thumb.url
     },
     updated: rawTextToText(post.updated),

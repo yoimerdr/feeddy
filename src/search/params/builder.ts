@@ -2,15 +2,19 @@ import {SearchParams} from "./params";
 import {OrderBy, RequestFeedParams} from "../../types/feeds/shared";
 import {Maybe, MaybeString} from "../../../lib/jstls/src/types/core";
 import {isDefined} from "../../../lib/jstls/src/core/objects/types";
-import {get, string} from "../../../lib/jstls/src/core/objects/handlers";
 import {call} from "../../../lib/jstls/src/core/functions/call";
 import {uid} from "../../../lib/jstls/src/core/polyfills/symbol";
 import {KeyableObject} from "../../../lib/jstls/src/types/core/objects";
+import {apply} from "../../../lib/jstls/src/core/functions/apply";
+import {toInt} from "../../../lib/jstls/src/core/extensions/string";
+import {coerceAtLeast} from "../../../lib/jstls/src/core/extensions/number";
+import {string} from "../../../lib/jstls/src/core/objects/handlers";
+import {get} from "../../../lib/jstls/src/core/objects/handlers/getset";
 
 function paramIndex(this: SearchParamsBuilder, index: Maybe<number | string>, action: 'replace' | 'add' | 'subtract') {
   const params = get(this, searchParamsSymbol) as SearchParams;
   let current = params.start();
-  index = string(index).toInt()! >> 0;
+  index = call(toInt, string(index))! >> 0;
 
   current = action === 'add' ? current + index : (action === 'subtract' ? current - index : index);
   params.start(current);
@@ -160,7 +164,7 @@ export class SearchParamsBuilder {
   paginated(page: Maybe<number | string>): this {
     if (isDefined(page)) {
       const max = get(this, searchParamsSymbol).max();
-      this.start((string(page).toInt()! - 1).coerceAtLeast(0) * max + 1);
+      this.start(apply(coerceAtLeast, call(toInt, string(page))! - 1, [0]) * max + 1);
     }
     return this;
   }
