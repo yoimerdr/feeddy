@@ -28,14 +28,11 @@ feeddy.posts({
     params: feeddy.search.params()
       .limit(12)
       .build()
-  },
-  onTotal(handler) {
-    handler.page(1); // retrieve the first 12 posts
-  },
-  onPosts(posts, blog) {
-    console.log(posts);
   }
-})
+}).then(handler => handler.page(1))
+  .then(result => {
+    console.log(result.posts);
+  })
 ```
 
 ### Search posts
@@ -52,14 +49,11 @@ feeddy.posts({
           .build()
       )
       .build()
-  },
-  onTotal(handler) {
-    handler.page(1); // retrieves the first 12 posts
-  },
-  onPosts(posts, blog) {
-    console.log(posts);
   }
-})
+}).then(handler => handler.page(1))
+  .then(result => {
+    console.log(result.posts);
+  })
 ```
 
 ### Posts with the given categories only
@@ -73,10 +67,11 @@ feeddy.posts.withCategories({
       .build()
   },
   categories: ['category', 'name'],
-  onPosts(postsAndCounts, blog) {
-    console.log(postsAndCounts); // will print the first 12 posts with the categories `category` or `name`
-  }
+  
 })
+  .then(result => {
+    console.log(result.posts);
+  })
 ```
 
 ### Interact with the feeds only

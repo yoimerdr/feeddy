@@ -5,10 +5,10 @@ import terser from '@rollup/plugin-terser';
 import { dts } from 'rollup-plugin-dts'
 
 
-function varConfig(path, name, external, globals) {
+function varConfig(input,path, name, external, globals) {
   return {
     external,
-    input: `src/index.ts`,
+    input,
     plugins: [
       resolve(),
       commonjs(),
@@ -40,7 +40,8 @@ function varConfig(path, name, external, globals) {
 }
 
 export default [
-  varConfig( `dist/feeddy.js`, 'feeddy'),
+  varConfig( "src/index.ts", "dist/feeddy.js", 'feeddy'),
+  varConfig("src/polyfied.ts", "dist/feeddy.poly.js", "feeddy"),
   {
     input: `src/index.ts`,
     plugins: [
