@@ -1,24 +1,29 @@
 import {RawAuthorImage, RawFeed, RawLink, RawPostLink} from "./raw";
 import {FeedOptionsFull, FeedOptionsSummary, ImageSize} from "./shared";
 
-export type Text = string;
+export type SimpleText = string;
+
+/**
+ * Unused, keep for compatibility.
+ */
+export type Text = SimpleText;
 
 export interface Author {
 
   /**
    * The author's email address.
    */
-  email: Text;
+  email: SimpleText;
 
   /**
    * The author's name.
    */
-  name: Text;
+  name: SimpleText;
 
   /**
    * The author's profile url.
    */
-  uri: Text;
+  uri: SimpleText;
 
   /**
    * The image of the author.
@@ -46,12 +51,12 @@ export type BasePost = {
   /**
    * The id of the post.
    */
-  id: Text;
+  id: SimpleText;
 
   /**
    * The title of the post.
    */
-  title: Text;
+  title: SimpleText;
 
   /**
    * The links of the post.
@@ -71,12 +76,12 @@ export type BasePost = {
   /**
    * RFC 3339 date-time when this post was last updated.
    */
-  updated: Text;
+  updated: SimpleText;
 
   /**
    * RFC 3339 date-time when this post was published.
    */
-  published: Text;
+  published: SimpleText;
 }
 
 /**
@@ -86,7 +91,7 @@ export type PostEntry = BasePost & {
   /**
    * The content of the post. Can contain HTML markup.
    */
-  content: Text
+  content: SimpleText
 }
 
 /**
@@ -96,7 +101,7 @@ export type PostEntrySummary = BasePost & {
   /**
    * The summary content of the post. Can contain HTML markup.
    */
-  summary: Text
+  summary: SimpleText
 }
 
 /**
@@ -112,7 +117,7 @@ export type BlogFeed = {
   /**
    * The blog id.
    */
-  id: Text;
+  id: SimpleText;
 
   /**
    * The categories with which the posts has been tagged.
@@ -129,14 +134,14 @@ export type BlogFeed = {
    *
    * The title can include HTML.
    */
-  title: Text;
+  title: SimpleText;
 
   /**
    * The subtitle of the blog, which is usually displayed in Blogger underneath the blog's title.
    *
    * The subtitle can include HTML.
    */
-  subtitle: Text;
+  subtitle: SimpleText;
 
   /**
    * The links of the blog.
@@ -146,7 +151,7 @@ export type BlogFeed = {
   /**
    * RFC 3339 date-time when the blog was last updated.
    */
-  updated: Text;
+  updated: SimpleText;
 
   /**
    * The 1-based index of the first retrieved post.

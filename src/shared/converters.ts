@@ -7,7 +7,7 @@ import {
   RawPostEntrySummary,
   RawText
 } from "../types/feeds/raw";
-import {Author, Blog, PostEntry, PostEntrySummary, Text} from "../types/feeds";
+import {Author, Blog, PostEntry, PostEntrySummary, SimpleText} from "../types/feeds";
 import {string} from "../../lib/jstls/src/core/objects/handlers";
 import {KeyableObject} from "../../lib/jstls/src/types/core/objects";
 import {IllegalArgumentError} from "../../lib/jstls/src/core/exceptions";
@@ -15,7 +15,7 @@ import {isObject} from "../../lib/jstls/src/core/objects/types";
 import {toInt} from "../../lib/jstls/src/core/extensions/string";
 import {apply} from "../../lib/jstls/src/core/functions/apply";
 
-export function rawTextToText(text: RawText): Text {
+export function rawTextToText(text: RawText): SimpleText {
   return isObject(text) ? string(text.$t) : '';
 }
 
