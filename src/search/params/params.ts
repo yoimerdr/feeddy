@@ -6,12 +6,12 @@ import {getDefined} from "../../../lib/jstls/src/core/objects/validators";
 import {assign} from "../../../lib/jstls/src/core/objects/factory";
 import {KeyableObject} from "../../../lib/jstls/src/types/core/objects";
 import {readonlys} from "../../../lib/jstls/src/core/definer";
-import {each} from "../../../lib/jstls/src/core/iterable/each";
 import {call} from "../../../lib/jstls/src/core/functions/call";
 import {toInt} from "../../../lib/jstls/src/core/extensions/string";
 import {apply} from "../../../lib/jstls/src/core/functions/apply";
 import {coerceAtLeast} from "../../../lib/jstls/src/core/extensions/number";
 import {keys} from "../../../lib/jstls/src/core/objects/handlers/properties";
+import {len} from "../../../lib/jstls/src/core/shortcuts/indexable";
 
 function minimumsOne(max: Maybe<string | number>): number {
   max = call(toInt, string(max));
@@ -33,8 +33,8 @@ function updateProperty<K extends Keys<RequestFeedParams>>(args: IArguments,
                                                            source: Partial<RequestFeedParams>, key: K,
                                                            builder?: (arg: any) => RequestFeedParams[K],
                                                            noArgs?: boolean,) {
-  if (args.length > 0 || noArgs) {
-    const value = args.length > 0 ? args[0] : source[key];
+  if (len(args) > 0 || noArgs) {
+    const value = len(args) > 0 ? args[0] : source[key];
     source[key] = builder ? builder(value) : value;
   }
 }
@@ -80,9 +80,9 @@ export class SearchParams {
   max(max: string | number): number;
 
   max(max?: Maybe<string | number>): number {
-    const {source} = this;
-    updateProperty(arguments, source, 'max-results', minimumsOne, true);
-    return source["max-results"] as number;
+    const {source} = this, key = 'max-results';
+    updateProperty(arguments, source, key, minimumsOne, true);
+    return source[key] as number;
   }
 
   /**
@@ -99,9 +99,9 @@ export class SearchParams {
   start(index: string | number): number;
 
   start(index?: Maybe<string | number>): number {
-    const {source} = this;
-    updateProperty(arguments, source, 'start-index', minimumsOne, true);
-    return source["start-index"] as number;
+    const {source} = this, key = 'start-index';
+    updateProperty(arguments, source, key, minimumsOne, true);
+    return source[key] as number;
   }
 
   /**
@@ -125,9 +125,9 @@ export class SearchParams {
   publishedAtLeast(min: Nullables): Nullables;
 
   publishedAtLeast(min?: MaybeString): MaybeString {
-    const {source} = this;
-    updateProperty(arguments, source, 'published-min', validDate)
-    return source["published-min"];
+    const {source} = this, key = 'published-min';
+    updateProperty(arguments, source, key, validDate)
+    return source[key];
   }
 
   /**
@@ -150,9 +150,9 @@ export class SearchParams {
   publishedAtMost(max: string): string;
 
   publishedAtMost(max?: MaybeString): MaybeString {
-    const {source} = this;
-    updateProperty(arguments, source, 'published-max', validDate)
-    return source["published-max"];
+    const {source} = this, key = 'published-max';
+    updateProperty(arguments, source, key, validDate)
+    return source[key];
   }
 
   /**
@@ -175,9 +175,9 @@ export class SearchParams {
   updatedAtLeast(min: Nullables): Nullables;
 
   updatedAtLeast(min?: MaybeString): MaybeString {
-    const {source} = this;
-    updateProperty(arguments, source, 'updated-min', validDate)
-    return source["updated-min"];
+    const {source} = this, key = 'updated-min';
+    updateProperty(arguments, source, key, validDate)
+    return source[key];
   }
 
   /**
@@ -200,9 +200,9 @@ export class SearchParams {
   updatedAtMost(max: Nullables): Nullables;
 
   updatedAtMost(max?: MaybeString): MaybeString {
-    const {source} = this;
-    updateProperty(arguments, source, 'updated-max', validDate)
-    return source["updated-max"];
+    const {source} = this, key = 'updated-max';
+    updateProperty(arguments, source, key, validDate)
+    return source[key];
   }
 
   /**
@@ -274,10 +274,11 @@ export class SearchParams {
    */
   toDefined(): Partial<RequestFeedParams> {
     const source: KeyableObject = {};
-    each(keys(this.source), function (key) {
-      if (isDefined(this[key]))
-        source[key] = this[key]
-    }, this.source);
+    keys(this.source)
+      .forEach(function (key) {
+        if (isDefined(this[key]))
+          source[key] = this[key]
+      }, this.source)
     return source as Partial<RequestFeedParams>;
   }
 }

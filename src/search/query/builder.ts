@@ -1,6 +1,5 @@
 import {uid} from "../../../lib/jstls/src/core/polyfills/symbol";
 import {KeyableObject} from "../../../lib/jstls/src/types/core/objects";
-import {rep} from "./representation";
 import {string} from "../../../lib/jstls/src/core/objects/handlers";
 import {get, set} from "../../../lib/jstls/src/core/objects/handlers/getset";
 import {getDefined} from "../../../lib/jstls/src/core/objects/validators";
@@ -10,6 +9,7 @@ import {MaybeString} from "../../../lib/jstls/src/types/core";
 import {writeables} from "../../../lib/jstls/src/core/definer";
 import {isEmpty, isNotEmpty} from "../../../lib/jstls/src/core/extensions/shared/iterables";
 import {len} from "../../../lib/jstls/src/core/shortcuts/indexable";
+import {exclude, operator, quote} from "./representation";
 
 const querySymbol = uid('QueryStringBuilder#Query');
 const excludeSymbol = uid('QueryStringBuilder#Exclude');
@@ -30,15 +30,15 @@ function appendQuery(this: QueryStringBuilder, args: ArrayLike<any>, name?: stri
   if (len(args) === 0)
     return;
 
-  const quote = rep.quote(get(this, exactSymbol));
-  const op = rep.operator(get(this, operatorSymbol));
-  const xc = get(this, excludeSymbol) ? rep.exclude() : '';
+  const qt = quote(get(this, exactSymbol));
+  const op = operator(get(this, operatorSymbol));
+  const xc = get(this, excludeSymbol) ? exclude() : '';
   name = string(name);
   name = apply(isNotEmpty, name) ? name + ':' : '';
 
   let current: string = get(this, querySymbol);
 
-  const query = buildQuery(slice(args), quote + op + xc + name + quote, xc + name + quote, quote);
+  const query = buildQuery(slice(args), qt + op + xc + name + qt, xc + name + qt, qt);
 
   if (apply(isNotEmpty, current))
     current += op;
