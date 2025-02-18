@@ -9,6 +9,7 @@ import {apply} from "../../../lib/jstls/src/core/functions/apply";
 import {MaybeString} from "../../../lib/jstls/src/types/core";
 import {writeables} from "../../../lib/jstls/src/core/definer";
 import {isEmpty, isNotEmpty} from "../../../lib/jstls/src/core/extensions/shared/iterables";
+import {len} from "../../../lib/jstls/src/core/shortcuts/indexable";
 
 const querySymbol = uid('QueryStringBuilder#Query');
 const excludeSymbol = uid('QueryStringBuilder#Exclude');
@@ -26,7 +27,7 @@ function buildQuery(terms: string | string[], sep: string, startQuote: string, e
 }
 
 function appendQuery(this: QueryStringBuilder, args: ArrayLike<any>, name?: string) {
-  if (args.length === 0)
+  if (len(args) === 0)
     return;
 
   const quote = rep.quote(get(this, exactSymbol));

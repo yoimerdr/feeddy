@@ -8,6 +8,7 @@ import {apply} from "../../../lib/jstls/src/core/functions/apply";
 import {extend} from "../../../lib/jstls/src/core/extensions/array";
 import {isNotEmpty} from "../../../lib/jstls/src/core/extensions/shared/iterables";
 import {string} from "../../../lib/jstls/src/core/objects/handlers";
+import {len} from "../../../lib/jstls/src/core/shortcuts/indexable";
 
 function _rawGet(options: Partial<FeedOptions>, all?: boolean): Promise<RawBlog> {
   options = feedOptions(options);
@@ -42,8 +43,8 @@ function _rawGet(options: Partial<FeedOptions>, all?: boolean): Promise<RawBlog>
           return request(buildUrl(options), max);
         }
         feed.entry = entries;
-        if (params.max() !== entries.length)
-          feed.openSearch$itemsPerPage.$t = feed.openSearch$totalResults.$t = string(entries.length);
+        if (params.max() !== len(entries))
+          feed.openSearch$itemsPerPage.$t = feed.openSearch$totalResults.$t = string(len(entries));
         feed.openSearch$startIndex.$t = string(startIndex);
         return blog;
       });

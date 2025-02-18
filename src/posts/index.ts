@@ -23,6 +23,9 @@ import {queryBuilder} from "../search/query/builder";
 import {apply} from "../../lib/jstls/src/core/functions/apply";
 import {isEmpty} from "../../lib/jstls/src/core/extensions/shared/iterables";
 import {PromiseConstructor} from "../../lib/jstls/src/types/core/polyfills";
+import {freeze} from "../../lib/jstls/src/core/shortcuts/object";
+import {round} from "../../lib/jstls/src/core/shortcuts/math";
+import {len} from "../../lib/jstls/src/core/shortcuts/indexable";
 
 export const thumbnailSizeExpression: string = 's72-c';
 
@@ -40,14 +43,14 @@ export function posts(options: KeyableObject): Promise<KeyableObject> {
       .build();
 
     return get(feed)
-      .then(blog => Object.freeze({
+      .then(blog => freeze({
         posts: isDefined(blog) ? blog!.feed.entry : [],
         blog
       }));
   }
 
   return (params.query() ? all : get)(feed)
-    .then(blog => Object.freeze({
+    .then(blog => freeze({
       total: blog.feed.openSearch$totalResults,
       page: changePage
     }))
@@ -59,8 +62,8 @@ function toFormatSize(size: ImageSize<number> | number | string): string {
 
 export function postThumbnail(source: PostEntry | PostEntrySummary | RawPostEntry | RawPostEntrySummary, size: ImageSize<number> | number | string, ratio?: string | number): string {
   const parse = parseSize(<any>function (this: KeyableObject, width: number, height: number) {
-    this.width = Math.round(width);
-    this.height = Math.round(height);
+    this.width = round(width);
+    this.height = round(height);
     this.adjust = function () {
       return this;
     }
@@ -98,9 +101,9 @@ export function withCategories(options: KeyableObject): Promise<KeyableObject | 
 
 
   return all(feed)
-    .then(blog => Object.freeze({
+    .then(blog => freeze({
       posts: blog.feed.entry
-        .map(post => ({count: post.category.filter(it => categories.indexOf(it) >= 0).length, post}))
+        .map(post => ({count: len(post.category.filter(it => categories.indexOf(it) >= 0)), post}))
         .sort((a, b) => b.count - a.count)
         .slice(0, params.max()),
       blog
