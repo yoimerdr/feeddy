@@ -1,11 +1,12 @@
 import {FeedOptions, Routes} from "../types/feeds/shared";
-import {SearchParams, SearchParamsBuilder} from "../search";
+import {maxResults, paramsFrom} from "../search";
 import {requireDefined} from "../../lib/jstls/src/core/objects/validators";
 import {isDefined} from "../../lib/jstls/src/core/objects/types";
 import {IllegalArgumentError} from "../../lib/jstls/src/core/exceptions";
-import {entries} from "../../lib/jstls/src/core/objects/factory";
 import {apply} from "../../lib/jstls/src/core/functions/apply";
 import {coerceIn} from "../../lib/jstls/src/core/extensions/number";
+import {keys} from "../../lib/jstls/src/core/objects/handlers/properties";
+import {forEach} from "../../lib/jstls/src/core/shortcuts/array";
 
 /**
  * The blogger feed routes.
@@ -33,6 +34,7 @@ export const routes: Routes = {
  */
 export function buildUrl(options: Partial<FeedOptions>): URL {
   requireDefined(options, "options")
+
   let href: string;
   if (isDefined(options.blogUrl))
     href = options.blogUrl!;
@@ -42,15 +44,16 @@ export function buildUrl(options: Partial<FeedOptions>): URL {
 
   options.blogUrl = href;
   const fetchUrl = new URL(href);
-
   fetchUrl.pathname += options.route === 'full' ? routes.posts() : routes.postsSummary();
 
-  const params = SearchParams.from(options.params);
+  const params = paramsFrom(options.params);
   params.alt("json");
-  params.max(apply(coerceIn, params.max(), [1, SearchParamsBuilder.maxResults]));
-  entries(params.toDefined())
-    .forEach(param => {
-      fetchUrl.searchParams.set(<string>param.key, <string>param.value)
-    })
+  params.max(apply(coerceIn, params.max(), [1, maxResults]));
+
+  const search = params.toDefined()
+  forEach(keys(search), key => {
+    fetchUrl.searchParams.set(key, search[key] as string);
+  })
+
   return fetchUrl;
 }

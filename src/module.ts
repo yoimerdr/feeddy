@@ -3,26 +3,23 @@ import {all, get} from "./feeds";
 import {paramsBuilder, SearchParamsBuilder} from "./search";
 import {buildUrl} from "./shared";
 import {Routes} from "./types/feeds/shared";
-import {posts, postThumbnail, withCategories} from "./posts";
-import {readonlys} from "../lib/jstls/src/core/definer";
-import {RawFeed} from "./types/feeds/raw";
+import {posts, } from "./posts";
+import {readonly} from "../lib/jstls/src/core/definer";
 import {Feed} from "./types/feeds";
 import {Posts} from "./types/posts";
 import {queryBuilder, QueryStringBuilder} from "./search/query/builder";
 import {Search} from "./types/search";
+import {postThumbnail} from "./posts/converters";
+import {withCategories} from "./posts/related";
 
-readonlys(<RawFeed>rawGet, {
-  all: rawAll
-})
+readonly(rawGet, "all", rawAll);
 
 /**
  * The handler to make requests to the blogger feed API.
  */
 export const feed = <Feed>get;
-readonlys(feed, {
-  all,
-  raw: rawGet,
-});
+readonly(feed, "all", all);
+readonly(feed, "raw", rawGet);
 
 /**
  * The handler for search on blogger feed.
@@ -34,11 +31,8 @@ export const search = <Search> {
   SearchParamsBuilder
 }
 
-readonlys(<Posts>posts, {
-  createsThumbnail: postThumbnail,
-  withCategories
-})
-
+readonly(<Posts>posts, "createsThumbnail", postThumbnail);
+readonly(<Posts>posts, "withCategories", withCategories);
 
 interface Feeddy {
   buildUrl: typeof buildUrl;

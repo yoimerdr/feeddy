@@ -1,7 +1,7 @@
 import {RawBlog, RawBlogSummary, RawPostEntry} from "../../types/feeds/raw";
 import {FeedOptions, FeedOptionsFull, FeedOptionsSummary} from "../../types/feeds/shared";
 import {buildUrl} from "../../shared";
-import {SearchParams, SearchParamsBuilder} from "../../search";
+import {maxResults, paramsFrom} from "../../search";
 import {getDefined} from "../../../lib/jstls/src/core/objects/validators";
 import {deepAssign} from "../../../lib/jstls/src/core/objects/factory";
 import {apply} from "../../../lib/jstls/src/core/functions/apply";
@@ -12,11 +12,11 @@ import {len} from "../../../lib/jstls/src/core/shortcuts/indexable";
 
 function _rawGet(options: Partial<FeedOptions>, all?: boolean): Promise<RawBlog> {
   options = feedOptions(options);
-  const params = SearchParams.from(options.params);
+  const params = paramsFrom(options.params);
 
   if (all) {
     params.start(1);
-    params.max(SearchParamsBuilder.maxResults);
+    params.max(maxResults);
   }
 
   const entries: RawPostEntry[] = [];
@@ -33,7 +33,6 @@ function _rawGet(options: Partial<FeedOptions>, all?: boolean): Promise<RawBlog>
         apply(extend<RawPostEntry>, entries, [entry])
 
         const {length} = entry;
-        const {maxResults} = SearchParamsBuilder;
 
         if (apply(isNotEmpty, entry) && length >= maxResults && ((all && length >= maxResults) || (!all && length < max))) {
           if (!all)

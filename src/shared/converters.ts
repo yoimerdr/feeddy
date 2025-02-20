@@ -1,19 +1,21 @@
 import {
   RawAuthor,
   RawBlog,
+  RawBlogFeed,
   RawCategory,
   RawPostCategory,
   RawPostEntry,
   RawPostEntrySummary,
   RawText
 } from "../types/feeds/raw";
-import {Author, Blog, PostEntry, PostEntrySummary, SimpleText} from "../types/feeds";
+import {Author, Blog, BlogFeed, PostEntry, PostEntrySummary, SimpleText} from "../types/feeds";
 import {string} from "../../lib/jstls/src/core/objects/handlers";
-import {KeyableObject} from "../../lib/jstls/src/types/core/objects";
-import {IllegalArgumentError} from "../../lib/jstls/src/core/exceptions";
 import {isObject} from "../../lib/jstls/src/core/objects/types";
 import {toInt} from "../../lib/jstls/src/core/extensions/string";
 import {apply} from "../../lib/jstls/src/core/functions/apply";
+import {isArray} from "../../lib/jstls/src/core/shortcuts/array";
+import {setTo} from "../../lib/jstls/src/core/objects/handlers/getset";
+import {self} from "../../lib/jstls/src/core/utils";
 
 export function rawTextToText(text: RawText): SimpleText {
   return isObject(text) ? string(text.$t) : '';
@@ -28,16 +30,17 @@ export function rawTextToBoolean(text: RawText): boolean {
 }
 
 export function rawCategoryToCategory(category: RawCategory[] | RawPostCategory[]): string[] {
-  return Array.isArray(category) ? category.map(it => it.term) : [];
+  return isArray(category) ? category.map(it => it.term) : [];
 }
 
-export function rawAuthorToAuthor(author: RawAuthor): Author {
-  return {
-    email: rawTextToText(author.email),
-    name: rawTextToText(author.name),
-    uri: rawTextToText(author.uri),
-    gd$image: author.gd$image
-  }
+export function rawAuthorToAuthor(author: RawAuthor[]): Author[] {
+  return isArray(author) ? author
+    .map(value => setTo<RawAuthor, Author>(value, {
+      email: rawTextToText,
+      name: rawTextToText,
+      uri: rawTextToText,
+      gd$image: self
+    }, {})) : [];
 }
 
 export function rawPostToPost(post: RawPostEntry): PostEntry;
@@ -46,47 +49,43 @@ export function rawPostToPost(post: RawPostEntry | RawPostEntrySummary): PostEnt
 export function rawPostToPost(post: RawPostEntry | RawPostEntrySummary): PostEntry | PostEntrySummary {
   if (!isObject(post))
     return {} as PostEntry;
-  const {media$thumbnail: thumb} = post;
-  const base: KeyableObject = {
-    id: rawTextToText(post.id),
-    author: post.author.map(rawAuthorToAuthor),
-    title: rawTextToText(post.title),
-    link: post.link,
-    category: rawCategoryToCategory(post.category),
-    media$thumbnail: {
-      width: apply(toInt, thumb.width),
-      height: apply(toInt, thumb.height),
-      url: thumb.url
-    },
-    updated: rawTextToText(post.updated),
-    published: rawTextToText(post.published)
-  }
-  if ((<RawPostEntry>post).content)
-    base.content = rawTextToText((<RawPostEntry>post).content);
-  else if ((<RawPostEntrySummary>post).summary)
-    base.summary = rawTextToText((<RawPostEntrySummary>post).summary);
-  else throw new IllegalArgumentError("No valid post given")
-  return base as PostEntry;
+  return setTo<RawPostEntry & RawPostEntrySummary, PostEntry>(post as any, {
+    id: rawTextToText,
+    author: rawAuthorToAuthor,
+    title: rawTextToText,
+    link: self,
+    category: rawCategoryToCategory,
+    media$thumbnail: (value) => ({
+      width: apply(toInt, value.width),
+      height: apply(toInt, value.height),
+      url: value.url
+    }),
+    updated: rawTextToText,
+    published: rawTextToText,
+    content: rawTextToText,
+    summary: rawTextToText
+  }, {})
 }
 
 export function rawBlogToBlog(blog: RawBlog): Blog {
-  const feed = blog.feed;
-  return {
-    version: blog.version,
-    encoding: blog.encoding,
-    feed: {
-      id: rawTextToText(feed.id),
-      author: feed.author.map(rawAuthorToAuthor),
-      category: rawCategoryToCategory(feed.category),
-      blogger$adultContent: rawTextToBoolean(feed.blogger$adultContent),
-      title: rawTextToText(feed.title),
-      subtitle: rawTextToText(feed.subtitle),
-      updated: rawTextToText(feed.updated),
-      openSearch$startIndex: rawTextToNumber(feed.openSearch$startIndex),
-      openSearch$totalResults: rawTextToNumber(feed.openSearch$totalResults),
-      openSearch$itemsPerPage: rawTextToNumber(feed.openSearch$itemsPerPage),
-      entry: Array.isArray(feed.entry) ? feed.entry.map(post => rawPostToPost(post)) : [],
-      link: feed.link
+  return setTo<RawBlog, Blog>(blog, {
+    version: self,
+    encoding: self,
+    feed: (feed) => {
+      return setTo<RawBlogFeed, BlogFeed>(feed, {
+        id: rawTextToText,
+        author: rawAuthorToAuthor,
+        category: rawCategoryToCategory,
+        blogger$adultContent: rawTextToBoolean,
+        title: rawTextToText,
+        subtitle: rawTextToText,
+        updated: rawTextToText,
+        openSearch$itemsPerPage: rawTextToNumber,
+        openSearch$startIndex: rawTextToNumber,
+        openSearch$totalResults: rawTextToNumber,
+        link: self,
+        entry: (value) => isArray(value) ? value.map(rawPostToPost) : [],
+      }, {})
     }
-  }
+  }, {})
 }

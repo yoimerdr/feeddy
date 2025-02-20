@@ -6,66 +6,21 @@ import {getDefined} from "../../../lib/jstls/src/core/objects/validators";
 import {slice} from "../../../lib/jstls/src/core/iterable";
 import {apply} from "../../../lib/jstls/src/core/functions/apply";
 import {MaybeString} from "../../../lib/jstls/src/types/core";
-import {writeables} from "../../../lib/jstls/src/core/definer";
+import {writeable} from "../../../lib/jstls/src/core/definer";
 import {isEmpty, isNotEmpty} from "../../../lib/jstls/src/core/extensions/shared/iterables";
 import {len} from "../../../lib/jstls/src/core/shortcuts/indexable";
 import {exclude, operator, quote} from "./representation";
+import {isArray} from "../../../lib/jstls/src/core/shortcuts/array";
+import {es5class} from "../../../lib/jstls/src/core/definer/classes";
+import {concat} from "../../../lib/jstls/src/core/shortcuts/string";
 
-const querySymbol = uid('QueryStringBuilder#Query');
-const excludeSymbol = uid('QueryStringBuilder#Exclude');
-const operatorSymbol = uid('QueryStringBuilder#Operator');
-const exactSymbol = uid('QueryStringBuilder#Exact');
+const querySymbol = uid('q');
+const excludeSymbol = uid('e');
+const operatorSymbol = uid('o');
+const exactSymbol = uid('e');
 
 
-function buildQuery(terms: string | string[], sep: string, startQuote: string, endQuote?: string): string {
-  if (!Array.isArray(terms))
-    return buildQuery([terms], sep, startQuote, endQuote);
-  endQuote = getDefined(endQuote, () => startQuote);
-  terms = terms.map(it => string(it))
-    .filter(it => apply(isNotEmpty, it));
-  return apply(isEmpty, terms) ? '' : `${startQuote}${terms.join(sep)}${endQuote}`
-}
-
-function appendQuery(this: QueryStringBuilder, args: ArrayLike<any>, name?: string) {
-  if (len(args) === 0)
-    return;
-
-  const qt = quote(get(this, exactSymbol));
-  const op = operator(get(this, operatorSymbol));
-  const xc = get(this, excludeSymbol) ? exclude() : '';
-  name = string(name);
-  name = apply(isNotEmpty, name) ? name + ':' : '';
-
-  let current: string = get(this, querySymbol);
-
-  const query = buildQuery(slice(args), qt + op + xc + name + qt, xc + name + qt, qt);
-
-  if (apply(isNotEmpty, current))
-    current += op;
-
-  current += query;
-
-  (this as KeyableObject)[querySymbol] = current;
-
-  return this;
-}
-
-/**
- * @class
- * The builder for create a search query string.
- */
-export class QueryStringBuilder {
-
-  constructor() {
-    const symbols: KeyableObject = {};
-    symbols[exactSymbol] = false;
-    symbols[operatorSymbol] = 'OR';
-    symbols[excludeSymbol] = false;
-    symbols[querySymbol] = '';
-
-    writeables(this as QueryStringBuilder, symbols);
-  }
-
+export interface QueryStringBuilder {
   /**
    * Changes the operator to append search terms to `AND`.
    *
@@ -79,10 +34,7 @@ export class QueryStringBuilder {
    *
    * @see {or}
    */
-  and(): this {
-    set(this, operatorSymbol, 'AND');
-    return this;
-  }
+  and(): this;
 
   /**
    * Changes the operator to append search terms to `OR`.
@@ -96,10 +48,7 @@ export class QueryStringBuilder {
    *
    * @see {and}
    */
-  or(): this {
-    set(this, operatorSymbol, 'OR');
-    return this;
-  }
+  or(): this;
 
   /**
    * Sets the exact mode on.
@@ -115,10 +64,7 @@ export class QueryStringBuilder {
    *
    * @see {noExact}
    */
-  exact(): this {
-    set(this, exactSymbol, true);
-    return this;
-  }
+  exact(): this;
 
   /**
    * Sets the exact mode off.
@@ -135,10 +81,7 @@ export class QueryStringBuilder {
    *
    * @see {exact}
    */
-  noExact(): this {
-    set(this, exactSymbol, false);
-    return this;
-  }
+  noExact(): this;
 
   /**
    * Sets the exclude mode on.
@@ -154,10 +97,7 @@ export class QueryStringBuilder {
    *
    * @see {noExclude}
    */
-  exclude(): this {
-    set(this, excludeSymbol, true);
-    return this;
-  }
+  exclude(): this;
 
   /**
    * Sets the exclude mode off.
@@ -175,29 +115,20 @@ export class QueryStringBuilder {
    *
    * @see {exclude}
    */
-  noExclude(): this {
-    set(this, excludeSymbol, false);
-    return this;
-  }
+  noExclude(): this;
 
   /**
    * Appends search terms to the query.
    * @param term The search term.
    */
-  terms(...term: string[]): this {
-    apply(appendQuery, this, [arguments])
-    return this;
-  }
+  terms(...term: string[]): this;
 
   /**
    * Appends named search terms to the query.
    * @param name The name of the search terms.
    * @param term The search term.
    */
-  named(name: string, ...term: string[]): this {
-    apply(appendQuery, this, [slice(arguments, 1), name])
-    return this;
-  }
+  named(name: string, ...term: string[]): this;
 
   /**
    * Appends category search terms to the query.
@@ -209,9 +140,7 @@ export class QueryStringBuilder {
    * @param category The category o category names.
    * @see {terms}
    */
-  categories(...category: string[]): this {
-    return apply(this.named, this, <any>['label'].concat(slice(arguments)))
-  }
+  categories(...category: string[]): this;
 
   /**
    * Appends category search terms to the query.
@@ -223,18 +152,105 @@ export class QueryStringBuilder {
    * @param label The category o category names.
    * @see {categories}
    */
-  labels(...label: string[]): this {
-    return apply(this.categories, this, <any>arguments);
-  }
+  labels(...label: string[]): this;
 
   /**
    * Returns the built query string. If It's empty, an undefined value is returned.
    */
-  build(): MaybeString {
-    const query: string = get(this, querySymbol);
-    return apply(isEmpty, query) ? undefined : query;
-  }
+  build(): MaybeString;
 }
+
+
+export interface QueryStringBuilderConstructor {
+  new(): QueryStringBuilder;
+}
+
+function buildQuery(terms: string | string[], sep: string, startQuote: string, endQuote?: string): string {
+  if (!isArray(terms))
+    return buildQuery([terms], sep, startQuote, endQuote);
+  endQuote = getDefined(endQuote, () => startQuote);
+  terms = terms.map(it => string(it))
+    .filter(it => apply(isNotEmpty, it));
+  return apply(isEmpty, terms) ? '' : concat(startQuote, terms.join(sep), endQuote);
+}
+
+function appendQuery(this: QueryStringBuilder, args: ArrayLike<any>, name?: string) {
+  if (len(args) === 0)
+    return;
+
+  const qt = quote(get(this, exactSymbol));
+  const op = operator(get(this, operatorSymbol));
+  const xc = get(this, excludeSymbol) ? exclude() : '';
+  name = string(name);
+  name = apply(isNotEmpty, name) ? concat(name, ':') : '';
+
+  let current: string = get(this, querySymbol);
+
+  const query = buildQuery(slice(args), concat(qt, op, xc, name, qt), concat(xc, name, qt), qt);
+
+  if (apply(isNotEmpty, current))
+    current += op;
+
+  current += query;
+
+  (this as KeyableObject)[querySymbol] = current;
+
+  return this;
+}
+
+export const QueryStringBuilder: QueryStringBuilderConstructor = function (this: QueryStringBuilder) {
+  writeable(this, exactSymbol, false);
+  writeable(this, operatorSymbol, 'OR');
+  writeable(this, excludeSymbol, false);
+  writeable(this, querySymbol, '');
+} as any;
+
+function categories(this: QueryStringBuilder, ...category: string[]) {
+  return apply(this.named, this, <any>["label"].concat(slice(arguments)))
+}
+
+es5class(QueryStringBuilder, {
+  prototype: {
+    and() {
+      set(this, operatorSymbol, 'AND');
+      return this;
+    },
+    or() {
+      set(this, operatorSymbol, 'OR');
+      return this;
+    },
+    exact() {
+      set(this, exactSymbol, true);
+      return this;
+    },
+    noExact() {
+      set(this, exactSymbol, false);
+      return this;
+    },
+    exclude() {
+      set(this, excludeSymbol, true);
+      return this;
+    },
+    noExclude() {
+      set(this, excludeSymbol, false);
+      return this;
+    },
+    terms(...term: string[]) {
+      apply(appendQuery, this, [arguments])
+      return this;
+    },
+    named(name: string, ...term: string[]) {
+      apply(appendQuery, this, [slice(arguments, 1), name])
+      return this;
+    },
+    categories,
+    labels: categories,
+    build(): MaybeString {
+      const query: string = get(this, querySymbol);
+      return apply(isEmpty, query) ? undefined : query;
+    }
+  },
+})
 
 /**
  * Creates a new query string builder.
