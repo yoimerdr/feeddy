@@ -1,5 +1,4 @@
 import {paramsFrom, SearchParams} from "./params";
-import {OrderBy, RequestFeedParams} from "../../types/feeds/shared";
 import {Maybe, MaybeString} from "../../../lib/jstls/src/types/core";
 import {isDefined} from "../../../lib/jstls/src/core/objects/types";
 import {call} from "../../../lib/jstls/src/core/functions/call";
@@ -9,8 +8,9 @@ import {toInt} from "../../../lib/jstls/src/core/extensions/string";
 import {coerceAtLeast} from "../../../lib/jstls/src/core/extensions/number";
 import {string} from "../../../lib/jstls/src/core/objects/handlers";
 import {get} from "../../../lib/jstls/src/core/objects/handlers/getset";
-import {readonly, writeable} from "../../../lib/jstls/src/core/definer";
+import {readonly2, writeable} from "../../../lib/jstls/src/core/definer";
 import {es5class} from "../../../lib/jstls/src/core/definer/classes";
+import {OrderBy, RequestFeedParams} from "../../types/feeds/shared/params";
 
 function paramIndex(this: SearchParamsBuilder, index: Maybe<number | string>, action: 'replace' | 'add' | 'subtract') {
   const params = get(this, searchParamsSymbol) as SearchParams;
@@ -22,14 +22,12 @@ function paramIndex(this: SearchParamsBuilder, index: Maybe<number | string>, ac
 }
 
 function paramDate(this: SearchParams,
-                   min: MaybeString, max: MaybeString,
-                   atLeast: (this: SearchParams, min: MaybeString) => MaybeString,
-                   atMost: (this: SearchParams, max: MaybeString) => MaybeString,
+                   min: MaybeString, max: MaybeString, type: "published" | "updated",
                    keepAtLeast?: boolean, keepAtMost?: boolean) {
   if (isDefined(min) || !keepAtLeast)
-    call(atLeast, this, min);
+    call(get(this, type + "AtLeast"), this, min);
   if (isDefined(max) || !keepAtMost)
-    call(atMost, this, max);
+    call(get(this, type + "AtMost"), this, max);
 }
 
 const searchParamsSymbol = uid("p");
@@ -283,38 +281,32 @@ es5class(SearchParamsBuilder, {
     },
     published(min: MaybeString, max?: MaybeString) {
       const params = get(this, searchParamsSymbol) as SearchParams;
-      call(paramDate, params, min, max, params.publishedAtLeast, params.publishedAtMost)
+      call(paramDate, params, min, max, "published")
       return this;
     },
     publishedAtLeast(min: MaybeString) {
       const params = get(this, searchParamsSymbol) as SearchParams;
-      call(paramDate, params, min, undefined,
-        params.publishedAtLeast, params.publishedAtMost,
-        false, true)
+      call(paramDate, params, min, undefined, "published", false, true)
       return this;
     },
     publishedAtMost(max: MaybeString) {
       const params = get(this, searchParamsSymbol) as SearchParams;
-      call(paramDate, params, undefined, max,
-        params.publishedAtLeast, params.publishedAtMost, true)
+      call(paramDate, params, undefined, max, "published", true)
       return this;
     },
     updated(min: MaybeString, max?: MaybeString) {
       const params = get(this, searchParamsSymbol) as SearchParams;
-      call(paramDate, params, min, max, params.updatedAtLeast, params.updatedAtMost)
+      call(paramDate, params, min, max, "updated")
       return this;
     },
     updatedAtLeast(min: MaybeString) {
       const params = get(this, searchParamsSymbol) as SearchParams;
-      call(paramDate, params, min, undefined,
-        params.updatedAtLeast, params.updatedAtMost,
-        false, true)
+      call(paramDate, params, min, undefined, "updated", false, true)
       return this;
     },
     updatedAtMost(max: MaybeString) {
       const params = get(this, searchParamsSymbol) as SearchParams;
-      call(paramDate, params, undefined, max,
-        params.updatedAtLeast, params.updatedAtMost, true)
+      call(paramDate, params, undefined, max, "updated", true)
       return this;
     },
     order(order: Maybe<OrderBy>) {
@@ -332,17 +324,17 @@ es5class(SearchParamsBuilder, {
     }
   },
   statics: {
-    from(params?: Partial<RequestFeedParams> | SearchParams, copy?: boolean): SearchParamsBuilder {
-      return new SearchParamsBuilder(paramsFrom(params, copy))
-    },
-    empty(): SearchParamsBuilder {
-      return new SearchParamsBuilder({});
-    }
+    from: builderFrom,
+    empty: paramsBuilder
   }
 })
 
-readonly(SearchParamsBuilder, "maxResults", maxResults);
+readonly2(SearchParamsBuilder, "maxResults", maxResults);
 
-export const builderFrom = SearchParamsBuilder.from;
+export function builderFrom(params?: Partial<RequestFeedParams> | SearchParams, copy?: boolean): SearchParamsBuilder {
+  return new SearchParamsBuilder(paramsFrom(params, copy))
+};
 
-export const paramsBuilder = SearchParamsBuilder.empty;
+export function paramsBuilder(): SearchParamsBuilder {
+  return new SearchParamsBuilder({});
+}

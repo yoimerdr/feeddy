@@ -1,6 +1,7 @@
 import {Posts} from "./types/posts";
 import {Search} from "./types/search";
 import {Routes} from "./types/feeds/shared";
+import {Entries} from "./types/entries";
 
 export * from "./module";
 /**
@@ -15,3 +16,5 @@ export declare const search: Search;
  * The helper to know some of the sub routes of the blog feed. All are relatives.
  */
 export declare const routes: Routes;
+
+export declare const entries: Entries;

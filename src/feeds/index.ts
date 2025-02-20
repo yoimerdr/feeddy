@@ -1,19 +1,33 @@
-import {rawAll, rawGet} from "./raw";
-import {FeedOptions, FeedOptionsFull, FeedOptionsSummary} from "../types/feeds/shared";
-import {Blog, BlogSummary} from "../types/feeds";
-import {rawBlogToBlog} from "../shared/converters";
+import {rawAll, rawById, rawGet} from "./raw";
+import {rawBlogEntryToBlogEntry, rawBlogToBlog} from "../shared/converters";
+import {
+  FeedByIdOptions,
+  FeedByIdOptionsSummary,
+  FeedOptions,
+  FeedOptionsSummary,
+  FeedRoute,
+  FeedType
+} from "../types/feeds/options";
+import {ByIdResult, Result} from "../types/feeds";
+import {KeyableObject} from "../../lib/jstls/src/types/core/objects";
 
-export function all(options: Partial<FeedOptionsFull>): Promise<Blog>;
-export function all(options: Partial<FeedOptionsSummary>): Promise<BlogSummary>;
-export function all(options: Partial<FeedOptions>): Promise<Blog>;
-export function all(options: Partial<FeedOptions>): Promise<Blog> {
+export function all<T extends FeedType = FeedType, R extends FeedRoute = FeedRoute>(options: FeedOptions<T, R>): Promise<Result<T, R>>;
+export function all<T extends FeedType = FeedType>(options: FeedOptionsSummary<T>): Promise<Result<T, "summary">>;
+export function all(options: FeedOptions | FeedOptionsSummary): Promise<KeyableObject> {
   return rawAll(options)
     .then(rawBlogToBlog);
 }
-export function get(options: Partial<FeedOptionsFull>): Promise<Blog>;
-export function get(options: Partial<FeedOptionsSummary>): Promise<BlogSummary>;
-export function get(options: Partial<FeedOptions>): Promise<Blog>;
-export function get(options: Partial<FeedOptions>): Promise<Blog> {
+
+export function get<T extends FeedType = FeedType, R extends FeedRoute = FeedRoute>(options: FeedOptions<T, R>): Promise<Result<T, R>>;
+export function get<T extends FeedType = FeedType>(options: FeedOptionsSummary<T>): Promise<Result<T, "summary">>;
+export function get(options: FeedOptions | FeedOptionsSummary): Promise<KeyableObject> {
   return rawGet(options)
     .then(rawBlogToBlog);
+}
+
+export function byId<T extends FeedType = FeedType, R extends FeedRoute = FeedRoute>(options: FeedByIdOptions<T, R>): Promise<ByIdResult<T, R>>;
+export function byId<T extends FeedType = FeedType>(options: FeedByIdOptionsSummary<T>): Promise<ByIdResult<T, "summary">>;
+export function byId(options: FeedByIdOptions | FeedByIdOptionsSummary): Promise<KeyableObject> {
+  return rawById(options)
+    .then(rawBlogEntryToBlogEntry)
 }

@@ -1,11 +1,9 @@
-import {OrderBy, RequestFeedParams} from "../../types/feeds/shared";
 import {Keys, Maybe, MaybeString, Nullables} from "../../../lib/jstls/src/types/core";
 import {string} from "../../../lib/jstls/src/core/objects/handlers";
 import {isDefined} from "../../../lib/jstls/src/core/objects/types";
-import {getDefined} from "../../../lib/jstls/src/core/objects/validators";
 import {assign} from "../../../lib/jstls/src/core/objects/factory";
 import {KeyableObject} from "../../../lib/jstls/src/types/core/objects";
-import {readonly,} from "../../../lib/jstls/src/core/definer";
+import {readonly2,} from "../../../lib/jstls/src/core/definer";
 import {call} from "../../../lib/jstls/src/core/functions/call";
 import {toInt} from "../../../lib/jstls/src/core/extensions/string";
 import {apply} from "../../../lib/jstls/src/core/functions/apply";
@@ -14,6 +12,7 @@ import {keys} from "../../../lib/jstls/src/core/objects/handlers/properties";
 import {len} from "../../../lib/jstls/src/core/shortcuts/indexable";
 import {forEach} from "../../../lib/jstls/src/core/shortcuts/array";
 import {es5class} from "../../../lib/jstls/src/core/definer/classes";
+import {OrderBy, RequestFeedParams} from "../../types/feeds/shared/params";
 
 
 export interface SearchParams {
@@ -239,7 +238,7 @@ function updateProperty<K extends Keys<RequestFeedParams>>(args: IArguments,
  * The class for managing search parameters.
  */
 export const SearchParams: SearchParamsConstructor = function (this: SearchParams, source?: Partial<RequestFeedParams>) {
-  readonly(this, "source", getDefined(source, () => ({})))
+  readonly2(this, "source", source || {})
 } as any;
 
 es5class(SearchParams, {
@@ -299,13 +298,13 @@ es5class(SearchParams, {
     }
   },
   statics: {
-    from(source?: Partial<RequestFeedParams> | SearchParams, copy?: boolean): SearchParams {
-      if (source instanceof SearchParams)
-        return copy ? paramsFrom(source.source, copy) : source as SearchParams;
-      return new SearchParams(copy ? assign(<RequestFeedParams>{}, source!) : source);
-    }
+    from: paramsFrom
   }
 });
 
-export const paramsFrom = SearchParams.from;
+export function paramsFrom(source?: Partial<RequestFeedParams> | SearchParams, copy?: boolean): SearchParams {
+  if (source instanceof SearchParams)
+    return copy ? paramsFrom(source.source, copy) : source as SearchParams;
+  return new SearchParams(copy ? assign(<RequestFeedParams>{}, source!) : source);
+};
 

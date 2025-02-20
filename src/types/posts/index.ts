@@ -1,81 +1,10 @@
-import {Blog, BlogSummary, PostEntry, PostEntrySummary} from "../feeds";
-import {FeedOptions, FeedOptionsFull, FeedOptionsSummary, ImageSize} from "../feeds/shared";
-import {RawPostEntry, RawPostEntrySummary} from "../feeds/raw";
-
-export interface InnerFeedOptions<F = FeedOptions> {
-
-  /**
-   * The blog's feed options.
-   */
-  feed: F;
-}
-
-export interface PaginatePostsHandler {
-
-  /**
-   * The total number of blog posts.
-   */
-  readonly total: number;
-
-  /**
-   * The blog categories.
-   */
-  readonly categories: Readonly<Array<string>>;
-
-  /**
-   * Performs a request to retrieve the posts from the specified page.
-   * @param page The page number.
-   */
-  page(this: PaginatePostsHandler, page: number): Promise<PaginatePostsPageResult>;
-}
-
-export interface PaginatePostsSummaryHandler {
-
-  /**
-   * The total number of blog posts.
-   */
-  readonly total: number;
-
-  /**
-   * The blog posts categories.
-   */
-  readonly categories: Readonly<Array<string>>;
-
-  /**
-   * Performs a request to retrieve the posts from the specified page.
-   * @param page The page number.
-   */
-  page(this: PaginatePostsSummaryHandler, page: number): Promise<PaginatePostsPageSummaryResult>;
-}
-
-export interface PaginatePostsPageResult {
-  /**
-   * The retrieved posts.
-   */
-  posts: PostEntry[],
-  /**
-   * The retrieved blog's feed.
-   */
-  blog: Blog;
-}
-
-export interface PaginatePostsPageSummaryResult {
-  /**
-   * The retrieved posts.
-   */
-  posts: PostEntrySummary[];
-  /**
-   * The retrieved blog's feed.
-   */
-  blog: BlogSummary;
-}
-
-export type PaginatePostsOptions = InnerFeedOptions<FeedOptionsFull>;
-
-export type PaginatePostsOptionsSummary = InnerFeedOptions<FeedOptionsSummary>;
+import {BasePostEntry, PostEntry, PostEntrySummary, PostsBlog} from "../feeds/posts";
+import {EntriesHandler,} from "../entries";
+import {FeedByIdOptions, FeedOptions, FeedOptionsSummary, FeedRoute, InnerFeedOptions} from "../feeds/options";
+import {ImageSize} from "../feeds/shared";
 
 
-export interface WithCategoriesPostEntry<E = PostEntry> {
+export interface WithCategoriesPost<E extends BasePostEntry = PostEntry> {
 
   /**
    * Number of categories to which the current {@link post} relates.
@@ -88,9 +17,9 @@ export interface WithCategoriesPostEntry<E = PostEntry> {
   readonly post: E;
 }
 
-export type WithCategoriesPostEntrySummary = WithCategoriesPostEntry<PostEntrySummary>
+export type WithCategoriesPostSummary = WithCategoriesPost<PostEntrySummary>
 
-export interface WithCategoriesPostsOptions<F = FeedOptionsFull> extends InnerFeedOptions<F> {
+export interface WithCategoriesPostsOptions<F = FeedOptions> extends InnerFeedOptions<F> {
 
   /**
    * The categories of the posts to be retrieved.
@@ -101,7 +30,6 @@ export interface WithCategoriesPostsOptions<F = FeedOptionsFull> extends InnerFe
    * If true, the retrieved posts will be have all the categories.
    */
   every?: boolean;
-
 }
 
 
@@ -111,24 +39,37 @@ export interface WithCategoriesPostsResult {
   /**
    * The retrieved posts.
    */
-  posts: WithCategoriesPostEntry[],
+  posts: WithCategoriesPost[],
   /**
    * The retrieved blog's feed.
    */
-  blog: Blog;
+  blog: PostsBlog;
 }
 
 export interface WithCategoriesPostsResultSummary {
   /**
    * The retrieved posts.
    */
-  posts: WithCategoriesPostEntrySummary[],
+  posts: WithCategoriesPostSummary[],
   /**
    * The retrieved blog's feed.
    */
-  blog: BlogSummary;
+  blog: PostsBlog;
 }
 
+
+export interface PostsHandler<R extends FeedRoute = FeedRoute> extends EntriesHandler<"posts", R> {
+  categories: string[];
+}
+
+export type PostsFeedOptions<R extends FeedRoute = FeedRoute> = Omit<FeedOptions<"posts", R>, "type">
+export type PostsFeedOptionsSummary = Omit<PostsFeedOptions, "route">;
+
+export type PostsOptions<R extends FeedRoute = FeedRoute> = InnerFeedOptions<PostsFeedOptions<R>>;
+export type PostsOptionsSummary = InnerFeedOptions<PostsFeedOptionsSummary>;
+
+export type ByIdPostsOptions<R extends FeedRoute = FeedRoute> = FeedByIdOptions<"posts", R>;
+export type ByIdPostsOptionsSummary = FeedByIdOptions<"posts", "summary">;
 
 export interface Posts {
 
@@ -136,13 +77,12 @@ export interface Posts {
    * Paginate the blog using the <b>summary</b> route.
    * @param options The paginate options. All properties must be defined.
    */
-  (options: PaginatePostsOptionsSummary): Promise<PaginatePostsSummaryHandler>;
+  (options: PostsOptionsSummary): Promise<PostsHandler<"summary">>;
 
   /**
    * Paginate the blog using the <b>default</b> route.
    * @param options The paginate options. All properties must be defined.
-   */
-  (options: PaginatePostsOptions): Promise<PaginatePostsHandler>;
+   */<R extends FeedRoute = FeedRoute>(options: PostsOptions<R>): Promise<PostsHandler<R>>;
 
   /**
    * Creates the thumbnail url of a post.
@@ -151,7 +91,7 @@ export interface Posts {
    * @param ratio The ratio of the thumbnail.
    * @returns The thumbnail url.
    */
-  createsThumbnail(source: PostEntry | PostEntrySummary | RawPostEntry | RawPostEntrySummary, size: ImageSize<number> | number, ratio?: number | string): string;
+  createsThumbnail(source: BasePostEntry, size: ImageSize<number> | number, ratio?: number | string): string;
 
   /**
    * Retrieves the posts from the <b>summary</b> with the given categories.

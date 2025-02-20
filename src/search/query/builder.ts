@@ -1,8 +1,6 @@
 import {uid} from "../../../lib/jstls/src/core/polyfills/symbol";
-import {KeyableObject} from "../../../lib/jstls/src/types/core/objects";
 import {string} from "../../../lib/jstls/src/core/objects/handlers";
 import {get, set} from "../../../lib/jstls/src/core/objects/handlers/getset";
-import {getDefined} from "../../../lib/jstls/src/core/objects/validators";
 import {slice} from "../../../lib/jstls/src/core/iterable";
 import {apply} from "../../../lib/jstls/src/core/functions/apply";
 import {MaybeString} from "../../../lib/jstls/src/types/core";
@@ -154,6 +152,10 @@ export interface QueryStringBuilder {
    */
   labels(...label: string[]): this;
 
+  author(...author: string[]): this;
+
+  title(...title: string[]): this;
+
   /**
    * Returns the built query string. If It's empty, an undefined value is returned.
    */
@@ -168,7 +170,7 @@ export interface QueryStringBuilderConstructor {
 function buildQuery(terms: string | string[], sep: string, startQuote: string, endQuote?: string): string {
   if (!isArray(terms))
     return buildQuery([terms], sep, startQuote, endQuote);
-  endQuote = getDefined(endQuote, () => startQuote);
+  endQuote = endQuote || startQuote;
   terms = terms.map(it => string(it))
     .filter(it => apply(isNotEmpty, it));
   return apply(isEmpty, terms) ? '' : concat(startQuote, terms.join(sep), endQuote);
@@ -178,9 +180,8 @@ function appendQuery(this: QueryStringBuilder, args: ArrayLike<any>, name?: stri
   if (len(args) === 0)
     return;
 
-  const qt = quote(get(this, exactSymbol));
-  const op = operator(get(this, operatorSymbol));
-  const xc = get(this, excludeSymbol) ? exclude() : '';
+  const qt = quote(get(this, exactSymbol)), op = operator(get(this, operatorSymbol)),
+    xc = get(this, excludeSymbol) ? exclude() : '';
   name = string(name);
   name = apply(isNotEmpty, name) ? concat(name, ':') : '';
 
@@ -193,8 +194,7 @@ function appendQuery(this: QueryStringBuilder, args: ArrayLike<any>, name?: stri
 
   current += query;
 
-  (this as KeyableObject)[querySymbol] = current;
-
+  set(this, querySymbol, current);
   return this;
 }
 
@@ -245,11 +245,17 @@ es5class(QueryStringBuilder, {
     },
     categories,
     labels: categories,
+    author(...author) {
+      return apply(this.named, this, <any>["author"].concat(slice(arguments)))
+    },
+    title(...title) {
+      return apply(this.named, this, <any>["title"].concat(slice(arguments)))
+    },
     build(): MaybeString {
       const query: string = get(this, querySymbol);
       return apply(isEmpty, query) ? undefined : query;
     }
-  },
+  }
 })
 
 /**
