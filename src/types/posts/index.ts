@@ -18,6 +18,11 @@ export interface PaginatePostsHandler {
   readonly total: number;
 
   /**
+   * The blog categories.
+   */
+  readonly categories: Readonly<Array<string>>;
+
+  /**
    * Performs a request to retrieve the posts from the specified page.
    * @param page The page number.
    */
@@ -30,6 +35,11 @@ export interface PaginatePostsSummaryHandler {
    * The total number of blog posts.
    */
   readonly total: number;
+
+  /**
+   * The blog posts categories.
+   */
+  readonly categories: Readonly<Array<string>>;
 
   /**
    * Performs a request to retrieve the posts from the specified page.
