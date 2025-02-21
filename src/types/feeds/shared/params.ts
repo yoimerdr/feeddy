@@ -1,7 +1,9 @@
 /**
  * The order by options for the feed request.
  */
-export type OrderBy = "lastmodified" | "starttime" | "updated";
+export type OrderBy = "updated" | "published";
+
+export type Alt = "json" | "rss" | "atom";
 
 
 export interface RequestFeedParams {

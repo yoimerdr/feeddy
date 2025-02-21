@@ -70,7 +70,10 @@ function _rawGet(options: Partial<BaseFeedOptions>, all?: boolean, id?: string):
           feed.openSearch$startIndex.$t = string(startIndex);
           return blog;
         } catch (e) {
-          throw new IllegalAccessError("Request failed. the response is not a JSON: " + body);
+          throw {
+            message: "Parse failed. The response is not a JSON.",
+            body,
+          };
         }
       });
   }

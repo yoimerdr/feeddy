@@ -2,7 +2,7 @@ import {Keys, Maybe, MaybeString, Nullables} from "../../../lib/jstls/src/types/
 import {string} from "../../../lib/jstls/src/core/objects/handlers";
 import {isDefined} from "../../../lib/jstls/src/core/objects/types";
 import {assign} from "../../../lib/jstls/src/core/objects/factory";
-import {KeyableObject} from "../../../lib/jstls/src/types/core/objects";
+import {KeyableObject, ThisObjectKeys} from "../../../lib/jstls/src/types/core/objects";
 import {readonly2,} from "../../../lib/jstls/src/core/definer";
 import {call} from "../../../lib/jstls/src/core/functions/call";
 import {toInt} from "../../../lib/jstls/src/core/extensions/string";
@@ -12,7 +12,11 @@ import {keys} from "../../../lib/jstls/src/core/objects/handlers/properties";
 import {len} from "../../../lib/jstls/src/core/shortcuts/indexable";
 import {forEach} from "../../../lib/jstls/src/core/shortcuts/array";
 import {es5class} from "../../../lib/jstls/src/core/definer/classes";
-import {OrderBy, RequestFeedParams} from "../../types/feeds/shared/params";
+import {Alt, OrderBy, RequestFeedParams} from "../../types/feeds/shared/params";
+import {set} from "../../../lib/jstls/src/core/objects/handlers/getset";
+import {concat} from "../../../lib/jstls/src/core/shortcuts/string";
+import {dateTypes} from "../shared";
+import {includes} from "../../../lib/jstls/src/core/polyfills/indexable/es2016";
 
 
 export interface SearchParams {
@@ -179,7 +183,11 @@ export interface SearchParams {
 
   alt(type: 'rss'): 'rss';
 
-  alt(type: 'json' | 'rss'): 'json' | 'rss';
+  alt(type: 'atom'): 'atom';
+
+  alt(type: Nullables): "json";
+
+  alt(type: Maybe<Alt>): Alt;
 
   /**
    * Creates a new object with only the defined parameters.
@@ -229,6 +237,7 @@ function updateProperty<K extends Keys<RequestFeedParams>>(args: IArguments,
   if (len(args) > 0 || noArgs) {
     const value = len(args) > 0 ? args[0] : source[key];
     source[key] = builder ? builder(value) : value;
+    return source[key]
   }
 }
 
@@ -241,62 +250,45 @@ export const SearchParams: SearchParamsConstructor = function (this: SearchParam
   readonly2(this, "source", source || {})
 } as any;
 
+
+function propertyFn(key: Keys<RequestFeedParams>, builder?: (value: any) => any) {
+  return function (this: SearchParams, value?: Maybe<string | number>) {
+    const {source} = this;
+    return updateProperty(arguments, source, key, builder, true) as any;
+  }
+}
+
+function dateProperties(type: "published" | "updated", mode: "max" | "min") {
+  const suffix = mode === "max" ? "AtMost" : "AtLeast";
+  set(prototype, type + suffix, function (this: SearchParams, value: MaybeString): MaybeString {
+    const {source} = this, key: any = concat(type, "-", mode);
+    return updateProperty(arguments, source, key, validDate)
+  })
+}
+
+const prototype: Partial<ThisObjectKeys<SearchParams>> = {
+  max: propertyFn("max-results", minimumsOne),
+  start: propertyFn("start-index", minimumsOne),
+  query: propertyFn("q"),
+  alt: propertyFn(<any>"alt", (it) => call(includes, ["json", "rss", "atom"], it) ? it : 'json'),
+  orderby: propertyFn("orderby", (order) => call(includes, dateTypes, order) ? order : 'updated'),
+  toDefined(): Partial<RequestFeedParams> {
+    const source: KeyableObject = {};
+    forEach(keys(this.source), function (key) {
+      if (isDefined(this[key]))
+        source[key] = this[key]
+    }, this.source)
+    return source as Partial<RequestFeedParams>;
+  }
+};
+
+forEach(dateTypes, (key) => {
+  dateProperties(key, "min")
+  dateProperties(key, "max")
+})
+
 es5class(SearchParams, {
-  prototype: {
-    max(max?: Maybe<string | number>): number {
-      const {source} = this, key = 'max-results';
-      updateProperty(arguments, source, key, minimumsOne, true);
-      return source[key] as number;
-    },
-    start(index?: Maybe<string | number>): number {
-      const {source} = this, key = 'start-index';
-      updateProperty(arguments, source, key, minimumsOne, true);
-      return source[key] as number;
-    },
-    publishedAtLeast(min?: MaybeString): MaybeString {
-      const {source} = this, key = 'published-min';
-      updateProperty(arguments, source, key, validDate)
-      return source[key];
-    },
-    publishedAtMost(max?: MaybeString): MaybeString {
-      const {source} = this, key = 'published-max';
-      updateProperty(arguments, source, key, validDate)
-      return source[key];
-    },
-    updatedAtLeast(min?: MaybeString): MaybeString {
-      const {source} = this, key = 'updated-min';
-      updateProperty(arguments, source, key, validDate)
-      return source[key];
-    },
-    updatedAtMost(max?: MaybeString): MaybeString {
-      const {source} = this, key = 'updated-max';
-      updateProperty(arguments, source, key, validDate)
-      return source[key];
-    },
-    query(query?: MaybeString): MaybeString {
-      const {source} = this;
-      updateProperty(arguments, source, 'q')
-      return source["q"];
-    },
-    alt(this: SearchParams, type: 'json' | 'rss') {
-      const key = "alt";
-      updateProperty(arguments, this.source, <any>key, (it) => (it == 'alt' || it === 'rss') ? it : 'json')
-      return (<any>this.source)[key]
-    },
-    orderby<O extends OrderBy>(this: SearchParams, order?: Maybe<O>): O {
-      order = (order === 'updated' || order === 'starttime' || order === 'lastmodified') ? order : 'lastmodified' as O;
-      this.source["orderby"] = order;
-      return order;
-    },
-    toDefined(): Partial<RequestFeedParams> {
-      const source: KeyableObject = {};
-      forEach(keys(this.source), function (key) {
-        if (isDefined(this[key]))
-          source[key] = this[key]
-      }, this.source)
-      return source as Partial<RequestFeedParams>;
-    }
-  },
+  prototype,
   statics: {
     from: paramsFrom
   }
@@ -306,5 +298,5 @@ export function paramsFrom(source?: Partial<RequestFeedParams> | SearchParams, c
   if (source instanceof SearchParams)
     return copy ? paramsFrom(source.source, copy) : source as SearchParams;
   return new SearchParams(copy ? assign(<RequestFeedParams>{}, source!) : source);
-};
+}
 

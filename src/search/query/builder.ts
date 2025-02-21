@@ -11,6 +11,7 @@ import {exclude, operator, quote} from "./representation";
 import {isArray} from "../../../lib/jstls/src/core/shortcuts/array";
 import {es5class} from "../../../lib/jstls/src/core/definer/classes";
 import {concat} from "../../../lib/jstls/src/core/shortcuts/string";
+import {ThisObjectKeys} from "../../../lib/jstls/src/types/core/objects";
 
 const querySymbol = uid('q');
 const excludeSymbol = uid('e');
@@ -178,7 +179,7 @@ function buildQuery(terms: string | string[], sep: string, startQuote: string, e
 
 function appendQuery(this: QueryStringBuilder, args: ArrayLike<any>, name?: string) {
   if (len(args) === 0)
-    return;
+    return this;
 
   const qt = quote(get(this, exactSymbol)), op = operator(get(this, operatorSymbol)),
     xc = get(this, excludeSymbol) ? exclude() : '';
@@ -205,57 +206,45 @@ export const QueryStringBuilder: QueryStringBuilderConstructor = function (this:
   writeable(this, querySymbol, '');
 } as any;
 
-function categories(this: QueryStringBuilder, ...category: string[]) {
-  return apply(this.named, this, <any>["label"].concat(slice(arguments)))
+function setFn(symbol: string, value: any) {
+  return function (this: QueryStringBuilder,) {
+    set(this, symbol, value);
+    return this;
+  }
 }
 
-es5class(QueryStringBuilder, {
-  prototype: {
-    and() {
-      set(this, operatorSymbol, 'AND');
-      return this;
-    },
-    or() {
-      set(this, operatorSymbol, 'OR');
-      return this;
-    },
-    exact() {
-      set(this, exactSymbol, true);
-      return this;
-    },
-    noExact() {
-      set(this, exactSymbol, false);
-      return this;
-    },
-    exclude() {
-      set(this, excludeSymbol, true);
-      return this;
-    },
-    noExclude() {
-      set(this, excludeSymbol, false);
-      return this;
-    },
-    terms(...term: string[]) {
-      apply(appendQuery, this, [arguments])
-      return this;
-    },
-    named(name: string, ...term: string[]) {
-      apply(appendQuery, this, [slice(arguments, 1), name])
-      return this;
-    },
-    categories,
-    labels: categories,
-    author(...author) {
-      return apply(this.named, this, <any>["author"].concat(slice(arguments)))
-    },
-    title(...title) {
-      return apply(this.named, this, <any>["title"].concat(slice(arguments)))
-    },
-    build(): MaybeString {
-      const query: string = get(this, querySymbol);
-      return apply(isEmpty, query) ? undefined : query;
-    }
+const prototype: Partial<ThisObjectKeys<QueryStringBuilder>> = {
+  and: setFn(operatorSymbol, "AND"),
+  or: setFn(operatorSymbol, 'OR'),
+  exact: setFn(exactSymbol, true),
+  noExact: setFn(exactSymbol, false),
+  exclude: setFn(excludeSymbol, true),
+  noExclude: setFn(excludeSymbol, false),
+  terms(...term) {
+    return apply(appendQuery, this, [arguments]);
+  },
+  named(name, ...term) {
+    return apply(appendQuery, this, [slice(arguments, 1), name]);
+  },
+  build(): MaybeString {
+    const query: string = get(this, querySymbol);
+    return apply(isEmpty, query) ? undefined : query;
   }
+}
+
+const named = ["label", "title", "author"]
+  .map(function (key) {
+    const handler = function (this: QueryStringBuilder, ...values: string[]) {
+      return apply(this.named, this, <any>[key].concat(slice(arguments)))
+    }
+    set(prototype, key, handler);
+    return handler;
+  });
+
+prototype["labels"] = prototype["categories"] = named[0];
+
+es5class(QueryStringBuilder, {
+  prototype
 })
 
 /**

@@ -36,7 +36,6 @@ export function buildUrl(options: Partial<BaseFeedOptions>, id?: string): URL {
   fetchUrl.pathname += createRoute(options.type, options.route, id);
 
   const params = paramsFrom(options.params);
-  params.alt("json");
   params.max(apply(coerceIn, params.max(), [1, maxResults]));
 
   const search = params.toDefined()
