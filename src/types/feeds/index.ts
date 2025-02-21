@@ -8,9 +8,9 @@ import {
   FeedType
 } from "./options";
 import {RawFeed} from "./raw";
-import {PostsBlog, PostsBlogSummary} from "./posts";
+import {PostsBlog, PostsBlogSummary, PostsEntryBlog, PostsEntryBlogSummary} from "./posts";
 import {CommentsBlog, CommentsBlogSummary} from "./comments";
-import {PagesBlogSummary} from "./pages";
+import {PagesBlogSummary, PagesEntryBlog, PagesEntryBlogSummary} from "./pages";
 
 export type Result<T extends FeedType = FeedType, R extends FeedRoute = FeedRoute, > =
   FeedResult<T, R,
@@ -19,8 +19,8 @@ export type Result<T extends FeedType = FeedType, R extends FeedRoute = FeedRout
 
 export type ByIdResult<T extends FeedType = FeedType, R extends FeedRoute = FeedRoute> =
   FeedResult<T, R,
-    PostsBlogSummary, never, PagesBlogSummary,
-    PostsBlog, never, PostsBlog>
+    PostsEntryBlogSummary, CommentsBlogSummary, PagesEntryBlogSummary,
+    PostsEntryBlog, CommentsBlog, PagesEntryBlog>
 
 export interface Feed {
   /**

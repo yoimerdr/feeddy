@@ -45,7 +45,9 @@ export interface FeedByIdOptions<T extends FeedType = FeedType, R extends FeedRo
   id: string;
 }
 
-export type FeedByIdOptionsSummary<T extends FeedType = FeedType> = FeedByIdOptions<T>;
+export interface FeedByIdOptionsSummary<T extends FeedType = FeedType> extends InnerFeedOptions<FeedOptionsSummary<T>> {
+  id: string;
+}
 
 export type FeedResult<T extends FeedType = FeedType,
   R extends FeedRoute = FeedRoute,
