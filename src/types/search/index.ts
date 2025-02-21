@@ -1,5 +1,5 @@
 import {queryBuilder, QueryStringBuilder} from "../../search/query/builder";
-import {paramsBuilder, SearchParamsBuilder} from "../../search";
+import {paramsBuilder, SearchParams, SearchParamsBuilder} from "../../search";
 
 export type {QueryStringBuilder};
 export type {SearchParamsBuilder};
@@ -9,4 +9,5 @@ export interface Search {
   QueryStringBuilder: typeof QueryStringBuilder;
   params: typeof paramsBuilder;
   SearchParamsBuilder: typeof SearchParamsBuilder;
+  SearchParams: typeof SearchParams;
 }

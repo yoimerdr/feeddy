@@ -1,9 +1,9 @@
 import {rawAll, rawById, rawGet} from "./feeds/raw";
 import {all, byId, get} from "./feeds";
-import {paramsBuilder, SearchParamsBuilder} from "./search";
+import {paramsBuilder, SearchParams, SearchParamsBuilder} from "./search";
 import {buildUrl, getId} from "./shared";
 import {Routes} from "./types/feeds/shared";
-import {postById, posts,} from "./posts";
+import {posts,} from "./posts";
 import {readonly2} from "../lib/jstls/src/core/definer";
 import {Feed} from "./types/feeds";
 import {Posts} from "./types/posts";
@@ -12,54 +12,110 @@ import {Search} from "./types/search";
 import {postThumbnail} from "./posts/converters";
 import {withCategories} from "./posts/related";
 import {entries} from "./entries";
-import {Entries} from "./types/entries";
+import {Entries, EntriesOptions} from "./types/entries";
+import {routes} from "./shared/routes";
+import {KeyableObject} from "../lib/jstls/src/types/core/objects";
+import {set} from "../lib/jstls/src/core/objects/handlers/getset";
+import {FeedByIdOptions} from "./types/feeds/options";
+import {forEach} from "../lib/jstls/src/core/shortcuts/array";
+import {assign} from "../lib/jstls/src/core/objects/factory";
+import {Comments} from "./types/comments";
+import {Pages} from "./types/pages";
 
+interface Feeddy {
+  buildUrl: typeof buildUrl;
+  getId: typeof getId;
+  routes: Routes;
+  feed: Feed;
+  search: Search;
+  posts: Posts;
+  entries: Entries;
+  comments: Comments,
+  pages: Pages
+}
+
+/**
+ * Define the sub handler for the raw feed.
+ */
 readonly2(rawGet, "all", rawAll);
 readonly2(rawGet, "byId", rawById);
 
 /**
  * The handler to make requests to the blogger feed API.
  */
-export const feed = <Feed>get;
+const feed = <Feed>get;
+
+/**
+ * Define the sub handler for the mapped feed.
+ */
 readonly2(feed, "all", all);
 readonly2(feed, "raw", rawGet);
 readonly2(feed, "byId", byId);
 
-/*
-
- */
-
-readonly2(entries, "byId", byId);
-
-
 /**
  * The handler for search on blogger feed.
  */
-export const search = <Search>{
+const search = <Search>{
   query: queryBuilder,
   QueryStringBuilder,
   params: paramsBuilder,
-  SearchParamsBuilder
+  SearchParamsBuilder,
+  SearchParams
 }
+
 /**
- *
+ * Define the sub handlers for entries.
+ */
+readonly2(entries, "byId", byId);
+
+/**
+ * Define the sub handlers for posts.
  */
 readonly2(<Posts>posts, "createsThumbnail", postThumbnail);
 readonly2(<Posts>posts, "withCategories", withCategories);
-readonly2(posts, "byId", postById);
 
-interface Feeddy {
-  buildUrl: typeof buildUrl;
-  routes: Routes;
-  feed: Feed;
-  search: Search;
-  posts: Posts;
-  entries: Entries;
-  getId: typeof getId;
+/**
+ * The exports object.
+ */
+const module = {
+  posts: <Posts>posts,
+  entries: <Entries>entries,
+  search,
+  feed,
+  routes,
+  buildUrl,
+  getId,
+} as Feeddy;
+
+/**
+ * Define the handlers for specific entry feeds
+ */
+const others = ["comments", "pages"];
+forEach(others, key => {
+  set(module, key, function (options: EntriesOptions) {
+    set(options, "feed", "type", key);
+    return entries(options);
+  })
+})
+
+/**
+ * Define the sub handlers for specific entry feeds
+ */
+others.push("posts");
+forEach(others, key => {
+  set(module, key, "byId", function (options: FeedByIdOptions) {
+    set(options, "feed", "type", key);
+    return byId(options);
+  })
+})
+
+declare const exports: KeyableObject;
+
+/**
+ * Assign the exports
+ */
+assign(exports, module);
+
+export {
+  feed
 }
-
-export * from "./shared";
-export {routes} from "./shared/routes";
-
-export {posts, entries}
-
