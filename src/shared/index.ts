@@ -37,6 +37,7 @@ export function buildUrl(options: Partial<BaseFeedOptions>, id?: string): URL {
 
   const params = paramsFrom(options.params);
   params.max(apply(coerceIn, params.max(), [1, maxResults]));
+  params.alt(params.alt());
 
   const search = params.toDefined()
   forEach(keys(search), key => {

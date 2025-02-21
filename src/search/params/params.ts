@@ -187,7 +187,9 @@ export interface SearchParams {
 
   alt(type: Nullables): "json";
 
-  alt(type: Maybe<Alt>): Alt;
+  alt(): Alt;
+
+  alt(type?: Maybe<Alt>): Alt;
 
   /**
    * Creates a new object with only the defined parameters.
