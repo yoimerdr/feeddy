@@ -18,8 +18,8 @@ import {
 } from "../../types/feeds/options";
 import {RawByIdResult, RawResult} from "../../types/feeds/raw";
 import {RawBaseBlog, RawBaseEntry} from "../../types/feeds/raw/entry";
-import {IllegalAccessError, IllegalArgumentError} from "../../../lib/jstls/src/core/exceptions";
-import {concat} from "../../../lib/jstls/src/core/shortcuts/string";
+import {IllegalAccessError,} from "../../../lib/jstls/src/core/exceptions";
+
 
 function _rawGet(options: Partial<BaseFeedOptions>,): Promise<RawResult>;
 function _rawGet(options: Partial<BaseFeedOptions>, all: boolean): Promise<RawResult>;
@@ -34,12 +34,7 @@ function _rawGet(options: Partial<BaseFeedOptions>, all?: boolean, id?: string):
   }
 
   const entries: RawBaseEntry[] = [];
-  const url = buildUrl(options);
-  if (id) {
-    if (options.type === "comments")
-      throw new IllegalArgumentError("Comments feed does not support requests by id.");
-    url.pathname += concat("/", id);
-  }
+  const url = buildUrl(options, id);
   const startIndex = params.start();
 
   function request(url: string | URL, max: number): Promise<RawBaseBlog> {

@@ -5,19 +5,23 @@ import {Routes} from "../types/feeds/shared";
 import {forEach} from "../../lib/jstls/src/core/shortcuts/array";
 import {readonly2} from "../../lib/jstls/src/core/definer";
 
-export function createRoute(type: Maybe<FeedType>, route: Maybe<FeedRoute>) {
-  let suffix = "summary"
-  let mid = "posts";
+export function createRoute(type: Maybe<FeedType>, route: Maybe<FeedRoute>, id?: string): string {
+  let suffix = "summary", mid = "posts", prefix = "/";
 
   if (route === "full")
     suffix = "default"
 
   if (type === "pages")
     mid = "pages";
-  else if (type === "comments")
+  else if (type === "comments") {
     mid = "comments";
+    if (id)
+      prefix = concat(prefix, id, prefix)
+  }
+  if (id && type !== "comments")
+    suffix += concat("/", id);
 
-  return concat("feeds", "/", mid, "/", suffix);
+  return concat("feeds", prefix, mid, "/", suffix);
 }
 
 /**

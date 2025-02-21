@@ -18,8 +18,9 @@ import {concat} from "../../lib/jstls/src/core/shortcuts/string";
 /**
  * Builds a request url according the given options.
  * @param options The request options.
+ * @param id The entry id.
  */
-export function buildUrl(options: Partial<BaseFeedOptions>): URL {
+export function buildUrl(options: Partial<BaseFeedOptions>, id?: string): URL {
   requireObject(options, "options")
 
   let href: string;
@@ -32,7 +33,7 @@ export function buildUrl(options: Partial<BaseFeedOptions>): URL {
   options.blogUrl = href;
   const fetchUrl = new URL(href);
 
-  fetchUrl.pathname += createRoute(options.type, options.route);
+  fetchUrl.pathname += createRoute(options.type, options.route, id);
 
   const params = paramsFrom(options.params);
   params.alt("json");
