@@ -1,8 +1,8 @@
-import {BasePostEntry, PostEntry, PostEntrySummary, PostsBlog} from "../feeds/posts";
-import {EntriesHandler,} from "../entries";
-import {FeedByIdOptions, FeedOptions, FeedOptionsSummary, FeedRoute, InnerFeedOptions} from "../feeds/options";
-import {ImageSize} from "../feeds/shared";
-import {ByIdResult} from "../feeds";
+import {BasePostEntry, PostEntry, PostEntrySummary, PostsBlog} from "./feeds/posts";
+import {EntriesHandler,} from "./entries";
+import {FeedByIdOptions, FeedOptions, FeedOptionsSummary, FeedRoute, InnerFeedOptions} from "./feeds/options";
+import {ImageSize} from "./feeds/shared";
+import {ByIdResult} from "./feeds";
 
 
 export interface WithCategoriesPost<E extends BasePostEntry = PostEntry> {

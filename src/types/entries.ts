@@ -8,12 +8,12 @@ import {
   FeedRoute,
   FeedType,
   InnerFeedOptions
-} from "../feeds/options";
-import {BaseBlog, BaseEntry} from "../feeds/entry";
-import {PostEntry, PostEntrySummary, PostsBlog, PostsBlogSummary} from "../feeds/posts";
-import {CommentEntry, CommentEntrySummary, CommentsBlog, CommentsBlogSummary} from "../feeds/comments";
-import {PageEntry, PageEntrySummary, PagesBlog, PagesBlogSummary} from "../feeds/pages";
-import {ByIdResult} from "../feeds";
+} from "./feeds/options";
+import {BaseBlog, BaseEntry} from "./feeds/entry";
+import {PostEntry, PostEntrySummary, PostsBlog, PostsBlogSummary} from "./feeds/posts";
+import {CommentEntry, CommentEntrySummary, CommentsBlog, CommentsBlogSummary} from "./feeds/comments";
+import {PageEntry, PageEntrySummary, PagesBlog, PagesBlogSummary} from "./feeds/pages";
+import {ByIdResult} from "./feeds";
 
 
 export interface EntriesResult<T extends BaseEntry = BaseEntry, B extends BaseBlog = BaseBlog> {
