@@ -27,12 +27,17 @@ export function entries2<B extends BaseBlog, R = KeyableObject>(options: Entries
   const params = paramsFrom(feed.params), max = params.max();
   const builder = builderFrom(params);
 
+  const request = isComments(feed) && id ? function (feed: BaseFeedOptions) {
+    return _rawGet(feed as BaseFeedOptions<"comments">, params.query() as any, id)
+      .then(rawBlogToBlog);
+  } : get;
+
   function changePage(this: KeyableObject, page: number) {
     feed.params = builder
       .paginated(page)
       .build();
 
-    return get(feed)
+    return request(feed)
       .then(blog => freeze({
         entries: getty(blog, "feed", "entry") || [],
         blog
@@ -53,12 +58,7 @@ export function entries2<B extends BaseBlog, R = KeyableObject>(options: Entries
   if (!params.query())
     params.max(1)
 
-  if (id && isComments(feed))
-    return _rawGet(feed as BaseFeedOptions<"comments">, params.query() as any, id)
-      .then(rawBlogToBlog)
-      .then(createHandler);
-
-  return (params.query() ? all : get)(feed)
+  return (id && isComments(feed) ? request : (params.query() ? all : get))(feed)
     .then(createHandler)
 }
 
