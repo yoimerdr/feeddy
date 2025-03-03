@@ -1,4 +1,5 @@
 import {RequestFeedParams} from "./shared/params";
+import {WithId} from "../index";
 
 /**
  * The route options of the blog's feed.
@@ -41,12 +42,10 @@ export interface InnerFeedOptions<F = BaseFeedOptions> {
   feed: F;
 }
 
-export interface FeedByIdOptions<T extends FeedType = FeedType, R extends FeedRoute = FeedRoute> extends InnerFeedOptions<FeedOptions<T, R>> {
-  id: string;
+export interface FeedByIdOptions<T extends FeedType = FeedType, R extends FeedRoute = FeedRoute> extends InnerFeedOptions<FeedOptions<T, R>>, WithId {
 }
 
-export interface FeedByIdOptionsSummary<T extends FeedType = FeedType> extends InnerFeedOptions<FeedOptionsSummary<T>> {
-  id: string;
+export interface FeedByIdOptionsSummary<T extends FeedType = FeedType> extends InnerFeedOptions<FeedOptionsSummary<T>>, WithId {
 }
 
 export type FeedResult<T extends FeedType = FeedType,

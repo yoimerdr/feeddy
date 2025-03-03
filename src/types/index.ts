@@ -1,1 +1,3 @@
-export type WithId = Record<"id", string>;
+export interface WithId {
+  id: string;
+}

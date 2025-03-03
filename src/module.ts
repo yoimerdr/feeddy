@@ -21,6 +21,7 @@ import {forEach} from "../lib/jstls/src/core/shortcuts/array";
 import {assign} from "../lib/jstls/src/core/objects/factory";
 import {Comments} from "./types/comments";
 import {Pages} from "./types/pages";
+import {commentsById} from "./comments";
 
 interface Feeddy {
   buildUrl: typeof buildUrl;
@@ -108,6 +109,12 @@ forEach(others, key => {
     return byId(options);
   })
 })
+
+/**
+ * Redefine the sub handlers for comments
+ */
+
+set(module, "comments", "byId", commentsById);
 
 declare const exports: KeyableObject;
 
