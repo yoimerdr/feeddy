@@ -1,6 +1,5 @@
-import {buildUrl} from "../../shared";
+import {buildUrl, isComments} from "../../shared";
 import {maxResults, paramsFrom} from "../../search";
-import {requireObject} from "../../../lib/jstls/src/core/objects/validators";
 import {deepAssign} from "../../../lib/jstls/src/core/objects/factory";
 import {apply} from "../../../lib/jstls/src/core/functions/apply";
 import {extend} from "../../../lib/jstls/src/core/extensions/array";
@@ -19,12 +18,13 @@ import {
 import {RawByIdResult, RawResult} from "../../types/feeds/raw";
 import {RawBaseBlog, RawBaseEntry} from "../../types/feeds/raw/entry";
 import {IllegalAccessError,} from "../../../lib/jstls/src/core/exceptions";
+import {get} from "../../../lib/jstls/src/core/objects/handlers/getset";
 
 
-function _rawGet(options: Partial<BaseFeedOptions>,): Promise<RawResult>;
-function _rawGet(options: Partial<BaseFeedOptions>, all: boolean): Promise<RawResult>;
-function _rawGet(options: Partial<BaseFeedOptions>, all: boolean, id: string): Promise<RawByIdResult>;
-function _rawGet(options: Partial<BaseFeedOptions>, all?: boolean, id?: string): Promise<RawResult | RawByIdResult> {
+export function _rawGet<T extends FeedType = FeedType, R extends FeedRoute = FeedRoute>(options: Partial<BaseFeedOptions<T, R>>,): Promise<RawResult>;
+export function _rawGet<T extends FeedType = FeedType, R extends FeedRoute = FeedRoute>(options: Partial<BaseFeedOptions<T, R>>, all: boolean): Promise<RawResult<T, R>>;
+export function _rawGet<T extends FeedType = FeedType, R extends FeedRoute = FeedRoute>(options: Partial<BaseFeedOptions<T, R>>, all: boolean, id: string): Promise<RawByIdResult<T, R>>;
+export function _rawGet(options: Partial<BaseFeedOptions>, all?: boolean, id?: string): Promise<RawResult | RawByIdResult> {
   options = feedOptions(options);
   const params = paramsFrom(options.params);
 
@@ -47,7 +47,7 @@ function _rawGet(options: Partial<BaseFeedOptions>, all?: boolean, id?: string):
       .then(body => {
         try {
           const blog: RawBaseBlog = JSON.parse(body);
-          if (id) {
+          if (id && !isComments(options)) {
             return blog;
           }
           const {feed} = blog;
@@ -105,6 +105,5 @@ export function rawAll(options: FeedOptions | FeedOptionsSummary): Promise<RawRe
 export function rawById<T extends FeedType = FeedType, R extends FeedRoute = FeedRoute>(options: FeedByIdOptions<T, R>): Promise<RawByIdResult<T, R>>;
 export function rawById<T extends FeedType = FeedType>(options: FeedByIdOptionsSummary<T>): Promise<RawByIdResult<T, "summary">>;
 export function rawById(options: FeedByIdOptions | FeedByIdOptionsSummary): Promise<RawByIdResult> {
-  requireObject(options, "options")
-  return _rawGet(options.feed || {}, false, options.id);
+  return _rawGet(get(options, "feed") || {}, false, get(options, "id"));
 }

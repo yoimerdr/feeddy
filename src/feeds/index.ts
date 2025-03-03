@@ -10,7 +10,7 @@ import {
 } from "../types/feeds/options";
 import {ByIdResult, Result} from "../types/feeds";
 import {KeyableObject} from "../../lib/jstls/src/types/core/objects";
-import {get as prop} from "../../lib/jstls/src/core/objects/handlers/getset";
+import { getty } from "../shared/shortnames";
 
 export function all<T extends FeedType = FeedType, R extends FeedRoute = FeedRoute>(options: FeedOptions<T, R>): Promise<Result<T, R>>;
 export function all<T extends FeedType = FeedType>(options: FeedOptionsSummary<T>): Promise<Result<T, "summary">>;
@@ -29,7 +29,7 @@ export function get(options: FeedOptions | FeedOptionsSummary): Promise<KeyableO
 export function byId<T extends FeedType = FeedType>(options: FeedByIdOptionsSummary<T>): Promise<ByIdResult<T, "summary">>;
 export function byId<T extends FeedType = FeedType, R extends FeedRoute = FeedRoute>(options: FeedByIdOptions<T, R>): Promise<ByIdResult<T, R>>;
 export function byId(options: FeedByIdOptions | FeedByIdOptionsSummary): Promise<KeyableObject> {
-  const mapper: any = prop(options, "feed", "type") === "comments" ? rawBlogToBlog : rawBlogEntryToBlogEntry;
+  const mapper: any = getty(options, "feed", "type") === "comments" ? rawBlogToBlog : rawBlogEntryToBlogEntry;
   return rawById(options)
     .then(mapper)
 }

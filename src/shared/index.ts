@@ -61,3 +61,8 @@ export function getId(source: string | RawText | Record<"id", RawText | string>,
   const res = requireDefined(expr.exec(source as string))
   return res[1];
 }
+
+
+export function isComments(options: Partial<BaseFeedOptions>): boolean {
+  return get(options, "type") === "comments";
+}

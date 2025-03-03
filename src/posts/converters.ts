@@ -5,8 +5,9 @@ import {concat} from "../../lib/jstls/src/core/shortcuts/string";
 import {parseSize} from "../../lib/jstls/src/core/geometry/size/size";
 import {KeyableObject} from "../../lib/jstls/src/types/core/objects";
 import {round} from "../../lib/jstls/src/core/shortcuts/math";
-import {thumbnailSizeExpression} from "./index";
 import {BasePostEntry} from "../types/feeds/posts";
+
+export const thumbnailSizeExpression: string = 's72-c';
 
 function toFormatSize(size: ImageSize<number> | number | string): string {
   return isObject(size) ? concat("", (<ImageSize<number>>size).width, ":", (<ImageSize<number>>size).height) : string(size);
