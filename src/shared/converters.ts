@@ -64,6 +64,7 @@ export function rawEntryToEntry<T extends RawBaseEntry, R extends BaseEntry>(pos
     }),
     content: rawTextToText,
     summary: rawTextToText,
+    thr$total: rawTextToNumber,
     /*comments property*/
     "thr$in-reply-to": self,
     gd$extendedProperty: self

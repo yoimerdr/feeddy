@@ -10,12 +10,12 @@ import {apply} from "../../lib/jstls/src/core/functions/apply";
 import {isEmpty} from "../../lib/jstls/src/core/extensions/shared/iterables";
 import {feedOptions} from "../feeds/raw";
 import {builderFrom, paramsFrom} from "../search";
-import {letValue} from "../../lib/jstls/src/core/objects/handlers";
 import {queryBuilder} from "../search/query/builder";
 import {all} from "../feeds";
 import {freeze} from "../../lib/jstls/src/core/shortcuts/object";
 import {len} from "../../lib/jstls/src/core/shortcuts/indexable";
 import {BaseFeedOptions} from "../types/feeds/options";
+import {set} from "../../lib/jstls/src/core/objects/handlers/getset";
 
 declare const Promise: PromiseConstructor;
 
@@ -28,9 +28,14 @@ export function withCategories(options: KeyableObject): Promise<KeyableObject | 
     return new Promise((_, reject) => reject("The categories are empty."));
 
   const feed = feedOptions(options.feed) as BaseFeedOptions<"posts">;
+  set(feed, "type", "posts");
+
   const params = paramsFrom(feed.params);
 
-  const builder = letValue(queryBuilder(), (it) => apply((options.every ? it.and : it.or), it));
+  const builder = queryBuilder()
+    .exact();
+
+  apply(options.every ? builder.and : builder.or, builder);
 
   builderFrom(params)
     .query(
