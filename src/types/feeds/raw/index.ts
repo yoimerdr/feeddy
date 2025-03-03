@@ -18,8 +18,12 @@ export type RawResult<T extends FeedType = FeedType, R extends FeedRoute = FeedR
 
 export type RawByIdResult<T extends FeedType = FeedType, R extends FeedRoute = FeedRoute> =
   FeedResult<T, R,
-    RawPostsEntryBlogSummary, never, RawPagesEntryBlogSummary,
-    RawPostsEntryBlog, never, RawPagesEntryBlog>
+    RawPostsEntryBlogSummary,
+    RawCommentsBlogSummary,
+    RawPagesEntryBlogSummary,
+    RawPostsEntryBlog,
+    RawCommentsBlog,
+    RawPagesEntryBlog>
 
 export interface RawFeed {
 

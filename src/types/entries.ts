@@ -14,6 +14,7 @@ import {PostEntry, PostEntrySummary, PostsBlog, PostsBlogSummary} from "./feeds/
 import {CommentEntry, CommentEntrySummary, CommentsBlog, CommentsBlogSummary} from "./feeds/comments";
 import {PageEntry, PageEntrySummary, PagesBlog, PagesBlogSummary} from "./feeds/pages";
 import {ByIdResult} from "./feeds";
+import {KeyableObject} from "../../lib/jstls/src/types/core/objects";
 
 
 export interface EntriesResult<T extends BaseEntry = BaseEntry, B extends BaseBlog = BaseBlog> {
@@ -52,6 +53,15 @@ export interface EntriesHandler<T extends FeedType = FeedType, R extends FeedRou
 export type EntriesOptions<T extends FeedType = FeedType, R extends FeedRoute = FeedRoute> = InnerFeedOptions<FeedOptions<T, R>>;
 export type EntriesOptionsSummary<T extends FeedType = FeedType> = InnerFeedOptions<FeedOptionsSummary<T>>;
 export type EntriesSimpleOptions = InnerFeedOptions<Partial<BaseFeedOptions>>;
+export type EntriesHandlerSimpleExtra<B extends BaseBlog, T> = (blog: B) => T;
+export type EntriesHandlerExtra<T extends FeedType = FeedType, R extends FeedRoute = FeedRoute, E = KeyableObject> =
+  FeedResult<T, R,
+    EntriesHandlerSimpleExtra<PostsBlogSummary, E>,
+    EntriesHandlerSimpleExtra<CommentsBlogSummary, E>,
+    EntriesHandlerSimpleExtra<PagesBlogSummary, E>,
+    EntriesHandlerSimpleExtra<PostsBlog, E>,
+    EntriesHandlerSimpleExtra<CommentsBlog, E>,
+    EntriesHandlerSimpleExtra<PagesBlog, E>>
 
 
 export interface Entries {
