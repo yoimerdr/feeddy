@@ -1,59 +1,88 @@
-import {RawBlog, RawBlogSummary, RawPostEntry} from "../../types/feeds/raw";
-import {FeedOptions, FeedOptionsFull, FeedOptionsSummary} from "../../types/feeds/shared";
-import {buildUrl} from "../../shared";
-import {SearchParams, SearchParamsBuilder} from "../../search";
-import {getDefined} from "../../../lib/jstls/src/core/objects/validators";
+import {buildUrl, isComments} from "../../shared";
+import {maxResults, paramsFrom} from "../../search";
 import {deepAssign} from "../../../lib/jstls/src/core/objects/factory";
 import {apply} from "../../../lib/jstls/src/core/functions/apply";
 import {extend} from "../../../lib/jstls/src/core/extensions/array";
 import {isNotEmpty} from "../../../lib/jstls/src/core/extensions/shared/iterables";
 import {string} from "../../../lib/jstls/src/core/objects/handlers";
+import {len} from "../../../lib/jstls/src/core/shortcuts/indexable";
+import {
+  BaseFeedOptions,
+  FeedByIdOptions,
+  FeedByIdOptionsSummary,
+  FeedOptions,
+  FeedOptionsSummary,
+  FeedRoute,
+  FeedType
+} from "../../types/feeds/options";
+import {RawByIdResult, RawResult} from "../../types/feeds/raw";
+import {RawBaseBlog, RawBaseEntry} from "../../types/feeds/raw/entry";
+import {IllegalAccessError,} from "../../../lib/jstls/src/core/exceptions";
+import {get} from "../../../lib/jstls/src/core/objects/handlers/getset";
 
-function _rawGet(options: Partial<FeedOptions>, all?: boolean): Promise<RawBlog> {
+
+export function _rawGet<T extends FeedType = FeedType, R extends FeedRoute = FeedRoute>(options: Partial<BaseFeedOptions<T, R>>,): Promise<RawResult>;
+export function _rawGet<T extends FeedType = FeedType, R extends FeedRoute = FeedRoute>(options: Partial<BaseFeedOptions<T, R>>, all: boolean): Promise<RawResult<T, R>>;
+export function _rawGet<T extends FeedType = FeedType, R extends FeedRoute = FeedRoute>(options: Partial<BaseFeedOptions<T, R>>, all: boolean, id: string): Promise<RawByIdResult<T, R>>;
+export function _rawGet(options: Partial<BaseFeedOptions>, all?: boolean, id?: string): Promise<RawResult | RawByIdResult> {
   options = feedOptions(options);
-  const params = SearchParams.from(options.params);
+  const params = paramsFrom(options.params);
 
   if (all) {
     params.start(1);
-    params.max(SearchParamsBuilder.maxResults);
+    params.max(maxResults);
   }
 
-  const entries: RawPostEntry[] = [];
-  const url = buildUrl(options);
+  const entries: RawBaseEntry[] = [];
+  const url = buildUrl(options, id);
   const startIndex = params.start();
 
-  function request(url: string | URL, max: number): Promise<RawBlog> {
-    return fetch(url)
-      .then(res => res.json())
-      .then((blog: RawBlog) => {
-        const {feed} = blog;
-        const entry = getDefined(feed.entry, () => []);
+  function request(url: string | URL, max: number): Promise<RawBaseBlog> {
+    return fetch(string(url))
+      .then(res => {
+        if (res.status !== 200)
+          throw new IllegalAccessError("Request failed. Status: " + res.status);
+        return res.text();
+      })
+      .then(body => {
+        try {
+          const blog: RawBaseBlog = JSON.parse(body);
+          if (id && !isComments(options)) {
+            return blog;
+          }
+          const {feed} = blog;
+          const entry = feed.entry || [];
 
-        apply(extend<RawPostEntry>, entries, [entry])
+          apply(extend<RawBaseEntry>, entries, [entry])
 
-        const {length} = entry;
-        const {maxResults} = SearchParamsBuilder;
+          const length = len(entry);
 
-        if (apply(isNotEmpty, entry) && length >= maxResults && ((all && length >= maxResults) || (!all && length < max))) {
-          if (!all)
-            max -= length;
-          params.start(params.start() + length)
-          params.max(max);
-          return request(buildUrl(options), max);
+          if (apply(isNotEmpty, entry) && length >= maxResults && ((all && length >= maxResults) || (!all && length < max))) {
+            if (!all)
+              max -= length;
+            params.start(params.start() + length)
+            params.max(max);
+            return request(buildUrl(options), max);
+          }
+          feed.entry = entries;
+          if (params.max() !== len(entries))
+            feed.openSearch$itemsPerPage.$t = feed.openSearch$totalResults.$t = string(len(entries));
+          feed.openSearch$startIndex.$t = string(startIndex);
+          return blog;
+        } catch (e) {
+          throw {
+            message: "Parse failed. The response is not a JSON.",
+            body,
+          };
         }
-        feed.entry = entries;
-        if (params.max() !== entries.length)
-          feed.openSearch$itemsPerPage.$t = feed.openSearch$totalResults.$t = string(entries.length);
-        feed.openSearch$startIndex.$t = string(startIndex);
-        return blog;
       });
   }
 
   return request(url, params.max())
 }
 
-export function feedOptions(options: Partial<FeedOptions>): FeedOptions {
-  return deepAssign(<FeedOptions>{
+export function feedOptions(options: Partial<BaseFeedOptions>): BaseFeedOptions {
+  return deepAssign(<BaseFeedOptions>{
     route: 'summary',
     params: {
       "max-results": 1
@@ -61,16 +90,20 @@ export function feedOptions(options: Partial<FeedOptions>): FeedOptions {
   }, options);
 }
 
-export function rawGet(options: Partial<FeedOptionsFull>): Promise<RawBlog>;
-export function rawGet(options: Partial<FeedOptionsSummary>): Promise<RawBlogSummary>;
-export function rawGet(options: Partial<FeedOptions>): Promise<RawBlog>;
-export function rawGet(options: Partial<FeedOptions>): Promise<RawBlog> {
+export function rawGet<T extends FeedType = FeedType, R extends FeedRoute = FeedRoute>(options: FeedOptions<T, R>): Promise<RawResult<T, R>>;
+export function rawGet<T extends FeedType = FeedType>(options: FeedOptionsSummary<T>): Promise<RawResult<T, "summary">>;
+export function rawGet<T extends FeedType = FeedType, R extends FeedRoute = FeedRoute>(options: FeedOptions<T, R> | FeedOptionsSummary): Promise<RawResult> {
   return _rawGet(options);
 }
 
-export function rawAll(options: Partial<FeedOptionsFull>): Promise<RawBlog>;
-export function rawAll(options: Partial<FeedOptionsSummary>): Promise<RawBlogSummary>;
-export function rawAll(options: Partial<FeedOptions>): Promise<RawBlog>;
-export function rawAll(options: Partial<FeedOptions>): Promise<RawBlog> {
+export function rawAll<T extends FeedType = FeedType, R extends FeedRoute = FeedRoute>(options: FeedOptions<T, R>): Promise<RawResult<T, R>>;
+export function rawAll<T extends FeedType = FeedType>(options: FeedOptionsSummary<T>): Promise<RawResult<T, "summary">>;
+export function rawAll(options: FeedOptions | FeedOptionsSummary): Promise<RawResult> {
   return _rawGet(options, true);
+}
+
+export function rawById<T extends FeedType = FeedType, R extends FeedRoute = FeedRoute>(options: FeedByIdOptions<T, R>): Promise<RawByIdResult<T, R>>;
+export function rawById<T extends FeedType = FeedType>(options: FeedByIdOptionsSummary<T>): Promise<RawByIdResult<T, "summary">>;
+export function rawById(options: FeedByIdOptions | FeedByIdOptionsSummary): Promise<RawByIdResult> {
+  return _rawGet(get(options, "feed") || {}, false, get(options, "id"));
 }

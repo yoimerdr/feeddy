@@ -1,70 +1,25 @@
 import {uid} from "../../../lib/jstls/src/core/polyfills/symbol";
-import {KeyableObject} from "../../../lib/jstls/src/types/core/objects";
-import {rep} from "./representation";
 import {string} from "../../../lib/jstls/src/core/objects/handlers";
 import {get, set} from "../../../lib/jstls/src/core/objects/handlers/getset";
-import {getDefined} from "../../../lib/jstls/src/core/objects/validators";
 import {slice} from "../../../lib/jstls/src/core/iterable";
 import {apply} from "../../../lib/jstls/src/core/functions/apply";
 import {MaybeString} from "../../../lib/jstls/src/types/core";
-import {writeables} from "../../../lib/jstls/src/core/definer";
+import {writeable} from "../../../lib/jstls/src/core/definer";
 import {isEmpty, isNotEmpty} from "../../../lib/jstls/src/core/extensions/shared/iterables";
+import {len} from "../../../lib/jstls/src/core/shortcuts/indexable";
+import {exclude, operator, quote} from "./representation";
+import {isArray} from "../../../lib/jstls/src/core/shortcuts/array";
+import {es5class} from "../../../lib/jstls/src/core/definer/classes";
+import {concat} from "../../../lib/jstls/src/core/shortcuts/string";
+import {ThisObjectKeys} from "../../../lib/jstls/src/types/core/objects";
 
-const querySymbol = uid('QueryStringBuilder#Query');
-const excludeSymbol = uid('QueryStringBuilder#Exclude');
-const operatorSymbol = uid('QueryStringBuilder#Operator');
-const exactSymbol = uid('QueryStringBuilder#Exact');
+const querySymbol = uid('q');
+const excludeSymbol = uid('e');
+const operatorSymbol = uid('o');
+const exactSymbol = uid('e');
 
 
-function buildQuery(terms: string | string[], sep: string, startQuote: string, endQuote?: string): string {
-  if (!Array.isArray(terms))
-    return buildQuery([terms], sep, startQuote, endQuote);
-  endQuote = getDefined(endQuote, () => startQuote);
-  terms = terms.map(it => string(it))
-    .filter(it => apply(isNotEmpty, it));
-  return apply(isEmpty, terms) ? '' : `${startQuote}${terms.join(sep)}${endQuote}`
-}
-
-function appendQuery(this: QueryStringBuilder, args: ArrayLike<any>, name?: string) {
-  if (args.length === 0)
-    return;
-
-  const quote = rep.quote(get(this, exactSymbol));
-  const op = rep.operator(get(this, operatorSymbol));
-  const xc = get(this, excludeSymbol) ? rep.exclude() : '';
-  name = string(name);
-  name = apply(isNotEmpty, name) ? name + ':' : '';
-
-  let current: string = get(this, querySymbol);
-
-  const query = buildQuery(slice(args), quote + op + xc + name + quote, xc + name + quote, quote);
-
-  if (apply(isNotEmpty, current))
-    current += op;
-
-  current += query;
-
-  (this as KeyableObject)[querySymbol] = current;
-
-  return this;
-}
-
-/**
- * @class
- * The builder for create a search query string.
- */
-export class QueryStringBuilder {
-
-  constructor() {
-    const symbols: KeyableObject = {};
-    symbols[exactSymbol] = false;
-    symbols[operatorSymbol] = 'OR';
-    symbols[excludeSymbol] = false;
-    symbols[querySymbol] = '';
-
-    writeables(this as QueryStringBuilder, symbols);
-  }
-
+export interface QueryStringBuilder {
   /**
    * Changes the operator to append search terms to `AND`.
    *
@@ -78,10 +33,7 @@ export class QueryStringBuilder {
    *
    * @see {or}
    */
-  and(): this {
-    set(this, operatorSymbol, 'AND');
-    return this;
-  }
+  and(): this;
 
   /**
    * Changes the operator to append search terms to `OR`.
@@ -95,10 +47,7 @@ export class QueryStringBuilder {
    *
    * @see {and}
    */
-  or(): this {
-    set(this, operatorSymbol, 'OR');
-    return this;
-  }
+  or(): this;
 
   /**
    * Sets the exact mode on.
@@ -114,10 +63,7 @@ export class QueryStringBuilder {
    *
    * @see {noExact}
    */
-  exact(): this {
-    set(this, exactSymbol, true);
-    return this;
-  }
+  exact(): this;
 
   /**
    * Sets the exact mode off.
@@ -134,10 +80,7 @@ export class QueryStringBuilder {
    *
    * @see {exact}
    */
-  noExact(): this {
-    set(this, exactSymbol, false);
-    return this;
-  }
+  noExact(): this;
 
   /**
    * Sets the exclude mode on.
@@ -153,10 +96,7 @@ export class QueryStringBuilder {
    *
    * @see {noExclude}
    */
-  exclude(): this {
-    set(this, excludeSymbol, true);
-    return this;
-  }
+  exclude(): this;
 
   /**
    * Sets the exclude mode off.
@@ -174,66 +114,179 @@ export class QueryStringBuilder {
    *
    * @see {exclude}
    */
-  noExclude(): this {
-    set(this, excludeSymbol, false);
-    return this;
-  }
+  noExclude(): this;
 
   /**
    * Appends search terms to the query.
+   *
+   * @example
+   * builder
+   *    .terms('search', 'terms')
+   *    .build() // 'search|terms'
+   *
    * @param term The search term.
+   * @param terms Other search terms.
    */
-  terms(...term: string[]): this {
-    apply(appendQuery, this, [arguments])
-    return this;
-  }
+  terms(term: string, ...terms: string[]): this;
 
   /**
    * Appends named search terms to the query.
+   *
+   * @example
+   * builder
+   *    .named('label', 'search', 'label')
+   *    .build() // 'label:search|label:label'
    * @param name The name of the search terms.
    * @param term The search term.
+   * @param terms Other search terms.
    */
-  named(name: string, ...term: string[]): this {
-    apply(appendQuery, this, [slice(arguments, 1), name])
-    return this;
-  }
+  named(name: string, term: string, ...terms: string[]): this;
+
+  /**
+   * Appends label search terms to the query.
+   *
+   * @example
+   * builder.label(label) // .named('label', label)
+   *
+   * @param label The label names.
+   * @param labels Other label names
+   * @see {named}
+   * @since 1.2
+   */
+  label(label: string, ...labels: string[]): this;
 
   /**
    * Appends category search terms to the query.
    *
-   * <b>Alias</b>
-   * @example
-   * builder.categories(...category) // .named('label', ...category)
-   *
-   * @param category The category o category names.
-   * @see {terms}
+   * @param category The category name.
+   * @param categories Other category names.
+   * @see {label}
+   * @remarks This is an alias for {@link label}
    */
-  categories(...category: string[]): this {
-    return apply(this.named, this, <any>['label'].concat(slice(arguments)))
-  }
+  categories(category: string, ...categories: string[]): this;
 
   /**
-   * Appends category search terms to the query.
+   * Appends label search terms to the query.
    *
-   * <b>Alias</b>
-   * @example
-   * builder.labels(label) // .categories(label)
-   *
-   * @param label The category o category names.
-   * @see {categories}
+   * @param label The label name.
+   * @param labels Other label names.
+   * @see {label}
+   * @remarks This is an alias for {@link label}
    */
-  labels(...label: string[]): this {
-    return apply(this.categories, this, <any>arguments);
-  }
+  labels(label: string, ...labels: string[]): this;
+
+  /**
+   * Appends author search terms to the query.
+   *
+   * @example
+   * builder.author(author) // .named('author', author)
+   *
+   * @param author The author name.
+   * @param authors Other author names.
+   * @see {named}
+   * @since 1.2
+   */
+  author(author: string, ...authors: string[]): this;
+
+  /**
+   * Appends title search terms to the query.
+   *
+   * @example
+   * builder.title(title) // .title('title', title)
+   *
+   * @param title The entry title.
+   * @param titles Other entry titles.
+   * @since 1.2
+   */
+  title(title: string, ...titles: string[]): this;
 
   /**
    * Returns the built query string. If It's empty, an undefined value is returned.
    */
+  build(): MaybeString;
+}
+
+
+export interface QueryStringBuilderConstructor {
+  new(): QueryStringBuilder;
+}
+
+function buildQuery(terms: string | string[], sep: string, startQuote: string, endQuote?: string): string {
+  if (!isArray(terms))
+    terms = [terms];
+  endQuote = endQuote || startQuote;
+  terms = terms.map(string)
+    .filter(it => apply(isNotEmpty, it));
+  return apply(isEmpty, terms) ? '' : concat(startQuote, terms.join(sep), endQuote);
+}
+
+function appendQuery(this: QueryStringBuilder, args: ArrayLike<any>, name?: string): QueryStringBuilder {
+  if (len(args) === 0)
+    return this;
+
+  const qt = quote(get(this, exactSymbol)), op = operator(get(this, operatorSymbol)),
+    xc = get(this, excludeSymbol) ? exclude() : '';
+  name = string(name);
+  name = apply(isNotEmpty, name) ? concat(name, ':') : '';
+
+  let current: string = get(this, querySymbol);
+
+  const query = buildQuery(slice(args), concat(qt, op, xc, name, qt), concat(xc, name, qt), qt);
+
+  if (apply(isNotEmpty, current))
+    current += op;
+
+  set(this, querySymbol, current + query);
+  return this;
+}
+
+export const QueryStringBuilder: QueryStringBuilderConstructor = function (this: QueryStringBuilder) {
+  writeable(this, exactSymbol, false);
+  writeable(this, operatorSymbol, 'OR');
+  writeable(this, excludeSymbol, false);
+  writeable(this, querySymbol, '');
+} as any;
+
+function setFn(symbol: string, value: any) {
+  return function (this: QueryStringBuilder,): QueryStringBuilder {
+    set(this, symbol, value);
+    return this;
+  }
+}
+
+const prototype: Partial<ThisObjectKeys<QueryStringBuilder>> = {
+  and: setFn(operatorSymbol, "AND"),
+  or: setFn(operatorSymbol, 'OR'),
+  exact: setFn(exactSymbol, true),
+  noExact: setFn(exactSymbol, false),
+  exclude: setFn(excludeSymbol, true),
+  noExclude: setFn(excludeSymbol, false),
+  terms(...term) {
+    return apply(appendQuery, this, [arguments]);
+  },
+  named(name, ...term) {
+    return apply(appendQuery, this, [slice(arguments, 1), name]);
+  },
   build(): MaybeString {
     const query: string = get(this, querySymbol);
     return apply(isEmpty, query) ? undefined : query;
   }
 }
+
+const named = ["label", "title", "author"]
+  .map(function (key) {
+    const handler = function (this: QueryStringBuilder, ...values: string[]) {
+      return apply(this.named, this, <any>[key].concat(slice(arguments)))
+    }
+    set(prototype, key, handler);
+    return handler;
+  });
+
+prototype["labels"] = prototype["categories"] = named[0];
+
+es5class(QueryStringBuilder, {
+  prototype
+})
 
 /**
  * Creates a new query string builder.

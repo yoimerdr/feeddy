@@ -43,7 +43,7 @@ export default [
   varConfig( "src/index.ts", "dist/feeddy.js", 'feeddy'),
   varConfig("src/polyfied.ts", "dist/feeddy.poly.js", "feeddy"),
   {
-    input: `src/index.ts`,
+    input: `src/typing.ts`,
     plugins: [
       dts()
     ],

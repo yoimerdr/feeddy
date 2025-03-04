@@ -5,9 +5,12 @@
   "lang": "en",
   "entryPoints": [
     "./src/index.ts",
-    "./src/types/feeds/*",
-    "./src/types/posts/*",
-    "./src/types/search/*"
+    "./src/types/feeds/**/*",
+    "./src/types/posts.ts",
+    "./src/types/comments.ts",
+    "./src/types/entries.ts",
+    "./src/types/pages.ts",
+    "./src/types/search.ts"
 
   ],
   "categorizeByGroup": false,

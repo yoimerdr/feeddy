@@ -1,70 +1,28 @@
-import {OrderBy, RequestFeedParams} from "../../types/feeds/shared";
 import {Keys, Maybe, MaybeString, Nullables} from "../../../lib/jstls/src/types/core";
 import {string} from "../../../lib/jstls/src/core/objects/handlers";
 import {isDefined} from "../../../lib/jstls/src/core/objects/types";
-import {getDefined} from "../../../lib/jstls/src/core/objects/validators";
 import {assign} from "../../../lib/jstls/src/core/objects/factory";
-import {KeyableObject} from "../../../lib/jstls/src/types/core/objects";
-import {readonlys} from "../../../lib/jstls/src/core/definer";
-import {each} from "../../../lib/jstls/src/core/iterable/each";
+import {ThisObjectKeys} from "../../../lib/jstls/src/types/core/objects";
+import {readonly2,} from "../../../lib/jstls/src/core/definer";
 import {call} from "../../../lib/jstls/src/core/functions/call";
 import {toInt} from "../../../lib/jstls/src/core/extensions/string";
 import {apply} from "../../../lib/jstls/src/core/functions/apply";
 import {coerceAtLeast} from "../../../lib/jstls/src/core/extensions/number";
-import {keys} from "../../../lib/jstls/src/core/objects/handlers/properties";
+import {len} from "../../../lib/jstls/src/core/shortcuts/indexable";
+import {forEach} from "../../../lib/jstls/src/core/shortcuts/array";
+import {es5class} from "../../../lib/jstls/src/core/definer/classes";
+import {Alt, OrderBy, RequestFeedParams} from "../../types/feeds/shared/params";
+import {set} from "../../../lib/jstls/src/core/objects/handlers/getset";
+import {concat} from "../../../lib/jstls/src/core/shortcuts/string";
+import {dateTypes} from "../shared";
+import {includes} from "../../../lib/jstls/src/core/polyfills/indexable/es2016";
 
-function minimumsOne(max: Maybe<string | number>): number {
-  max = call(toInt, string(max));
-  return isDefined(max) ? apply(coerceAtLeast, max!, [1]) : 1;
-}
 
-function validDate(date: MaybeString): string {
-  try {
-    return new Date(date!)
-      .toISOString()
-  } catch (e) {
-    if (isDefined(date))
-      console.error('No valid date given: ', date);
-    return undefined!;
-  }
-}
-
-function updateProperty<K extends Keys<RequestFeedParams>>(args: IArguments,
-                                                           source: Partial<RequestFeedParams>, key: K,
-                                                           builder?: (arg: any) => RequestFeedParams[K],
-                                                           noArgs?: boolean,) {
-  if (args.length > 0 || noArgs) {
-    const value = args.length > 0 ? args[0] : source[key];
-    source[key] = builder ? builder(value) : value;
-  }
-}
-
-/**
- * @class
- * The class for managing search parameters.
- */
-export class SearchParams {
+export interface SearchParams {
   /**
    * The search parameters.
    */
-  readonly source!: Partial<RequestFeedParams>;
-
-  constructor(source?: Partial<RequestFeedParams>) {
-    readonlys(this as SearchParams, {
-      source: getDefined(source, () => ({}))
-    })
-  }
-
-  /**
-   * Creates a new search parameters object.
-   * @param source The search parameters or other SearchParams instance.
-   * @param copy Whether to copy the search parameters.
-   */
-  static from(source?: Partial<RequestFeedParams> | SearchParams, copy?: boolean): SearchParams {
-    if (source instanceof SearchParams)
-      return copy ? SearchParams.from(source.source, copy) : source;
-    return new SearchParams(copy ? assign(<RequestFeedParams>{}, source!) : source);
-  }
+  readonly source: Partial<RequestFeedParams>;
 
   /**
    * Gets the `max-results` parameter.
@@ -79,12 +37,6 @@ export class SearchParams {
    */
   max(max: string | number): number;
 
-  max(max?: Maybe<string | number>): number {
-    const {source} = this;
-    updateProperty(arguments, source, 'max-results', minimumsOne, true);
-    return source["max-results"] as number;
-  }
-
   /**
    * Gets the `start-index` parameter.
    * @see {RequestFeedParams.start-index}
@@ -97,12 +49,6 @@ export class SearchParams {
    * @param index The new start index.
    */
   start(index: string | number): number;
-
-  start(index?: Maybe<string | number>): number {
-    const {source} = this;
-    updateProperty(arguments, source, 'start-index', minimumsOne, true);
-    return source["start-index"] as number;
-  }
 
   /**
    * Gets the `published-min` parameter.
@@ -124,11 +70,7 @@ export class SearchParams {
    */
   publishedAtLeast(min: Nullables): Nullables;
 
-  publishedAtLeast(min?: MaybeString): MaybeString {
-    const {source} = this;
-    updateProperty(arguments, source, 'published-min', validDate)
-    return source["published-min"];
-  }
+  publishedAtLeast(min?: MaybeString): MaybeString;
 
   /**
    * Removes the `published-max` parameter.
@@ -149,11 +91,7 @@ export class SearchParams {
    */
   publishedAtMost(max: string): string;
 
-  publishedAtMost(max?: MaybeString): MaybeString {
-    const {source} = this;
-    updateProperty(arguments, source, 'published-max', validDate)
-    return source["published-max"];
-  }
+  publishedAtMost(max?: MaybeString): MaybeString
 
   /**
    * Gets the `updated-min` parameter.
@@ -174,11 +112,7 @@ export class SearchParams {
    */
   updatedAtLeast(min: Nullables): Nullables;
 
-  updatedAtLeast(min?: MaybeString): MaybeString {
-    const {source} = this;
-    updateProperty(arguments, source, 'updated-min', validDate)
-    return source["updated-min"];
-  }
+  updatedAtLeast(min?: MaybeString): MaybeString
 
   /**
    * Gets the `updated-max` parameter.
@@ -199,11 +133,7 @@ export class SearchParams {
    */
   updatedAtMost(max: Nullables): Nullables;
 
-  updatedAtMost(max?: MaybeString): MaybeString {
-    const {source} = this;
-    updateProperty(arguments, source, 'updated-max', validDate)
-    return source["updated-max"];
-  }
+  updatedAtMost(max?: MaybeString): MaybeString
 
   /**
    * Gets the `orderby` parameter.
@@ -214,10 +144,10 @@ export class SearchParams {
   /**
    * Sets and gets the `orderby` parameter.
    *
-   * The value assigned will be the default one: `lastmodified`.
+   * The value assigned will be the default one: `updated`.
    * @see {RequestFeedParams.orderby}
    */
-  orderby(order: Nullables): 'lastmodified';
+  orderby(order: Nullables): 'updated';
 
   /**
    * Sets and gets the `orderby` parameter.
@@ -226,11 +156,7 @@ export class SearchParams {
    */
   orderby<O extends OrderBy>(order: O): O;
 
-  orderby<O extends OrderBy>(order?: Maybe<O>): O {
-    order = (order === 'updated' || order === 'starttime' || order === 'lastmodified') ? order : 'lastmodified' as O;
-    this.source["orderby"] = order;
-    return order;
-  }
+  orderby<O extends OrderBy>(order?: O): O;
 
   /**
    * Gets the `q` parameter.
@@ -252,18 +178,38 @@ export class SearchParams {
    */
   query(query: Nullables): Nullables;
 
-  query(query?: MaybeString): MaybeString {
-    const {source} = this;
-    updateProperty(arguments, source, 'q')
-    return source["q"];
-  }
+  query(query?: MaybeString): MaybeString;
 
-  alt(type: 'json' | 'rss') {
-    updateProperty(arguments, this.source, <any>'alt', (it) => (it == 'alt' || it === 'rss') ? it : 'json')
-  }
+  /**
+   * Gets the `alt` parameter.
+   * @see {RequestFeedParams.alt}
+   */
+  alt(): Alt;
+
+  /**
+   * Sets and gets the `q` parameter.
+   * @see {RequestFeedParams.alt}
+   */
+  alt<A extends Alt>(type: A): A;
+
+  /**
+   * Sets and gets the `alt` parameter.
+   *
+   * The value assigned will be the default one: `json`.
+   * @see {RequestFeedParams.alt}
+   */
+  alt(type: Nullables): "json";
+
+  /**
+   * Gets the `alt` parameter.
+   * @see {RequestFeedParams.alt}
+   */
+  alt(type?: Maybe<Alt>): Alt;
 
   /**
    * Creates a new object with only the defined parameters.
+   *
+   * @deprecated Since 1.2 undefined or null values deletes the property from the source. Use `source` instead.
    *
    * @example
    * var params = new SearchParams();
@@ -271,13 +217,107 @@ export class SearchParams {
    * params.max(9) // { source: { q: 'title', "max-results": 12 } }
    * params.query(undefined) // { source: { q: undefined, "max-results": 12 } }
    * var source = params.toDefined(); // { "max-results": 12 }
+   *
+   * @see {source}
    */
-  toDefined(): Partial<RequestFeedParams> {
-    const source: KeyableObject = {};
-    each(keys(this.source), function (key) {
-      if (isDefined(this[key]))
-        source[key] = this[key]
-    }, this.source);
-    return source as Partial<RequestFeedParams>;
+  toDefined(): Partial<RequestFeedParams>;
+}
+
+export interface SearchParamsConstructor {
+  /**
+   * Instances a new search params.
+   * @param source The source params.
+   */
+  new(source?: Partial<RequestFeedParams>): SearchParams;
+
+  /**
+   * Creates a new search parameters object.
+   * @param source The search parameters or other SearchParams instance.
+   * @param copy Whether to copy the search parameters.
+   * @static
+   */
+  from(source?: Partial<RequestFeedParams> | SearchParams, copy?: boolean): SearchParams;
+}
+
+
+function minimumsOne(max: Maybe<string | number>): number {
+  max = call(toInt, string(max));
+  return isDefined(max) ? apply(coerceAtLeast, max!, [1]) : 1;
+}
+
+function validDate(date: MaybeString): string {
+  try {
+    return new Date(date!)
+      .toISOString()
+  } catch (e) {
+    if (isDefined(date))
+      console.error('No valid date given: ', date);
+    return undefined!;
   }
 }
+
+function updateProperty<K extends Keys<RequestFeedParams>>(args: IArguments,
+                                                           source: Partial<RequestFeedParams>, key: K,
+                                                           builder?: (arg: any) => RequestFeedParams[K],
+                                                           allowUndefined?: boolean) {
+  const value = len(args) > 0 ? args[0] : source[key];
+  if (!allowUndefined && !isDefined(value))
+    delete source[key];
+  else source[key] = builder ? builder(value) : value;
+  return source[key]
+}
+
+
+/**
+ * @class
+ * The class for managing search parameters.
+ */
+export const SearchParams: SearchParamsConstructor = function (this: SearchParams, source?: Partial<RequestFeedParams>) {
+  readonly2(this, "source", source || {})
+} as any;
+
+
+function propertyFn<K extends Keys<RequestFeedParams>>(key: K, builder?: (value: RequestFeedParams[K]) => any, allowUndefined?: boolean) {
+  return function (this: SearchParams, value?: Maybe<string | number>) {
+    const {source} = this;
+    return updateProperty(arguments, source, key, builder, allowUndefined) as any;
+  }
+}
+
+function dateProperties(type: "published" | "updated", mode: "max" | "min") {
+  const suffix = mode === "max" ? "AtMost" : "AtLeast";
+  set(prototype, type + suffix, function (this: SearchParams, value: MaybeString): MaybeString {
+    const {source} = this, key: any = concat(type, "-", mode);
+    return updateProperty(arguments, source, key, validDate)
+  })
+}
+
+const prototype: Partial<ThisObjectKeys<SearchParams>> = {
+  max: propertyFn("max-results", minimumsOne),
+  start: propertyFn("start-index", minimumsOne),
+  query: propertyFn("q"),
+  alt: propertyFn("alt", (it) => call(includes, ["json", "rss", "atom"], it) ? it : 'json', true),
+  orderby: propertyFn("orderby", (order) => call(includes, dateTypes, order) ? order : 'updated', true),
+  toDefined(): Partial<RequestFeedParams> {
+    return this.source;
+  }
+};
+
+forEach(dateTypes, (key) => {
+  dateProperties(key, "min")
+  dateProperties(key, "max")
+})
+
+es5class(SearchParams, {
+  prototype,
+  statics: {
+    from: paramsFrom
+  }
+});
+
+export function paramsFrom(source?: Partial<RequestFeedParams> | SearchParams, copy?: boolean): SearchParams {
+  if (source instanceof SearchParams)
+    return copy ? paramsFrom(source.source, copy) : source as SearchParams;
+  return new SearchParams(copy ? assign(<RequestFeedParams>{}, source!) : source);
+}
+

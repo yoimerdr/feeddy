@@ -17,9 +17,10 @@ or you can use
 ```
 ## How to
 
-### Paginate posts
+### Paginate entries
 
 ```javascript
+// you can also use .comments or .pages instead .posts.
 feeddy.posts({
   feed: {
     // For tests only you can use the 'https://cors-anywhere.herokuapp.com/' + your blog url.
@@ -31,7 +32,7 @@ feeddy.posts({
   }
 }).then(handler => handler.page(1))
   .then(result => {
-    console.log(result.posts);
+    console.log(result.entries); // .posts was deprecated an removed since 1.2
   })
 ```
 
@@ -52,7 +53,7 @@ feeddy.posts({
   }
 }).then(handler => handler.page(1))
   .then(result => {
-    console.log(result.posts);
+    console.log(result.entries);
   })
 ```
 
@@ -81,6 +82,7 @@ feeddy.posts.withCategories({
 ```javascript
 feeddy.feed({
   blogUrl: '', // The blog url, or nothing if the current origin is the blogger blog. 
+  type: "posts", // since 1.2 the type (posts, pages, comments) is mandatory
   params: feeddy.search.params()
     .limit(12)
     .build()
@@ -92,6 +94,7 @@ feeddy.feed({
 ```javascript
 feeddy.feed.raw({
   blogUrl: '', // The blog url, or nothing if the current origin is the blogger blog. 
+  type: "posts", // since 1.2 the type (posts, pages, comments) is mandatory
   params: feeddy.search.params()
     .limit(12)
     .build()
