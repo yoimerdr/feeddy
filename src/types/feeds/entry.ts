@@ -63,12 +63,9 @@ export interface BaseSimpleFeed<T extends BaseEntry = BaseEntry> {
   updated: SimpleText;
 
   /**
-   * The name of the blog, which is usually displayed in Blogger as the blog's title.
-   *
-   * The title can include HTML.
+   * The name of the feed. Can include HTML markup.
    */
   title: SimpleText;
-
 
   /**
    * The links of the blog.
@@ -81,9 +78,9 @@ export interface BaseSimpleFeed<T extends BaseEntry = BaseEntry> {
   author: Author[];
 
   /**
-   * The total number of blog posts.
+   * The total number of entries.
    *
-   * In a request with a query (`q` parameter), this value is usually equals to the number of posts retrieved.
+   * In a request with a query (`q` parameter), this value is usually equals to the number of entries retrieved.
    */
   openSearch$totalResults: number;
 
@@ -107,14 +104,14 @@ export interface BaseSimpleFeed<T extends BaseEntry = BaseEntry> {
 
 export interface BaseFeed<T extends BaseEntry> extends BaseSimpleFeed<T> {
   /**
-   * The subtitle of the blog, which is usually displayed in Blogger underneath the blog's title.
+   * The subtitle or description of the feed.
    *
-   * The subtitle can include HTML.
+   * Can contain HTML markup.
    */
   subtitle: SimpleText;
 
   /**
-   * Indicates whether the blog was marked as `for adults`.
+   * A flag indicating whether the blog contains adult content.
    */
   blogger$adultContent: boolean;
 }

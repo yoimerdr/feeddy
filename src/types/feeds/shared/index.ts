@@ -29,8 +29,24 @@ export interface Routes {
    * The summary feed posts route.
    */
   readonly postsSummary: string;
+
+  /**
+   * The default feed comments route.
+   */
   readonly comments: string;
+
+  /**
+   * The summary feed comments route.
+   */
   readonly commentsSummary: string;
+
+  /**
+   * The default feed pages route.
+   */
   readonly pages: string;
+
+  /**
+   * The summary feed pages route.
+   */
   readonly pagesSummary: string;
 }

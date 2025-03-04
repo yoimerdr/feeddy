@@ -6,21 +6,39 @@ import {Pages} from "./types/pages";
 import {Comments} from "./types/comments";
 
 export * from "./module";
+
 /**
- * The handler to paginate the blogger feed posts.
+ * Handler for paginated access to blog posts.
  */
 export declare const posts: Posts;
+
 /**
- * The helper to build the query and search parameters for a request to the blog's feed.
+ * Utility for building search queries and parameters for blog feed requests.
+ * Includes builders for constructing query strings and search parameter objects.
  */
 export declare const search: Search;
+
 /**
- * The helper to know some of the sub routes of the blog feed. All are relatives.
+ * Helper containing relative sub-routes for the blog feed API.
+ * Provides path constants for different feed endpoints.
  */
 export declare const routes: Routes;
 
+/**
+ * Generic handler for paginated access to blog entries.
+ * Supports posts, comments and pages with configurable route types.
+ * @since 1.2
+ */
 export declare const entries: Entries;
 
+/**
+ * Handler for paginated access to blog pages.
+ * @since 1.2
+ */
 export declare const pages: Pages;
 
+/**
+ * Handler for paginated access to blog comments.
+ * @since 1.2
+ */
 export declare const comments: Comments;

@@ -188,6 +188,11 @@ export interface SearchParamsBuilder {
    */
   query(query: MaybeString): this;
 
+  /**
+   * Changes alternative representation type.
+   * @param alt The alternative representation type.
+   * @since 1.2
+   */
   alt(alt: Maybe<Alt>): this;
 
   /**
@@ -198,7 +203,10 @@ export interface SearchParamsBuilder {
 }
 
 export interface SearchParamsBuilderConstructor {
-
+  /**
+   * Instances a new search params builder.
+   * @param source The source params.
+   */
   new(source: Partial<RequestFeedParams> | SearchParams): SearchParamsBuilder;
 
   /**
@@ -215,6 +223,8 @@ export interface SearchParamsBuilderConstructor {
 
   /**
    * The maximum value of results that the blogger feed api can retrieve.
+   *
+   * This number is representative, the actual value may be much lower.
    */
   readonly maxResults: number;
 }
@@ -318,10 +328,18 @@ es5class(SearchParamsBuilder, {
 
 readonly2(SearchParamsBuilder, "maxResults", maxResults);
 
+/**
+ * Creates a new builder from the given params
+ * @param params The source params.
+ * @param copy If true, creates first a new param object from the given.
+ */
 export function builderFrom(params?: Partial<RequestFeedParams> | SearchParams, copy?: boolean): SearchParamsBuilder {
   return new SearchParamsBuilder(paramsFrom(params, copy))
 }
 
+/**
+ * Creates a new params builder.
+ */
 export function paramsBuilder(): SearchParamsBuilder {
   return new SearchParamsBuilder({});
 }

@@ -16,9 +16,13 @@ import {concat} from "../../lib/jstls/src/core/shortcuts/string";
 
 
 /**
- * Builds a request url according the given options.
- * @param options The request options.
- * @param id The entry id.
+ * Builds a request URL for the blog feed API based on provided options.
+ *
+ * @param options - Configuration options for the request
+ * @param id - Optional ID of a specific entry to fetch.
+ * @returns Constructed URL object with appropriate path and query parameters
+ * @throws {IllegalArgumentError} If options object is invalid or blog URL cannot be determined
+ * @remarks The id parameter is supported since 1.2
  */
 export function buildUrl(options: Partial<BaseFeedOptions>, id?: string): URL {
   requireObject(options, "options")
@@ -47,6 +51,15 @@ export function buildUrl(options: Partial<BaseFeedOptions>, id?: string): URL {
   return fetchUrl;
 }
 
+/**
+ * Extracts the numeric ID from a blog entry identifier string or object.
+ *
+ * @param source - The source containing the ID.
+ * @param type - The type of entry ID to extract (blog, post, page).
+ * @returns The extracted numeric ID as a string
+ * @throws {IllegalArgumentError} If type is invalid or ID cannot be extracted
+ * @since 1.2
+ */
 export function getId(source: string | RawText | Record<"id", RawText | string>, type: "blog" | "post" | "page"): string {
   if (isObject(source)) {
     if (hasOwn(source, "id"))
@@ -62,7 +75,13 @@ export function getId(source: string | RawText | Record<"id", RawText | string>,
   return res[1];
 }
 
-
+/**
+ * Checks if the given feed options are for a comments feed.
+ *
+ * @param options - The feed options to check
+ * @returns True if the feed type is 'comments', false otherwise
+ * @since 1.2
+ */
 export function isComments(options: Partial<BaseFeedOptions>): boolean {
   return get(options, "type") === "comments";
 }

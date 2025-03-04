@@ -145,10 +145,10 @@ export interface SearchParams {
   /**
    * Sets and gets the `orderby` parameter.
    *
-   * The value assigned will be the default one: `lastmodified`.
+   * The value assigned will be the default one: `updated`.
    * @see {RequestFeedParams.orderby}
    */
-  orderby(order: Nullables): 'lastmodified';
+  orderby(order: Nullables): 'updated';
 
   /**
    * Sets and gets the `orderby` parameter.
@@ -156,6 +156,8 @@ export interface SearchParams {
    * @param order The new order.
    */
   orderby<O extends OrderBy>(order: O): O;
+
+  orderby<O extends OrderBy>(order?: O): O;
 
   /**
    * Gets the `q` parameter.
@@ -177,18 +179,32 @@ export interface SearchParams {
    */
   query(query: Nullables): Nullables;
 
-  query(query?: MaybeString): MaybeString
+  query(query?: MaybeString): MaybeString;
 
-  alt(type: 'json'): 'json';
-
-  alt(type: 'rss'): 'rss';
-
-  alt(type: 'atom'): 'atom';
-
-  alt(type: Nullables): "json";
-
+  /**
+   * Gets the `alt` parameter.
+   * @see {RequestFeedParams.alt}
+   */
   alt(): Alt;
 
+  /**
+   * Sets and gets the `q` parameter.
+   * @see {RequestFeedParams.alt}
+   */
+  alt<A extends Alt>(type: A): A;
+
+  /**
+   * Sets and gets the `alt` parameter.
+   *
+   * The value assigned will be the default one: `json`.
+   * @see {RequestFeedParams.alt}
+   */
+  alt(type: Nullables): "json";
+
+  /**
+   * Gets the `alt` parameter.
+   * @see {RequestFeedParams.alt}
+   */
   alt(type?: Maybe<Alt>): Alt;
 
   /**
@@ -205,6 +221,10 @@ export interface SearchParams {
 }
 
 export interface SearchParamsConstructor {
+  /**
+   * Instances a new search params.
+   * @param source The source params.
+   */
   new(source?: Partial<RequestFeedParams>): SearchParams;
 
   /**

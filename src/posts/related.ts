@@ -39,7 +39,7 @@ export function withCategories(options: KeyableObject): Promise<KeyableObject | 
 
   builderFrom(params)
     .query(
-      apply(builder.categories, builder, categories)
+      apply(builder.categories, builder, categories as any)
         .build()
     );
 

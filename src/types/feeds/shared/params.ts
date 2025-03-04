@@ -3,8 +3,10 @@
  */
 export type OrderBy = "updated" | "published";
 
+/**
+ * The alternative representation type options.
+ */
 export type Alt = "json" | "rss" | "atom";
-
 
 export interface RequestFeedParams {
 
@@ -47,4 +49,9 @@ export interface RequestFeedParams {
    * The full-text query string.
    */
   q: string;
+
+  /**
+   * The alternative representation type.
+   */
+  alt: Alt;
 }

@@ -21,7 +21,6 @@ export type RawTextContent = RawText & Record<"type", "html">;
  */
 export type RawCategory = Record<"term", string>;
 
-
 /**
  * Represents a link in the blog.
  */
@@ -55,6 +54,9 @@ export interface RawEntryLink extends RawLink {
 }
 
 export interface RawSourceLink extends RawLink {
+  /**
+   * The link to the resource it belongs to.
+   */
   source: string;
 }
 
@@ -90,7 +92,6 @@ export interface RawBaseEntry {
   author: RawAuthor[];
 }
 
-
 export interface RawBaseSimpleFeed<T extends RawBaseEntry = RawBaseEntry> {
   /**
    * The blog id.
@@ -103,12 +104,9 @@ export interface RawBaseSimpleFeed<T extends RawBaseEntry = RawBaseEntry> {
   updated: RawText;
 
   /**
-   * The name of the blog, which is usually displayed in Blogger as the blog's title.
-   *
-   * The title can include HTML.
+   * The name of the feed. Can include HTML markup.
    */
   title: RawTextTitle;
-
 
   /**
    * The links of the blog.
@@ -121,9 +119,9 @@ export interface RawBaseSimpleFeed<T extends RawBaseEntry = RawBaseEntry> {
   author: RawAuthor[];
 
   /**
-   * The total number of blog posts.
+   * The total number of entries.
    *
-   * In a request with a query (`q` parameter), this value is usually equals to the number of posts retrieved.
+   * In a request with a query (`q` parameter), this value is usually equals to the number of entries retrieved.
    */
   openSearch$totalResults: RawText;
 
@@ -147,14 +145,12 @@ export interface RawBaseSimpleFeed<T extends RawBaseEntry = RawBaseEntry> {
 
 export interface RawBaseFeed<T extends RawBaseEntry = RawBaseEntry> extends RawBaseSimpleFeed<T> {
   /**
-   * The subtitle of the blog, which is usually displayed in Blogger underneath the blog's title.
-   *
-   * The subtitle can include HTML.
+   * The subtitle or description of the feed. Can contain HTML markup.
    */
   subtitle: RawTextTitle;
 
   /**
-   * Indicates whether the blog was marked as `for adults`.
+   * A flag indicating whether the blog contains adult content.
    */
   blogger$adultContent: RawText;
 }

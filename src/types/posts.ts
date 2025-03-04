@@ -58,31 +58,68 @@ export interface WithCategoriesPostsResultSummary {
   blog: PostsBlog;
 }
 
-
-export interface PostsHandler<R extends FeedRoute = FeedRoute> extends EntriesHandler<"posts", R> {
-  categories: string[];
+/**
+ * Interface for handling paginated blog posts.
+ * @template R - The route type (summary or full)
+ */
+export interface PostsHandler<R extends FeedRoute = FeedRoute> extends EntriesHandler<"posts", R, PostsHandler<R>> {
+  /**
+   * The categories with which the posts has been tagged.
+   * @since 1.2
+   */
+  readonly categories: string[];
 }
 
+/**
+ * The options for configuring a blog feed posts request.
+ * @template R - The route type (summary or full)
+ */
 export type PostsFeedOptions<R extends FeedRoute = FeedRoute> = Omit<FeedOptions<"posts", R>, "type">
+
+/**
+ * The options for configuring a summary blog posts feed request.
+ */
 export type PostsFeedOptionsSummary = Omit<PostsFeedOptions, "route">;
 
+/**
+ * Options for configuring posts retrieval with route control.
+ * @template T - The type of feed (posts, posts, or posts)
+ */
 export type PostsOptions<R extends FeedRoute = FeedRoute> = InnerFeedOptions<PostsFeedOptions<R>>;
+
+/**
+ * Options for configuring posts retrieval using the summary route.
+ */
 export type PostsOptionsSummary = InnerFeedOptions<PostsFeedOptionsSummary>;
 
+/**
+ * The options for configuring a blog feed posts request by ID.
+ * @template R - The route type (summary or full)
+ */
 export type ByIdPostsOptions<R extends FeedRoute = FeedRoute> = FeedByIdOptions<"posts", R>;
+
+/**
+ * The options for configuring a summary blog posts feed request by ID.
+ */
 export type ByIdPostsOptionsSummary = FeedByIdOptions<"posts", "summary">;
 
+/**
+ * Interface for retrieving blog posts.
+ *
+ * Provides methods for paginated access and individual entry retrieval.
+ */
 export interface Posts {
 
   /**
-   * Paginate the blog using the <b>summary</b> route.
-   * @param options The paginate options. All properties must be defined.
+   * Creates a handler for paginated access to blog posts using the summary route.
+   * @param options - Configuration options for the summary posts retrieval
    */
   (options: PostsOptionsSummary): Promise<PostsHandler<"summary">>;
 
   /**
-   * Paginate the blog using the <b>default</b> route.
-   * @param options The paginate options. All properties must be defined.
+   * Creates a handler for paginated access to blog posts.
+   * @template R - The route type (summary or full)
+   * @param options - Configuration options for the posts retrieval
    */<R extends FeedRoute = FeedRoute>(options: PostsOptions<R>): Promise<PostsHandler<R>>;
 
   /**
@@ -110,7 +147,16 @@ export interface Posts {
    */
   withCategories(options: WithCategoriesPostsOptions): Promise<WithCategoriesPostsResult>;
 
+  /**
+   * Retrieves a specific page by its ID with route control.
+   * @template R - The route type (summary or full)
+   * @param options - Configuration options including the page ID
+   */
   byId<R extends FeedRoute = FeedRoute>(options: ByIdPostsOptions<R>): Promise<ByIdResult<"posts", R>>;
 
+  /**
+   * Retrieves a specific page by its ID using the summary route.
+   * @param options - Configuration options including the page ID
+   */
   byId(options: ByIdPostsOptionsSummary): Promise<ByIdResult<"posts", "summary">>;
 }

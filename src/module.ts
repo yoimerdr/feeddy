@@ -42,7 +42,7 @@ readonly2(rawGet, "all", rawAll);
 readonly2(rawGet, "byId", rawById);
 
 /**
- * The handler to make requests to the blogger feed API.
+ * The handler to make mapped requests to the blogger feed API.
  */
 const feed = <Feed>get;
 
@@ -124,5 +124,7 @@ declare const exports: KeyableObject;
 assign(exports, module);
 
 export {
-  feed
+  feed,
+  buildUrl,
+  getId
 }

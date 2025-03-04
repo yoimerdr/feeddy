@@ -118,44 +118,87 @@ export interface QueryStringBuilder {
 
   /**
    * Appends search terms to the query.
+   *
+   * @example
+   * builder
+   *    .terms('search', 'terms')
+   *    .build() // 'search|terms'
+   *
    * @param term The search term.
+   * @param terms Other search terms.
    */
-  terms(...term: string[]): this;
+  terms(term: string, ...terms: string[]): this;
 
   /**
    * Appends named search terms to the query.
+   *
+   * @example
+   * builder
+   *    .named('label', 'search', 'label')
+   *    .build() // 'label:search|label:label'
    * @param name The name of the search terms.
    * @param term The search term.
+   * @param terms Other search terms.
    */
-  named(name: string, ...term: string[]): this;
+  named(name: string, term: string, ...terms: string[]): this;
+
+  /**
+   * Appends label search terms to the query.
+   *
+   * @example
+   * builder.label(label) // .named('label', label)
+   *
+   * @param label The label names.
+   * @param labels Other label names
+   * @see {named}
+   * @since 1.2
+   */
+  label(label: string, ...labels: string[]): this;
 
   /**
    * Appends category search terms to the query.
    *
-   * <b>Alias</b>
-   * @example
-   * builder.categories(...category) // .named('label', ...category)
-   *
-   * @param category The category o category names.
-   * @see {terms}
+   * @param category The category name.
+   * @param categories Other category names.
+   * @see {label}
+   * @remarks This is an alias for {@link label}
    */
-  categories(...category: string[]): this;
+  categories(category: string, ...categories: string[]): this;
 
   /**
-   * Appends category search terms to the query.
+   * Appends label search terms to the query.
    *
-   * <b>Alias</b>
-   * @example
-   * builder.labels(label) // .categories(label)
-   *
-   * @param label The category o category names.
-   * @see {categories}
+   * @param label The label name.
+   * @param labels Other label names.
+   * @see {label}
+   * @remarks This is an alias for {@link label}
    */
-  labels(...label: string[]): this;
+  labels(label: string, ...labels: string[]): this;
 
-  author(...author: string[]): this;
+  /**
+   * Appends author search terms to the query.
+   *
+   * @example
+   * builder.author(author) // .named('author', author)
+   *
+   * @param author The author name.
+   * @param authors Other author names.
+   * @see {named}
+   * @since 1.2
+   */
+  author(author: string, ...authors: string[]): this;
 
-  title(...title: string[]): this;
+  /**
+   * Appends title search terms to the query.
+   *
+   * @example
+   * builder.title(title) // .title('title', title)
+   *
+   * @param title The entry title.
+   * @param titles Other entry titles.
+   * @since 1.2
+   */
+  title(title: string, ...titles: string[]): this;
 
   /**
    * Returns the built query string. If It's empty, an undefined value is returned.
