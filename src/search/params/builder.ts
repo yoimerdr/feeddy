@@ -109,9 +109,6 @@ export interface SearchParamsBuilder {
   /**
    * Changes the inclusive min bound on the entry publication date.
    *
-   * <b>Alias</b>.
-   * @example
-   * builder.publishedAtLeast(min) // .published(min)
    * @param min The min publication date value.
    * @see {published}
    */
@@ -120,9 +117,6 @@ export interface SearchParamsBuilder {
   /**
    * Changes the exclusive max bound on the entry publication date.
    *
-   * <b>Alias</b>.
-   * @example
-   * builder.publishedAtMost(max) // .published(undefined, max)
    * @param max The max publication date value.
    * @see {published}
    */
@@ -142,9 +136,6 @@ export interface SearchParamsBuilder {
   /**
    * Changes the inclusive min bound on the entry update date.
    *
-   * <b>Alias</b>.
-   * @example
-   * builder.updatedAtLeast(min) // .updated(min)
    * @param min The min updated date value.
    * @see {updated}
    */
@@ -153,14 +144,10 @@ export interface SearchParamsBuilder {
   /**
    * Changes the exclusive min bound on the entry update date.
    *
-   * <b>Alias</b>.
-   * @example
-   * builder.updatedAtMost(max) // .updated(undefined, max)
    * @param max The max updated date value.
    * @see {updated}
    */
   updatedAtMost(max: MaybeString): this;
-
 
   /**
    * Changes the sort order applied to results.
@@ -183,7 +170,6 @@ export interface SearchParamsBuilder {
    *
    * @param query The query value.
    *
-   * @see {queryBuilder}
    * @see {QueryStringBuilder}
    */
   query(query: MaybeString): this;
@@ -213,11 +199,13 @@ export interface SearchParamsBuilderConstructor {
    * Creates a new builder from the given params
    * @param params The source params.
    * @param copy If true, creates first a new param object from the given.
+   * @static
    */
   from(params?: Partial<RequestFeedParams> | SearchParams, copy?: boolean): SearchParamsBuilder
 
   /**
    * Creates a new builder.
+   * @static
    */
   empty(): SearchParamsBuilder
 
@@ -225,6 +213,7 @@ export interface SearchParamsBuilderConstructor {
    * The maximum value of results that the blogger feed api can retrieve.
    *
    * This number is representative, the actual value may be much lower.
+   * @static
    */
   readonly maxResults: number;
 }
@@ -246,12 +235,12 @@ function paramDate(this: SearchParams,
     call(get(this, type + "AtLeast"), this, min);
   if (isDefined(max) || !keepAtMost)
     call(get(this, type + "AtMost"), this, max);
-  return this;
 }
 
 const searchParamsSymbol = uid("p");
 export const maxResults: number = 500;
 
+/** @class */
 export const SearchParamsBuilder: SearchParamsBuilderConstructor = function (this: SearchParamsBuilder, source: Partial<RequestFeedParams> | SearchParams) {
   if (source instanceof SearchParams)
     writeable(this, searchParamsSymbol, source);
@@ -259,31 +248,34 @@ export const SearchParamsBuilder: SearchParamsBuilderConstructor = function (thi
 } as any
 
 function simpleProperty(key: Keys<SearchParams>) {
-  return function (this: SearchParamsBuilder, value: any) {
+  return function (this: SearchParamsBuilder, value: any): SearchParamsBuilder {
     const params = get(this, searchParamsSymbol);
     apply(get(params, key), params, [value]);
     return this;
   }
 }
 
-function datePropertiesBuilder(type: "published" | "updated"): any {
-  set(prototype, type, function (this: SearchParamsBuilder, min: MaybeString, max?: MaybeString) {
-    const params = get(this, searchParamsSymbol) as SearchParams;
-    return call(paramDate, params, min, max, type)
-  });
-  set(prototype, type + "AtLeast", function (this: SearchParamsBuilder, min: MaybeString) {
+function datePropertiesBuilder(type: "published" | "updated") {
+  set(prototype, type, function (this: SearchParamsBuilder, min: MaybeString, max?: MaybeString): SearchParamsBuilder {
     const params = get(this, searchParamsSymbol);
-    return call(paramDate, params, min, undefined, type, false, true)
+    call(paramDate, params, min, max, type);
+    return this;
   });
-  set(prototype, type + "AtMost", function (this: SearchParamsBuilder, max: MaybeString) {
+  set(prototype, type + "AtLeast", function (this: SearchParamsBuilder, min: MaybeString): SearchParamsBuilder {
     const params = get(this, searchParamsSymbol);
-    return call(paramDate, params, undefined, max, type, true)
+    call(paramDate, params, min, undefined, type, false, true);
+    return this;
+  });
+  set(prototype, type + "AtMost", function (this: SearchParamsBuilder, max: MaybeString): SearchParamsBuilder {
+    const params = get(this, searchParamsSymbol);
+    call(paramDate, params, undefined, max, type, true)
+    return this;
   })
 }
 
 const source = ['place', 'plus', 'minus']
   .map((mode: any) => {
-    return function (this: SearchParamsBuilder, index: Maybe<number | string>) {
+    return function (this: SearchParamsBuilder, index: Maybe<number | string>): SearchParamsBuilder {
       return call(paramIndex, this, index, mode)
     }
   });

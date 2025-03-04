@@ -2,13 +2,12 @@ import {Keys, Maybe, MaybeString, Nullables} from "../../../lib/jstls/src/types/
 import {string} from "../../../lib/jstls/src/core/objects/handlers";
 import {isDefined} from "../../../lib/jstls/src/core/objects/types";
 import {assign} from "../../../lib/jstls/src/core/objects/factory";
-import {KeyableObject, ThisObjectKeys} from "../../../lib/jstls/src/types/core/objects";
+import {ThisObjectKeys} from "../../../lib/jstls/src/types/core/objects";
 import {readonly2,} from "../../../lib/jstls/src/core/definer";
 import {call} from "../../../lib/jstls/src/core/functions/call";
 import {toInt} from "../../../lib/jstls/src/core/extensions/string";
 import {apply} from "../../../lib/jstls/src/core/functions/apply";
 import {coerceAtLeast} from "../../../lib/jstls/src/core/extensions/number";
-import {keys} from "../../../lib/jstls/src/core/objects/handlers/properties";
 import {len} from "../../../lib/jstls/src/core/shortcuts/indexable";
 import {forEach} from "../../../lib/jstls/src/core/shortcuts/array";
 import {es5class} from "../../../lib/jstls/src/core/definer/classes";
@@ -210,12 +209,16 @@ export interface SearchParams {
   /**
    * Creates a new object with only the defined parameters.
    *
+   * @deprecated Since 1.2 undefined or null values deletes the property from the source. Use `source` instead.
+   *
    * @example
    * var params = new SearchParams();
    * params.query("title") // { source: { q: 'title' } }
    * params.max(9) // { source: { q: 'title', "max-results": 12 } }
    * params.query(undefined) // { source: { q: undefined, "max-results": 12 } }
    * var source = params.toDefined(); // { "max-results": 12 }
+   *
+   * @see {source}
    */
   toDefined(): Partial<RequestFeedParams>;
 }
@@ -255,12 +258,12 @@ function validDate(date: MaybeString): string {
 function updateProperty<K extends Keys<RequestFeedParams>>(args: IArguments,
                                                            source: Partial<RequestFeedParams>, key: K,
                                                            builder?: (arg: any) => RequestFeedParams[K],
-                                                           noArgs?: boolean,) {
-  if (len(args) > 0 || noArgs) {
-    const value = len(args) > 0 ? args[0] : source[key];
-    source[key] = builder ? builder(value) : value;
-    return source[key]
-  }
+                                                           allowUndefined?: boolean) {
+  const value = len(args) > 0 ? args[0] : source[key];
+  if (!allowUndefined && !isDefined(value))
+    delete source[key];
+  else source[key] = builder ? builder(value) : value;
+  return source[key]
 }
 
 
@@ -273,10 +276,10 @@ export const SearchParams: SearchParamsConstructor = function (this: SearchParam
 } as any;
 
 
-function propertyFn(key: Keys<RequestFeedParams>, builder?: (value: any) => any) {
+function propertyFn<K extends Keys<RequestFeedParams>>(key: K, builder?: (value: RequestFeedParams[K]) => any, allowUndefined?: boolean) {
   return function (this: SearchParams, value?: Maybe<string | number>) {
     const {source} = this;
-    return updateProperty(arguments, source, key, builder, true) as any;
+    return updateProperty(arguments, source, key, builder, allowUndefined) as any;
   }
 }
 
@@ -292,15 +295,10 @@ const prototype: Partial<ThisObjectKeys<SearchParams>> = {
   max: propertyFn("max-results", minimumsOne),
   start: propertyFn("start-index", minimumsOne),
   query: propertyFn("q"),
-  alt: propertyFn(<any>"alt", (it) => call(includes, ["json", "rss", "atom"], it) ? it : 'json'),
-  orderby: propertyFn("orderby", (order) => call(includes, dateTypes, order) ? order : 'updated'),
+  alt: propertyFn("alt", (it) => call(includes, ["json", "rss", "atom"], it) ? it : 'json', true),
+  orderby: propertyFn("orderby", (order) => call(includes, dateTypes, order) ? order : 'updated', true),
   toDefined(): Partial<RequestFeedParams> {
-    const source: KeyableObject = {};
-    forEach(keys(this.source), function (key) {
-      if (isDefined(this[key]))
-        source[key] = this[key]
-    }, this.source)
-    return source as Partial<RequestFeedParams>;
+    return this.source;
   }
 };
 

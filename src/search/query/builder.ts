@@ -213,14 +213,14 @@ export interface QueryStringBuilderConstructor {
 
 function buildQuery(terms: string | string[], sep: string, startQuote: string, endQuote?: string): string {
   if (!isArray(terms))
-    return buildQuery([terms], sep, startQuote, endQuote);
+    terms = [terms];
   endQuote = endQuote || startQuote;
-  terms = terms.map(it => string(it))
+  terms = terms.map(string)
     .filter(it => apply(isNotEmpty, it));
   return apply(isEmpty, terms) ? '' : concat(startQuote, terms.join(sep), endQuote);
 }
 
-function appendQuery(this: QueryStringBuilder, args: ArrayLike<any>, name?: string) {
+function appendQuery(this: QueryStringBuilder, args: ArrayLike<any>, name?: string): QueryStringBuilder {
   if (len(args) === 0)
     return this;
 
@@ -236,9 +236,7 @@ function appendQuery(this: QueryStringBuilder, args: ArrayLike<any>, name?: stri
   if (apply(isNotEmpty, current))
     current += op;
 
-  current += query;
-
-  set(this, querySymbol, current);
+  set(this, querySymbol, current + query);
   return this;
 }
 
@@ -250,7 +248,7 @@ export const QueryStringBuilder: QueryStringBuilderConstructor = function (this:
 } as any;
 
 function setFn(symbol: string, value: any) {
-  return function (this: QueryStringBuilder,) {
+  return function (this: QueryStringBuilder,): QueryStringBuilder {
     set(this, symbol, value);
     return this;
   }
