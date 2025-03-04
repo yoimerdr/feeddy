@@ -1,13 +1,20 @@
-import {queryBuilder, QueryStringBuilder, QueryStringBuilderConstructor} from "../search/query/builder";
+import {queryBuilder, QueryStringBuilder, QueryStringBuilderConstructor} from "../search/query";
 import {
   paramsBuilder,
+  SearchParams,
   SearchParamsBuilder,
   SearchParamsBuilderConstructor,
   SearchParamsConstructor
 } from "../search";
 
-export type {QueryStringBuilder};
-export type {SearchParamsBuilder};
+export type {
+  QueryStringBuilder,
+  SearchParamsBuilder,
+  SearchParamsBuilderConstructor,
+  SearchParamsConstructor,
+  QueryStringBuilderConstructor,
+  SearchParams
+};
 
 /**
  * Interface for search functionality in the blog API.

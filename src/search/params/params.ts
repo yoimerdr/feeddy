@@ -234,6 +234,7 @@ export interface SearchParamsConstructor {
    * Creates a new search parameters object.
    * @param source The search parameters or other SearchParams instance.
    * @param copy Whether to copy the search parameters.
+   * @static
    */
   from(source?: Partial<RequestFeedParams> | SearchParams, copy?: boolean): SearchParams;
 }

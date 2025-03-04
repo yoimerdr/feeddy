@@ -20,7 +20,7 @@ export interface WithCategoriesPost<E extends BasePostEntry = PostEntry> {
 
 export type WithCategoriesPostSummary = WithCategoriesPost<PostEntrySummary>
 
-export interface WithCategoriesPostsOptions<F = FeedOptions> extends InnerFeedOptions<F> {
+export interface WithCategoriesPostsOptions<F = PostsFeedOptions> extends InnerFeedOptions<F> {
 
   /**
    * The categories of the posts to be retrieved.
@@ -28,13 +28,13 @@ export interface WithCategoriesPostsOptions<F = FeedOptions> extends InnerFeedOp
   categories: string[];
 
   /**
-   * If true, the retrieved posts will be have all the categories.
+   * If true, the retrieved posts will have all the categories.
    */
   every?: boolean;
 }
 
 
-export type WithCategoriesPostsOptionsSummary = WithCategoriesPostsOptions<FeedOptionsSummary>;
+export type WithCategoriesPostsOptionsSummary = WithCategoriesPostsOptions<PostsFeedOptionsSummary>;
 
 export interface WithCategoriesPostsResult {
   /**
