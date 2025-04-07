@@ -4,7 +4,7 @@ import {isDefined, isObject} from "../../lib/jstls/src/core/objects/types";
 import {IllegalArgumentError} from "../../lib/jstls/src/core/exceptions";
 import {apply} from "../../lib/jstls/src/core/functions/apply";
 import {coerceIn} from "../../lib/jstls/src/core/extensions/number";
-import {keys} from "../../lib/jstls/src/core/objects/handlers/properties";
+import {keys} from "../../lib/jstls/src/core/shortcuts/object";
 import {forEach} from "../../lib/jstls/src/core/shortcuts/array";
 import {BaseFeedOptions} from "../types/feeds/options";
 import {createRoute} from "./routes";
@@ -30,7 +30,7 @@ export function buildUrl(options: Partial<BaseFeedOptions>, id?: string): URL {
   let href: string;
   if (isDefined(options.blogUrl))
     href = options.blogUrl!;
-  else if (location)
+  else if (typeof location !== "undefined")
     href = location.origin;
   else throw new IllegalArgumentError("You must pass the blog url or call this on the browser.");
 
@@ -40,10 +40,10 @@ export function buildUrl(options: Partial<BaseFeedOptions>, id?: string): URL {
   fetchUrl.pathname += createRoute(options.type, options.route, id);
 
   const params = paramsFrom(options.params);
-  params.max(apply(coerceIn, params.max(), [1, maxResults]));
+  params.max(coerceIn(1, maxResults, params.max(),));
   params.alt(params.alt());
 
-  const search = params.toDefined()
+  const search = params.source;
   forEach(keys(search), key => {
     fetchUrl.searchParams.set(key, search[key] as string);
   })
@@ -64,14 +64,13 @@ export function getId(source: string | RawText | Record<"id", RawText | string>,
   if (isObject(source)) {
     if (hasOwn(source, "id"))
       return getId(get(source, "id"), type);
-    if (hasOwn(source, "$t"))
-      source = get(source, "$t");
+    hasOwn(source, "$t") && (source = get(source, "$t"));
   }
   if (!apply(includes, ["blog", "post", "page"], [type]))
     throw new IllegalArgumentError(concat("'", type, "' is an unknown type id."));
 
-  const expr = new RegExp(concat(type, "-", "([0-9]+)"), "g");
-  const res = requireDefined(expr.exec(source as string))
+  const expr = new RegExp(concat(type, "-([0-9]+)"), "g"),
+    res = requireDefined(expr.exec(source as string))
   return res[1];
 }
 

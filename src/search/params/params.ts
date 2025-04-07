@@ -1,7 +1,7 @@
 import {Keys, Maybe, MaybeString, Nullables} from "../../../lib/jstls/src/types/core";
 import {string} from "../../../lib/jstls/src/core/objects/handlers";
 import {isDefined} from "../../../lib/jstls/src/core/objects/types";
-import {assign} from "../../../lib/jstls/src/core/objects/factory";
+import {assign2} from "../../../lib/jstls/src/core/objects/factory";
 import {ThisObjectKeys} from "../../../lib/jstls/src/types/core/objects";
 import {readonly2,} from "../../../lib/jstls/src/core/definer";
 import {call} from "../../../lib/jstls/src/core/functions/call";
@@ -10,12 +10,14 @@ import {apply} from "../../../lib/jstls/src/core/functions/apply";
 import {coerceAtLeast} from "../../../lib/jstls/src/core/extensions/number";
 import {len} from "../../../lib/jstls/src/core/shortcuts/indexable";
 import {forEach} from "../../../lib/jstls/src/core/shortcuts/array";
-import {es5class} from "../../../lib/jstls/src/core/definer/classes";
 import {Alt, OrderBy, RequestFeedParams} from "../../types/feeds/shared/params";
 import {set} from "../../../lib/jstls/src/core/objects/handlers/getset";
 import {concat} from "../../../lib/jstls/src/core/shortcuts/string";
 import {dateTypes} from "../shared";
 import {includes} from "../../../lib/jstls/src/core/polyfills/indexable/es2016";
+import {deletes} from "../../../lib/jstls/src/core/objects/handlers/deletes";
+import {funclass2} from "../../../lib/jstls/src/core/definer/classes/funclass";
+import {indefinite} from "../../../lib/jstls/src/core/utils/types";
 
 
 export interface SearchParams {
@@ -250,9 +252,8 @@ function validDate(date: MaybeString): string {
     return new Date(date!)
       .toISOString()
   } catch (e) {
-    if (isDefined(date))
-      console.error('No valid date given: ', date);
-    return undefined!;
+    isDefined(date) && console.error('No valid date given: ', date);
+    return indefinite!;
   }
 }
 
@@ -262,19 +263,10 @@ function updateProperty<K extends Keys<RequestFeedParams>>(args: IArguments,
                                                            allowUndefined?: boolean) {
   const value = len(args) > 0 ? args[0] : source[key];
   if (!allowUndefined && !isDefined(value))
-    delete source[key];
+    deletes(source, key);
   else source[key] = builder ? builder(value) : value;
   return source[key]
 }
-
-
-/**
- * @class
- * The class for managing search parameters.
- */
-export const SearchParams: SearchParamsConstructor = function (this: SearchParams, source?: Partial<RequestFeedParams>) {
-  readonly2(this, "source", source || {})
-} as any;
 
 
 function propertyFn<K extends Keys<RequestFeedParams>>(key: K, builder?: (value: RequestFeedParams[K]) => any, allowUndefined?: boolean) {
@@ -308,16 +300,19 @@ forEach(dateTypes, (key) => {
   dateProperties(key, "max")
 })
 
-es5class(SearchParams, {
-  prototype,
+export const SearchParams: SearchParamsConstructor = funclass2({
+  construct: function (source) {
+    readonly2(this, "source", source || {})
+  },
   statics: {
     from: paramsFrom
-  }
-});
+  },
+  prototype
+})
 
 export function paramsFrom(source?: Partial<RequestFeedParams> | SearchParams, copy?: boolean): SearchParams {
   if (source instanceof SearchParams)
     return copy ? paramsFrom(source.source, copy) : source as SearchParams;
-  return new SearchParams(copy ? assign(<RequestFeedParams>{}, source!) : source);
+  return new SearchParams(copy ? assign2(<RequestFeedParams>{}, source!) : source);
 }
 

@@ -10,7 +10,7 @@ import {apply} from "../../lib/jstls/src/core/functions/apply";
 import {isEmpty} from "../../lib/jstls/src/core/extensions/shared/iterables";
 import {feedOptions} from "../feeds/raw";
 import {builderFrom, paramsFrom} from "../search";
-import {queryBuilder} from "../search/query/builder";
+import {queryBuilder} from "../search/query";
 import {all} from "../feeds";
 import {freeze} from "../../lib/jstls/src/core/shortcuts/object";
 import {len} from "../../lib/jstls/src/core/shortcuts/indexable";
@@ -30,10 +30,9 @@ export function withCategories(options: KeyableObject): Promise<KeyableObject | 
   const feed = feedOptions(options.feed) as BaseFeedOptions<"posts">;
   set(feed, "type", "posts");
 
-  const params = paramsFrom(feed.params);
-
-  const builder = queryBuilder()
-    .exact();
+  const params = paramsFrom(feed.params),
+    builder = queryBuilder()
+      .exact();
 
   apply(options.every ? builder.and : builder.or, builder);
 

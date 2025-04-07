@@ -5,7 +5,7 @@ import {isObject} from "../../lib/jstls/src/core/objects/types";
 import {builderFrom, paramsFrom} from "../search";
 import {all, get} from "../feeds";
 import {freeze} from "../../lib/jstls/src/core/shortcuts/object";
-import {assign, create} from "../../lib/jstls/src/core/objects/factory";
+import {assign2} from "../../lib/jstls/src/core/objects/factory";
 import {
   EntriesHandler,
   EntriesHandlerExtra, EntriesHandlerSimpleExtra,
@@ -18,14 +18,17 @@ import {_rawGet} from "../feeds/raw";
 import {rawBlogToBlog} from "../shared/converters";
 import {isComments} from "../shared";
 import {getty} from "../shared/shortnames";
+import {self} from "../../lib/jstls/src/core/definer/getters/builders";
+import {deletes} from "../../lib/jstls/src/core/objects/handlers/deletes";
 
 export function entries2<B extends BaseBlog, R = KeyableObject>(options: EntriesSimpleOptions,
                                                                 fn?: EntriesHandlerSimpleExtra<B, R>, id?: string): Promise<EntriesHandler & R> {
   requireObject(options, "options");
   let feed: BaseFeedOptions;
-  options.feed = feed = getIf(options.feed as BaseFeedOptions, isObject, create) as BaseFeedOptions;
-  const params = paramsFrom(feed.params), max = params.max();
-  const builder = builderFrom(params);
+  options.feed = feed = getIf(options.feed as BaseFeedOptions, isObject, self, {}) as BaseFeedOptions;
+  const params = paramsFrom(feed.params),
+    max = params.max(),
+    builder = builderFrom(params);
 
   const request = isComments(feed) && id ? function (feed: BaseFeedOptions) {
     return _rawGet(feed as BaseFeedOptions<"comments">, params.query() as any, id)
@@ -46,17 +49,16 @@ export function entries2<B extends BaseBlog, R = KeyableObject>(options: Entries
 
   function createHandler(blog: BaseBlog) {
     builder.max(max);
-    const source = fn ? fn(blog as B) : {} as R;
-    const handler = freeze(assign(source as KeyableObject, {
-      total: blog.feed.openSearch$totalResults,
-      page: changePage
-    }));
-    delete (blog as KeyableObject).feed;
+    const source = fn ? fn(blog as B) : {} as R,
+      handler = freeze(assign2(source as KeyableObject, {
+        total: blog.feed.openSearch$totalResults,
+        page: changePage
+      }));
+    deletes(blog, "feed");
     return handler as any;
   }
 
-  if (!params.query())
-    params.max(1)
+  params.query() || params.max(1)
 
   return (id && isComments(feed) ? request : (params.query() ? all : get))(feed)
     .then(createHandler)

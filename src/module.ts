@@ -7,7 +7,7 @@ import {posts,} from "./posts";
 import {readonly2} from "../lib/jstls/src/core/definer";
 import {Feed} from "./types/feeds";
 import {Posts} from "./types/posts";
-import {queryBuilder, QueryStringBuilder} from "./search/query/builder";
+import {queryBuilder, QueryStringBuilder} from "./search/query";
 import {Search} from "./types/search";
 import {postThumbnail} from "./posts/converters";
 import {withCategories} from "./posts/related";
@@ -18,7 +18,7 @@ import {KeyableObject} from "../lib/jstls/src/types/core/objects";
 import {set} from "../lib/jstls/src/core/objects/handlers/getset";
 import {FeedByIdOptions} from "./types/feeds/options";
 import {forEach} from "../lib/jstls/src/core/shortcuts/array";
-import {assign} from "../lib/jstls/src/core/objects/factory";
+import {assign2} from "../lib/jstls/src/core/objects/factory";
 import {Comments} from "./types/comments";
 import {Pages} from "./types/pages";
 import {commentsById} from "./comments";
@@ -121,7 +121,7 @@ declare const exports: KeyableObject;
 /**
  * Assign the exports
  */
-assign(exports, module);
+assign2(exports, module);
 
 export {
   feed,
