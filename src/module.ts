@@ -4,7 +4,7 @@ import {paramsBuilder, SearchParams, SearchParamsBuilder} from "./search";
 import {buildUrl, getId} from "./shared";
 import {Routes} from "./types/feeds/shared";
 import {posts,} from "./posts";
-import {readonly2} from "../lib/jstls/src/core/definer";
+import {readonlys2} from "../lib/jstls/src/core/definer";
 import {Feed} from "./types/feeds";
 import {Posts} from "./types/posts";
 import {queryBuilder, QueryStringBuilder} from "./search/query";
@@ -22,6 +22,8 @@ import {assign2} from "../lib/jstls/src/core/objects/factory";
 import {Comments} from "./types/comments";
 import {Pages} from "./types/pages";
 import {commentsById} from "./comments";
+import {RawFeed} from "./types/feeds/raw";
+import {entryPathname} from "./entries/shared";
 
 interface Feeddy {
   buildUrl: typeof buildUrl;
@@ -38,20 +40,24 @@ interface Feeddy {
 /**
  * Define the sub handler for the raw feed.
  */
-readonly2(rawGet, "all", rawAll);
-readonly2(rawGet, "byId", rawById);
+readonlys2(rawGet as RawFeed, {
+  all: rawAll,
+  byId: rawById,
+})
 
 /**
  * The handler to make mapped requests to the blogger feed API.
  */
-const feed = <Feed>get;
+const feed: Feed = get as any;
 
 /**
  * Define the sub handler for the mapped feed.
  */
-readonly2(feed, "all", all);
-readonly2(feed, "raw", rawGet);
-readonly2(feed, "byId", byId);
+readonlys2(feed, {
+  all,
+  raw: rawGet,
+  byId,
+})
 
 /**
  * The handler for search on blogger feed.
@@ -67,20 +73,25 @@ const search = <Search>{
 /**
  * Define the sub handlers for entries.
  */
-readonly2(entries, "byId", byId);
+readonlys2(entries as Entries, {
+  byId,
+  createsPathname: entryPathname,
+})
 
 /**
  * Define the sub handlers for posts.
  */
-readonly2(<Posts>posts, "createsThumbnail", postThumbnail);
-readonly2(<Posts>posts, "withCategories", withCategories);
+readonlys2(posts as Posts, {
+  createsThumbnail: postThumbnail,
+  withCategories
+})
 
 /**
  * The exports object.
  */
-const module = {
-  posts: <Posts>posts,
-  entries: <Entries>entries,
+const module: Feeddy = {
+  posts: posts,
+  entries: entries,
   search,
   feed,
   routes,

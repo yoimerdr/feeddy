@@ -182,5 +182,24 @@ export interface Entries {
    * @since 1.2.1 The default type is `posts`
    */
   byId(options: ByIdPostsOptionsSummary): Promise<ByIdPostResultSummary>;
+
+  /**
+   * Extracts or generates a URL-friendly pathname string from a blog entry.
+   *
+   * @example String title
+   * createsPathname("Entry's Title") // "entry-s-title"
+   *
+   * @example Object with title
+   * createsPathname({title: "Entry's Title"}) // "entry-s-title"
+   *
+   * @example An retrieved entry
+   * createsPathname(entry) // "entry-s-alternate-url"
+   *
+   * @param source The blog entry object or string to generate URL from.
+   * @param length The maximum length for the generated URL. Defaults to `40`.
+   * @returns A URL-friendly pathname string derived from either the entry's alternate link or title
+   * @since 1.2.1
+   */
+  createsPathname(source: Partial<BaseEntry> | string, length?: number): string;
 }
 
