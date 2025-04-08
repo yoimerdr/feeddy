@@ -19,6 +19,17 @@ import {RawBaseBlog, RawBaseEntry} from "../../types/feeds/raw/entry";
 import {IllegalAccessError,} from "../../../lib/jstls/src/core/exceptions";
 import {get, set} from "../../../lib/jstls/src/core/objects/handlers/getset";
 import {KeyableObject} from "../../../lib/jstls/src/types/core/objects";
+import {
+  ByIdPostsOptions, ByIdPostsOptionsSummary,
+  PostsFeedOptions,
+  PostsFeedOptionsSummary,
+} from "../../types/posts";
+import {
+  RawByIdPostResult,
+  RawByIdPostResultSummary,
+  RawPostsResult,
+  RawPostsResultSummary
+} from "../../types/feeds/raw/posts";
 
 
 export function _rawGet<T extends FeedType = FeedType, R extends FeedRoute = FeedRoute>(options: Partial<BaseFeedOptions<T, R>>,): Promise<RawResult>;
@@ -84,6 +95,7 @@ export function _rawGet(options: Partial<BaseFeedOptions>, all?: boolean, id?: s
 export function feedOptions(options: Partial<BaseFeedOptions>): BaseFeedOptions {
   const result = assign2(<BaseFeedOptions>{
       route: "summary",
+      type: "posts",
     }, options),
     key = "params",
     max = "max-results",
@@ -95,18 +107,24 @@ export function feedOptions(options: Partial<BaseFeedOptions>): BaseFeedOptions 
 
 export function rawGet<T extends FeedType = FeedType, R extends FeedRoute = FeedRoute>(options: FeedOptions<T, R>): Promise<RawResult<T, R>>;
 export function rawGet<T extends FeedType = FeedType>(options: FeedOptionsSummary<T>): Promise<RawResult<T, "summary">>;
-export function rawGet<T extends FeedType = FeedType, R extends FeedRoute = FeedRoute>(options: FeedOptions<T, R> | FeedOptionsSummary): Promise<RawResult> {
+export function rawGet<R extends FeedRoute = FeedRoute>(options: PostsFeedOptions<R>): Promise<RawPostsResult<R>>;
+export function rawGet(options: PostsFeedOptionsSummary): Promise<RawPostsResultSummary>;
+export function rawGet(options: any): Promise<RawResult> {
   return _rawGet(options);
 }
 
 export function rawAll<T extends FeedType = FeedType, R extends FeedRoute = FeedRoute>(options: FeedOptions<T, R>): Promise<RawResult<T, R>>;
 export function rawAll<T extends FeedType = FeedType>(options: FeedOptionsSummary<T>): Promise<RawResult<T, "summary">>;
-export function rawAll(options: FeedOptions | FeedOptionsSummary): Promise<RawResult> {
+export function rawAll<R extends FeedRoute = FeedRoute>(options: PostsFeedOptions<R>): Promise<RawPostsResult<R>>;
+export function rawAll(options: PostsFeedOptionsSummary): Promise<RawPostsResultSummary>;
+export function rawAll(options: any): Promise<RawResult> {
   return _rawGet(options, true);
 }
 
 export function rawById<T extends FeedType = FeedType, R extends FeedRoute = FeedRoute>(options: FeedByIdOptions<T, R>): Promise<RawByIdResult<T, R>>;
 export function rawById<T extends FeedType = FeedType>(options: FeedByIdOptionsSummary<T>): Promise<RawByIdResult<T, "summary">>;
-export function rawById(options: FeedByIdOptions | FeedByIdOptionsSummary): Promise<RawByIdResult> {
+export function rawById<R extends FeedRoute = FeedRoute>(options: ByIdPostsOptions<R>): Promise<RawByIdPostResult<R>>;
+export function rawById(options: ByIdPostsOptionsSummary): Promise<RawByIdPostResultSummary>;
+export function rawById(options: any): Promise<RawByIdResult> {
   return _rawGet(get(options, "feed") || {}, false, get(options, "id"));
 }

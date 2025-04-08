@@ -1,4 +1,6 @@
 import {RawBaseBlog, RawBaseEntry, RawBaseEntryBlog, RawBaseFeed, RawWithContent, RawWithSummary,} from "./entry";
+import {RawByIdResult} from "./index";
+import {FeedRoute} from "../options";
 
 /**
  * Raw page entry that includes the full content of the page.
@@ -66,3 +68,7 @@ export interface RawPagesEntryBlog extends RawBaseEntryBlog<RawPageEntry> {
  */
 export interface RawPagesEntryBlogSummary extends RawBaseEntryBlog<RawPageEntrySummary> {
 }
+
+export type RawByIdPageResult<R extends FeedRoute = FeedRoute> = RawByIdResult<"posts", R>;
+
+export type RawByIdPageResultSummary = RawByIdPageResult<"summary">;

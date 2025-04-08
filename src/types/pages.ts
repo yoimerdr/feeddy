@@ -1,11 +1,11 @@
 import {
-  FeedByIdOptions,
   FeedOptions,
   FeedRoute,
   InnerFeedOptions
 } from "./feeds/options";
 import {ByIdResult} from "./feeds";
 import {EntriesHandler,} from "./entries";
+import {WithId} from "./index";
 
 /**
  * Interface for handling paginated blog pages.
@@ -40,12 +40,16 @@ export type PagesOptionsSummary = InnerFeedOptions<PagesFeedOptionsSummary>;
  * The options for configuring a blog feed pages request by ID.
  * @template R - The route type (summary or full)
  */
-export type ByIdPagesOptions<R extends FeedRoute = FeedRoute> = FeedByIdOptions<"pages", R>;
+export type ByIdPagesOptions<R extends FeedRoute = FeedRoute> = PagesOptions<R> & WithId;
 
 /**
  * The options for configuring a summary blog pages feed request by ID.
  */
-export type ByIdPagesOptionsSummary = FeedByIdOptions<"pages", "summary">;
+export type ByIdPagesOptionsSummary = PagesOptionsSummary & WithId;
+
+export type ByIdPageResult<R extends FeedRoute = FeedRoute> = ByIdResult<"pages", R>;
+
+export type ByIdPageResultSummary = ByIdPageResult<"summary">;
 
 /**
  * Interface for retrieving blog pages.
@@ -70,11 +74,11 @@ export interface Pages {
    * @template R - The route type (summary or full)
    * @param options - Configuration options including the page ID
    */
-  byId<R extends FeedRoute = FeedRoute>(options: ByIdPagesOptions<R>): Promise<ByIdResult<"pages", R>>;
+  byId<R extends FeedRoute = FeedRoute>(options: ByIdPagesOptions<R>): Promise<ByIdPageResult>;
 
   /**
    * Retrieves a specific page by its ID using the summary route.
    * @param options - Configuration options including the page ID
    */
-  byId(options: ByIdPagesOptionsSummary): Promise<ByIdResult<"pages", "summary">>;
+  byId(options: ByIdPagesOptionsSummary): Promise<ByIdPageResultSummary>;
 }
