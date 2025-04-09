@@ -7,8 +7,7 @@
     "clean": "tsc -b --clean",
     "dev:ts": "npm run build:ts -- -w",
     "run": "npx ts-node src/index.ts",
-    "test": "npx ts-node src/tests/main.ts",
-    "docs": "npx typedoc --plugin @mxssfd/typedoc-theme --plugin typedoc-plugin-extras --favicon favicon.ico"
+    "test": "npx ts-node src/tests/main.ts"
   },
   "devDependencies": {
     "@mxssfd/typedoc-theme": "^1.1.6",
