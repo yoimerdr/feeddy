@@ -2,10 +2,13 @@ import typescript from '@rollup/plugin-typescript';
 import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import terser from '@rollup/plugin-terser';
-import { dts } from 'rollup-plugin-dts'
+import {dts} from 'rollup-plugin-dts'
 
+import pkg from './package.json' with { type: 'json' };
 
-function varConfig(input,path, name, external, globals) {
+const distFolder = `dist/v${pkg.version}`
+
+function varConfig(input, path, name, external, globals) {
   return {
     external,
     input,
@@ -24,7 +27,6 @@ function varConfig(input,path, name, external, globals) {
         file: path,
         format: 'iife',
         name,
-        sourcemap: true,
       },
       {
         globals,
@@ -40,15 +42,15 @@ function varConfig(input,path, name, external, globals) {
 }
 
 export default [
-  varConfig( "src/index.ts", "dist/feeddy.js", 'feeddy'),
-  varConfig("src/polyfied.ts", "dist/feeddy.poly.js", "feeddy"),
+  varConfig("src/index.ts", `${distFolder}/feeddy.js`, 'feeddy'),
+  varConfig("src/polyfied.ts", `${distFolder}/feeddy.poly.js`, "feeddy"),
   {
     input: `src/typing.ts`,
     plugins: [
       dts()
     ],
     output: {
-      file: `dist/feeddy.d.ts`,
+      file: `${distFolder}/feeddy.d.ts`,
       name: 'feeddy',
       format: 'iife',
     },
