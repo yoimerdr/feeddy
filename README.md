@@ -13,7 +13,7 @@ Download the [feeddy](https://github.com/yoimerdr/feeddy/releases/latest) script
 or you can use
 
 ```html
-<script src="https://yoimerdr.github.io/feeddy/dist/feeddy.min.js"></script>
+<script src="https://yoimerdr.github.io/feeddy/dist/v1.2.1/feeddy.min.js"></script>
 ```
 ## How to
 
@@ -82,7 +82,7 @@ feeddy.posts.withCategories({
 ```javascript
 feeddy.feed({
   blogUrl: '', // The blog url, or nothing if the current origin is the blogger blog. 
-  type: "posts", // since 1.2 the type (posts, pages, comments) is mandatory
+  type: "posts", // since 1.2 the type (posts, pages, comments) is mandatory. This condition was removed in 1.2.1, default is posts.
   params: feeddy.search.params()
     .limit(12)
     .build()
@@ -94,7 +94,7 @@ feeddy.feed({
 ```javascript
 feeddy.feed.raw({
   blogUrl: '', // The blog url, or nothing if the current origin is the blogger blog. 
-  type: "posts", // since 1.2 the type (posts, pages, comments) is mandatory
+  type: "posts", // since 1.2 the type (posts, pages, comments) is mandatory. This condition was removed in 1.2.1, default is posts.
   params: feeddy.search.params()
     .limit(12)
     .build()

@@ -1,3 +1,5 @@
+import {ParseableSize} from "../../../../lib/jstls/src/types/core/size";
+
 export type ImageSize<U = string> = {
   /**
    * Width dimension.
@@ -49,4 +51,9 @@ export interface Routes {
    * The summary feed pages route.
    */
   readonly pagesSummary: string;
+}
+
+
+export interface SimpleSize extends ParseableSize, ImageSize<number> {
+
 }

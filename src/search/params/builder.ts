@@ -9,11 +9,13 @@ import {coerceAtLeast} from "../../../lib/jstls/src/core/extensions/number";
 import {string} from "../../../lib/jstls/src/core/objects/handlers";
 import {get, set} from "../../../lib/jstls/src/core/objects/handlers/getset";
 import {readonly2, writeable} from "../../../lib/jstls/src/core/definer";
-import {es5class} from "../../../lib/jstls/src/core/definer/classes";
 import {Alt, OrderBy, RequestFeedParams} from "../../types/feeds/shared/params";
 import {ThisObjectKeys} from "../../../lib/jstls/src/types/core/objects";
 import {dateTypes} from "../shared";
 import {forEach} from "../../../lib/jstls/src/core/shortcuts/array";
+import {indefinite, nullable} from "../../../lib/jstls/src/core/utils/types";
+import {funclass2} from "../../../lib/jstls/src/core/definer/classes/funclass";
+import {deletesAll} from "../../../lib/jstls/src/core/objects/handlers/deletes";
 
 export interface SearchParamsBuilder {
   /**
@@ -182,6 +184,13 @@ export interface SearchParamsBuilder {
   alt(alt: Maybe<Alt>): this;
 
   /**
+   * Clears all the parameters.
+   *
+   * @since 1.2.1
+   */
+  clear(): this;
+
+  /**
    * Creates the search feed params.
    * @param copy If true, return a copy of the created params.
    */
@@ -218,104 +227,107 @@ export interface SearchParamsBuilderConstructor {
   readonly maxResults: number;
 }
 
-function paramIndex(this: SearchParamsBuilder, index: Maybe<number | string>, action: 'place' | 'plus' | 'minus') {
-  const params = get(this, searchParamsSymbol) as SearchParams;
+function paramIndex($this: SearchParamsBuilder, index: Maybe<number | string>, action: 'place' | 'plus' | 'minus') {
+  const params = get($this, searchParamsSymbol) as SearchParams;
   let current = params.start();
   index = call(toInt, string(index))! >> 0;
 
   current = action === 'plus' ? current + index : (action === 'minus' ? current - index : index);
   params.start(current);
-  return this;
+  return $this;
 }
 
-function paramDate(this: SearchParams,
+function paramDate($this: SearchParamsBuilder,
                    min: MaybeString, max: MaybeString, type: "published" | "updated",
                    keepAtLeast?: boolean, keepAtMost?: boolean) {
+  const params = get($this, searchParamsSymbol) as SearchParams;
   if (isDefined(min) || !keepAtLeast)
-    call(get(this, type + "AtLeast"), this, min);
+    apply(get(params, type + "AtLeast"), params, [min]);
   if (isDefined(max) || !keepAtMost)
-    call(get(this, type + "AtMost"), this, max);
+    apply(get(params, type + "AtMost"), params, [max]);
+
+  return $this;
 }
 
 const searchParamsSymbol = uid("p");
 export const maxResults: number = 500;
 
-/** @class */
-export const SearchParamsBuilder: SearchParamsBuilderConstructor = function (this: SearchParamsBuilder, source: Partial<RequestFeedParams> | SearchParams) {
-  if (source instanceof SearchParams)
-    writeable(this, searchParamsSymbol, source);
-  else return builderFrom(source)
-} as any
 
 function simpleProperty(key: Keys<SearchParams>) {
   return function (this: SearchParamsBuilder, value: any): SearchParamsBuilder {
-    const params = get(this, searchParamsSymbol);
+    const $this = this,
+      params = get($this, searchParamsSymbol);
     apply(get(params, key), params, [value]);
-    return this;
+    return $this;
   }
 }
 
 function datePropertiesBuilder(type: "published" | "updated") {
   set(prototype, type, function (this: SearchParamsBuilder, min: MaybeString, max?: MaybeString): SearchParamsBuilder {
-    const params = get(this, searchParamsSymbol);
-    call(paramDate, params, min, max, type);
-    return this;
+    return paramDate(this, min, max, type);
   });
   set(prototype, type + "AtLeast", function (this: SearchParamsBuilder, min: MaybeString): SearchParamsBuilder {
-    const params = get(this, searchParamsSymbol);
-    call(paramDate, params, min, undefined, type, false, true);
-    return this;
+    return paramDate(this, min, indefinite, type, false, true);
   });
   set(prototype, type + "AtMost", function (this: SearchParamsBuilder, max: MaybeString): SearchParamsBuilder {
-    const params = get(this, searchParamsSymbol);
-    call(paramDate, params, undefined, max, type, true)
-    return this;
+    return paramDate(this, indefinite, max, type, true)
   })
 }
 
 const source = ['place', 'plus', 'minus']
   .map((mode: any) => {
     return function (this: SearchParamsBuilder, index: Maybe<number | string>): SearchParamsBuilder {
-      return call(paramIndex, this, index, mode)
+      return paramIndex(this, index, mode)
     }
   });
 
-const max = simpleProperty("max");
-
-const prototype: Partial<ThisObjectKeys<SearchParamsBuilder>> = {
-  max,
-  limit: max,
-  start: source[0],
-  plusStart: source[1],
-  minusStart: source[2],
-  index: source[0],
-  plusIndex: source[1],
-  minusIndex: source[2],
-  paginated(page: Maybe<number | string>) {
-    if (isDefined(page)) {
-      const max = get(this, searchParamsSymbol).max();
-      this.start(apply(coerceAtLeast, call(toInt, string(page))! - 1, [0]) * max + 1);
+const max = simpleProperty("max"),
+  prototype: Partial<ThisObjectKeys<SearchParamsBuilder>> = {
+    max,
+    limit: max,
+    start: source[0],
+    plusStart: source[1],
+    minusStart: source[2],
+    index: source[0],
+    plusIndex: source[1],
+    minusIndex: source[2],
+    paginated(page: Maybe<number | string>) {
+      const $this = this;
+      if (isDefined(page)) {
+        const max = get($this, searchParamsSymbol).max();
+        $this.start(coerceAtLeast(0, toInt(nullable, string(page))! - 1) * max + 1);
+      }
+      return $this;
+    },
+    order: simpleProperty("orderby"),
+    query: simpleProperty("query"),
+    alt: simpleProperty("alt"),
+    clear() {
+      const $this = this;
+      deletesAll(get($this, searchParamsSymbol).source);
+      return $this;
+    },
+    build(copy?: boolean): Partial<RequestFeedParams> {
+      const params = get(this, searchParamsSymbol) as SearchParams,
+        source = params.source;
+      return copy ? builderFrom(source, true)
+        .build() : source;
     }
-    return this;
-  },
-  order: simpleProperty("orderby"),
-  query: simpleProperty("query"),
-  alt: simpleProperty("alt"),
-  build(copy?: boolean): Partial<RequestFeedParams> {
-    const params = get(this, searchParamsSymbol) as SearchParams;
-    return copy ? builderFrom(params.source, true)
-      .build() : params.source;
-  }
-};
+  };
 
 forEach(dateTypes, datePropertiesBuilder);
 
-es5class(SearchParamsBuilder, {
-  prototype,
+export const SearchParamsBuilder: SearchParamsBuilderConstructor = funclass2({
+  construct: function (source) {
+    if (source instanceof SearchParams)
+      writeable(this, searchParamsSymbol, source);
+    else return builderFrom(source)
+  },
   statics: {
     from: builderFrom,
     empty: paramsBuilder
-  }
+  },
+  prototype
 })
 
 readonly2(SearchParamsBuilder, "maxResults", maxResults);

@@ -6,17 +6,14 @@ import {apply} from "../../../lib/jstls/src/core/functions/apply";
 import {MaybeString} from "../../../lib/jstls/src/types/core";
 import {writeable} from "../../../lib/jstls/src/core/definer";
 import {isEmpty, isNotEmpty} from "../../../lib/jstls/src/core/extensions/shared/iterables";
-import {len} from "../../../lib/jstls/src/core/shortcuts/indexable";
 import {exclude, operator, quote} from "./representation";
 import {isArray} from "../../../lib/jstls/src/core/shortcuts/array";
-import {es5class} from "../../../lib/jstls/src/core/definer/classes";
 import {concat} from "../../../lib/jstls/src/core/shortcuts/string";
 import {ThisObjectKeys} from "../../../lib/jstls/src/types/core/objects";
-
-const querySymbol = uid('q');
-const excludeSymbol = uid('e');
-const operatorSymbol = uid('o');
-const exactSymbol = uid('e');
+import {funclass2} from "../../../lib/jstls/src/core/definer/classes/funclass";
+import {getDefined} from "../../../lib/jstls/src/core/objects/validators";
+import {returns} from "../../../lib/jstls/src/core/utils";
+import {indefinite} from "../../../lib/jstls/src/core/utils/types";
 
 
 export interface QueryStringBuilder {
@@ -192,13 +189,46 @@ export interface QueryStringBuilder {
    * Appends title search terms to the query.
    *
    * @example
-   * builder.title(title) // .title('title', title)
+   * builder.title(title) // .named('title', title)
    *
    * @param title The entry title.
    * @param titles Other entry titles.
    * @since 1.2
    */
   title(title: string, ...titles: string[]): this;
+
+  /**
+   * Appends link search terms to the query.
+   *
+   * @example
+   * builder.link("post-title") // .named("link", "post-title")
+   *
+   * @param link A word of the entry link.
+   * @param links Other words of the entry link.
+   *
+   * @since 1.2.1
+   */
+  link(link: string, ...links: string[]): this;
+
+  /**
+   * Appends link search terms to the query.
+   *
+   * @param url A word of the entry link.
+   * @param urls Other words of the entry link.
+   *
+   * @since 1.2.1
+   * @remarks This is an alias for {@link link}
+   */
+  url(url: string, ...urls: string[]): this;
+
+  /**
+   * Clears the query string.
+   *
+   * @param reset Whether want to return to the initial state of the builder
+   *
+   * @sice 1.2.1
+   */
+  clear(reset?: boolean): this;
 
   /**
    * Returns the built query string. If It's empty, an undefined value is returned.
@@ -211,46 +241,46 @@ export interface QueryStringBuilderConstructor {
   new(): QueryStringBuilder;
 }
 
+const querySymbol = uid('q'),
+  excludeSymbol = uid('e'),
+  operatorSymbol = uid('o'),
+  exactSymbol = uid('e');
+
 function buildQuery(terms: string | string[], sep: string, startQuote: string, endQuote?: string): string {
-  if (!isArray(terms))
-    terms = [terms];
-  endQuote = endQuote || startQuote;
-  terms = terms.map(string)
-    .filter(it => apply(isNotEmpty, it));
-  return apply(isEmpty, terms) ? '' : concat(startQuote, terms.join(sep), endQuote);
+  terms = isArray(terms) ? terms : [terms];
+  endQuote = getDefined(endQuote, returns(startQuote));
+  terms = terms
+    .map(string)
+    .filter(isNotEmpty);
+  return isEmpty(terms) ? '' : concat(startQuote, terms.join(sep), endQuote);
 }
 
-function appendQuery(this: QueryStringBuilder, args: ArrayLike<any>, name?: string): QueryStringBuilder {
-  if (len(args) === 0)
-    return this;
+function appendQuery($this: QueryStringBuilder, args: ArrayLike<any>, name?: string): QueryStringBuilder {
+  if (isEmpty(args))
+    return $this;
 
-  const qt = quote(get(this, exactSymbol)), op = operator(get(this, operatorSymbol)),
-    xc = get(this, excludeSymbol) ? exclude() : '';
+  const qt = quote(get($this, exactSymbol)),
+    op = operator(get($this, operatorSymbol)),
+    xc = get($this, excludeSymbol) ? exclude() : '';
+
   name = string(name);
-  name = apply(isNotEmpty, name) ? concat(name, ':') : '';
+  name = isNotEmpty(name) ? concat(name, ':') : '';
 
-  let current: string = get(this, querySymbol);
+  let current: string = get($this, querySymbol);
 
   const query = buildQuery(slice(args), concat(qt, op, xc, name, qt), concat(xc, name, qt), qt);
 
-  if (apply(isNotEmpty, current))
-    current += op;
+  isNotEmpty(current) && (current += op);
 
-  set(this, querySymbol, current + query);
-  return this;
+  set($this, querySymbol, current + query);
+  return $this;
 }
-
-export const QueryStringBuilder: QueryStringBuilderConstructor = function (this: QueryStringBuilder) {
-  writeable(this, exactSymbol, false);
-  writeable(this, operatorSymbol, 'OR');
-  writeable(this, excludeSymbol, false);
-  writeable(this, querySymbol, '');
-} as any;
 
 function setFn(symbol: string, value: any) {
   return function (this: QueryStringBuilder,): QueryStringBuilder {
-    set(this, symbol, value);
-    return this;
+    const $this = this;
+    set($this, symbol, value);
+    return $this;
   }
 }
 
@@ -262,30 +292,51 @@ const prototype: Partial<ThisObjectKeys<QueryStringBuilder>> = {
   exclude: setFn(excludeSymbol, true),
   noExclude: setFn(excludeSymbol, false),
   terms(...term) {
-    return apply(appendQuery, this, [arguments]);
+    return appendQuery(this, arguments);
   },
   named(name, ...term) {
-    return apply(appendQuery, this, [slice(arguments, 1), name]);
+    return appendQuery(this, slice(arguments, 1), name);
   },
   build(): MaybeString {
     const query: string = get(this, querySymbol);
-    return apply(isEmpty, query) ? undefined : query;
+    return isEmpty(query) ? indefinite : query;
+  },
+  clear(reset) {
+    const $this = this;
+    if(reset) {
+      set($this, querySymbol, "");
+      set($this, operatorSymbol, "OR");
+      set($this, excludeSymbol, false);
+      set($this, exactSymbol, false);
+    }
+
+    return $this;
   }
 }
 
-const named = ["label", "title", "author"]
+const named = ["label", "title", "author", "link"]
   .map(function (key) {
     const handler = function (this: QueryStringBuilder, ...values: string[]) {
-      return apply(this.named, this, <any>[key].concat(slice(arguments)))
+      const $this = this;
+      return apply($this.named, $this, concat([key], slice(arguments)))
     }
     set(prototype, key, handler);
     return handler;
   });
 
 prototype["labels"] = prototype["categories"] = named[0];
+prototype["url"] = named[3];
 
-es5class(QueryStringBuilder, {
-  prototype
+export const QueryStringBuilder: QueryStringBuilderConstructor = funclass2({
+  construct: function () {
+    const $this = this;
+
+    writeable($this, exactSymbol, false);
+    writeable($this, operatorSymbol, 'OR');
+    writeable($this, excludeSymbol, false);
+    writeable($this, querySymbol, '');
+  },
+  prototype,
 })
 
 /**

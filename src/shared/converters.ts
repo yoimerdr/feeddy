@@ -3,7 +3,7 @@ import {isObject} from "../../lib/jstls/src/core/objects/types";
 import {toInt} from "../../lib/jstls/src/core/extensions/string";
 import {apply} from "../../lib/jstls/src/core/functions/apply";
 import {isArray} from "../../lib/jstls/src/core/shortcuts/array";
-import {setTo} from "../../lib/jstls/src/core/objects/handlers/getset";
+import {get, setTo} from "../../lib/jstls/src/core/objects/handlers/getset";
 import {self} from "../../lib/jstls/src/core/utils";
 import {
   RawBaseBlog,
@@ -18,13 +18,14 @@ import {RawAuthor} from "../types/feeds/raw/author";
 import {Author} from "../types/feeds/author";
 import {PostThumbnail} from "../types/feeds/posts";
 import {KeyableObject} from "../../lib/jstls/src/types/core/objects";
+import {nullable} from "../../lib/jstls/src/core/utils/types";
 
 export function rawTextToText(text: RawText): SimpleText {
-  return isObject(text) ? string(text.$t) : '';
+  return string(get(text, '$t'));
 }
 
 export function rawTextToNumber(text: RawText): number {
-  return apply(toInt, rawTextToText(text))!;
+  return toInt(nullable, rawTextToText(text))!;
 }
 
 export function rawTextToBoolean(text: RawText): boolean {

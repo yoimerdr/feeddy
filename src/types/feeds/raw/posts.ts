@@ -9,6 +9,8 @@ import {
   RawWithSummary,
 } from "./entry";
 import {ImageSize} from "../shared";
+import {FeedRoute} from "../options";
+import {RawByIdResult, RawResult} from "./index";
 
 /**
  * Represents a category of a blog entry.
@@ -129,3 +131,11 @@ export interface RawPostsEntryBlog extends RawBaseEntryBlog<RawPostEntry> {
  */
 export interface RawPostsEntryBlogSummary extends RawBaseEntryBlog<RawPostEntrySummary> {
 }
+
+export type RawPostsResult<R extends FeedRoute = FeedRoute> = RawResult<"posts", R>;
+
+export type RawPostsResultSummary = RawPostsResult<"summary">;
+
+export type RawByIdPostResult<R extends FeedRoute = FeedRoute> = RawByIdResult<"posts", R>;
+
+export type RawByIdPostResultSummary = RawByIdPostResult<"summary">;

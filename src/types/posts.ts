@@ -1,8 +1,9 @@
 import {BasePostEntry, PostEntry, PostEntrySummary, PostsBlog} from "./feeds/posts";
 import {EntriesHandler,} from "./entries";
-import {FeedByIdOptions, FeedOptions, FeedOptionsSummary, FeedRoute, InnerFeedOptions} from "./feeds/options";
+import {FeedOptions, FeedRoute, InnerFeedOptions} from "./feeds/options";
 import {ImageSize} from "./feeds/shared";
-import {ByIdResult} from "./feeds";
+import {ByIdResult, Result} from "./feeds";
+import {WithId} from "./index";
 
 
 export interface WithCategoriesPost<E extends BasePostEntry = PostEntry> {
@@ -74,7 +75,15 @@ export interface PostsHandler<R extends FeedRoute = FeedRoute> extends EntriesHa
  * The options for configuring a blog feed posts request.
  * @template R - The route type (summary or full)
  */
-export type PostsFeedOptions<R extends FeedRoute = FeedRoute> = Omit<FeedOptions<"posts", R>, "type">
+export type PostsFeedOptions<R extends FeedRoute = FeedRoute> = Omit<FeedOptions<"posts", R>, "type">;
+
+export type PostsResult<R extends FeedRoute = FeedRoute> = Result<"posts", R>;
+
+export type PostsResultSummary = PostsResult<"summary">;
+
+export type ByIdPostResult<R extends FeedRoute = FeedRoute> = ByIdResult<"posts", R>;
+
+export type ByIdPostResultSummary = ByIdPostResult<"summary">;
 
 /**
  * The options for configuring a summary blog posts feed request.
@@ -96,12 +105,12 @@ export type PostsOptionsSummary = InnerFeedOptions<PostsFeedOptionsSummary>;
  * The options for configuring a blog feed posts request by ID.
  * @template R - The route type (summary or full)
  */
-export type ByIdPostsOptions<R extends FeedRoute = FeedRoute> = FeedByIdOptions<"posts", R>;
+export type ByIdPostsOptions<R extends FeedRoute = FeedRoute> = PostsOptions<R> & WithId;
 
 /**
  * The options for configuring a summary blog posts feed request by ID.
  */
-export type ByIdPostsOptionsSummary = FeedByIdOptions<"posts", "summary">;
+export type ByIdPostsOptionsSummary = PostsOptionsSummary & WithId;
 
 /**
  * Interface for retrieving blog posts.
@@ -128,8 +137,10 @@ export interface Posts {
    * @param size The size of the thumbnail.
    * @param ratio The ratio of the thumbnail.
    * @returns The thumbnail url.
+   *
+   * @since 1.2.1 The source can be a string
    */
-  createsThumbnail(source: BasePostEntry, size: ImageSize<number> | number, ratio?: number | string): string;
+  createsThumbnail(source: BasePostEntry | string, size: ImageSize<number> | number, ratio?: number | string): string;
 
   /**
    * Retrieves the posts from the <b>summary</b> with the given categories.
@@ -142,7 +153,7 @@ export interface Posts {
   /**
    * Retrieves the posts from the <b>default</b> route with the given categories.
    *
-   * All posts are retrieved, but it is sliced by the value of the `max-results` parameter.
+   * @remarks * All posts are retrieved, but it is sliced by the value of the `max-results` parameter.
    * @param options The request options.
    */
   withCategories(options: WithCategoriesPostsOptions): Promise<WithCategoriesPostsResult>;
@@ -152,11 +163,11 @@ export interface Posts {
    * @template R - The route type (summary or full)
    * @param options - Configuration options including the page ID
    */
-  byId<R extends FeedRoute = FeedRoute>(options: ByIdPostsOptions<R>): Promise<ByIdResult<"posts", R>>;
+  byId<R extends FeedRoute = FeedRoute>(options: ByIdPostsOptions<R>): Promise<ByIdPostResult<R>>;
 
   /**
    * Retrieves a specific page by its ID using the summary route.
    * @param options - Configuration options including the page ID
    */
-  byId(options: ByIdPostsOptionsSummary): Promise<ByIdResult<"posts", "summary">>;
+  byId(options: ByIdPostsOptionsSummary): Promise<ByIdPostResultSummary>;
 }

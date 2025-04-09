@@ -28,12 +28,12 @@ export type CommentsFeedOptionsSummary = Omit<CommentsFeedOptions, "route">;
  * The options for configuring a blog feed comments request by ID.
  * @template R - The route type (summary or full)
  */
-export type ByIdCommentsOptions<R extends FeedRoute = FeedRoute> = InnerFeedOptions<CommentsFeedOptions<R>> & WithId;
+export type ByIdCommentsOptions<R extends FeedRoute = FeedRoute> = CommentsOptions<R> & WithId;
 
 /**
  * The options for configuring a summary blog comments feed request by ID.
  */
-export type ByIdCommentsOptionsSummary = InnerFeedOptions<CommentsFeedOptionsSummary> & WithId;
+export type ByIdCommentsOptionsSummary = CommentsOptionsSummary & WithId;
 
 /**
  * Options for configuring comments retrieval with route control.

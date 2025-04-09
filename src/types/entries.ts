@@ -15,6 +15,14 @@ import {CommentEntry, CommentEntrySummary, CommentsBlog, CommentsBlogSummary} fr
 import {PageEntry, PageEntrySummary, PagesBlog, PagesBlogSummary} from "./feeds/pages";
 import {ByIdResult} from "./feeds";
 import {KeyableObject} from "../../lib/jstls/src/types/core/objects";
+import {
+  ByIdPostResult,
+  ByIdPostResultSummary,
+  ByIdPostsOptions, ByIdPostsOptionsSummary,
+  PostsHandler,
+  PostsOptions,
+  PostsOptionsSummary
+} from "./posts";
 
 
 /**
@@ -132,6 +140,20 @@ export interface Entries {
    */<T extends FeedType = FeedType>(options: EntriesOptionsSummary<T>): Promise<EntriesHandler<T, "summary">>;
 
   /**
+   * Creates a handler for paginated access to blog posts using the summary route.
+   * @param options - Configuration options for the summary posts retrieval
+   * @since 1.2.1 The default type is `posts`
+   */
+  (options: PostsOptionsSummary): Promise<PostsHandler<"summary">>;
+
+  /**
+   * Creates a handler for paginated access to blog posts.
+   * @template R - The route type (summary or full)
+   * @param options - Configuration options for the posts retrieval
+   * @since 1.2.1 The default type is `posts`
+   */<R extends FeedRoute = FeedRoute>(options: PostsOptions<R>): Promise<PostsHandler<R>>;
+
+  /**
    * Retrieves a specific entry by its ID with route control.
    * @template T - The type of feed (posts, comments, or pages)
    * @template R - The route type (summary or full)
@@ -145,5 +167,39 @@ export interface Entries {
    * @param options - Configuration options including the entry ID
    */
   byId<T extends FeedType = FeedType>(options: FeedByIdOptionsSummary<T>): Promise<ByIdResult<T, "summary">>;
+
+  /**
+   * Retrieves a specific page by its ID with route control.
+   * @template R - The route type (summary or full)
+   * @param options - Configuration options including the page ID
+   * @since 1.2.1 The default type is `posts`
+   */
+  byId<R extends FeedRoute = FeedRoute>(options: ByIdPostsOptions<R>): Promise<ByIdPostResult<R>>;
+
+  /**
+   * Retrieves a specific page by its ID using the summary route.
+   * @param options - Configuration options including the page ID
+   * @since 1.2.1 The default type is `posts`
+   */
+  byId(options: ByIdPostsOptionsSummary): Promise<ByIdPostResultSummary>;
+
+  /**
+   * Extracts or generates a URL-friendly pathname string from a blog entry.
+   *
+   * @example
+   * createsPathname("Entry's Title") // "entry-s-title"
+   *
+   * @example
+   * createsPathname({title: "Entry's Title"}) // "entry-s-title"
+   *
+   * @example
+   * createsPathname(entry) // "entry-s-alternate-url"
+   *
+   * @param source The blog entry object or string to generate URL from.
+   * @param length The maximum length for the generated URL. Defaults to `40`.
+   * @returns A URL-friendly pathname string derived from either the entry's alternate link or title
+   * @since 1.2.1
+   */
+  createsPathname(source: Partial<BaseEntry> | string, length?: number): string;
 }
 
