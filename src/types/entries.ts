@@ -186,13 +186,13 @@ export interface Entries {
   /**
    * Extracts or generates a URL-friendly pathname string from a blog entry.
    *
-   * @example String title
+   * @example
    * createsPathname("Entry's Title") // "entry-s-title"
    *
-   * @example Object with title
+   * @example
    * createsPathname({title: "Entry's Title"}) // "entry-s-title"
    *
-   * @example An retrieved entry
+   * @example
    * createsPathname(entry) // "entry-s-alternate-url"
    *
    * @param source The blog entry object or string to generate URL from.
