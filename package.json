@@ -7,14 +7,19 @@
     "clean": "tsc -b --clean",
     "dev:ts": "npm run build:ts -- -w",
     "run": "npx ts-node src/index.ts",
-    "test": "npx ts-node src/tests/main.ts"
+    "test": "npx ts-node src/tests/main.ts",
+    "docs": "npx typedoc --favicon favicon.ico"
   },
   "devDependencies": {
+    "@mxssfd/typedoc-theme": "^1.1.6",
     "@rollup/plugin-commonjs": "^26.0.1",
     "@rollup/plugin-node-resolve": "^15.2.3",
     "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-typescript": "^11.1.6",
+    "@shipgirl/typedoc-plugin-versions": "^0.3.0",
     "rollup-plugin-dts": "^6.1.1",
-    "tslib": "^2.6.3"
+    "tslib": "^2.6.3",
+    "typedoc": "^0.26.7",
+    "typedoc-plugin-extras": "^3.1.0"
   }
 }
