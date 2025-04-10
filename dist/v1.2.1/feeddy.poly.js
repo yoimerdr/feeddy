@@ -166,8 +166,7 @@ var feeddy = (function (exports) {
         }
         else if (isArray(key)) {
             props = reduce(key, function (props, name) {
-                var value = key[name];
-                props[name] = isFunction(value) ? value : self$1;
+                props[name] = self$1;
                 return props;
             }, props);
         }
@@ -1210,4 +1209,3 @@ var feeddy = (function (exports) {
     return exports;
 
 })({});
-//# sourceMappingURL=feeddy.poly.js.map
