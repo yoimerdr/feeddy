@@ -196,7 +196,7 @@ export interface Entries {
    * createsPathname(entry) // "entry-s-alternate-url"
    *
    * @param source The blog entry object or string to generate URL from.
-   * @param length The maximum length for the generated URL. Defaults to `40`.
+   * @param length The maximum length for the generated URL.
    * @returns A URL-friendly pathname string derived from either the entry's alternate link or title
    * @since 1.2.1
    */
