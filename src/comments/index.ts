@@ -1,8 +1,8 @@
-import {ByIdCommentsOptions, ByIdCommentsOptionsSummary, CommentsHandler} from "../types/comments";
-import {entries2} from "../entries";
-import {FeedRoute} from "../types/feeds/options";
-import {get, set} from "../../lib/jstls/src/core/objects/handlers/getset";
-import {nullable} from "../../lib/jstls/src/core/utils/types";
+import {ByIdCommentsOptions, ByIdCommentsOptionsSummary, CommentsHandler} from "@/types/comments";
+import {entries2} from "@/entries";
+import {FeedRoute} from "@/types/feeds/options";
+import {get, set} from "@jstls/core/objects/handlers/getset";
+import {nullable} from "@jstls/core/utils/types";
 
 export function commentsById<R extends FeedRoute = FeedRoute, >(options: ByIdCommentsOptions<R>): Promise<CommentsHandler<R>>;
 export function commentsById(options: ByIdCommentsOptionsSummary): Promise<CommentsHandler<"summary">>;

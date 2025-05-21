@@ -1,5 +1,5 @@
 import {RequestFeedParams} from "./shared/params";
-import {WithId} from "../index";
+import {WithId} from "@/types";
 
 /**
  * The route options of the blog's feed.

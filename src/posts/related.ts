@@ -1,21 +1,21 @@
-import {PromiseConstructor} from "../../lib/jstls/src/types/core/polyfills";
+import {PromiseConstructor} from "@jstls/types/core/polyfills";
 import {
   WithCategoriesPostsOptions,
   WithCategoriesPostsOptionsSummary,
   WithCategoriesPostsResult,
   WithCategoriesPostsResultSummary
-} from "../types/posts";
-import {KeyableObject} from "../../lib/jstls/src/types/core/objects";
-import {apply} from "../../lib/jstls/src/core/functions/apply";
-import {isEmpty} from "../../lib/jstls/src/core/extensions/shared/iterables";
-import {feedOptions} from "../feeds/raw";
-import {builderFrom, paramsFrom} from "../search";
-import {queryBuilder} from "../search/query";
-import {all} from "../feeds";
-import {freeze} from "../../lib/jstls/src/core/shortcuts/object";
-import {len} from "../../lib/jstls/src/core/shortcuts/indexable";
-import {BaseFeedOptions} from "../types/feeds/options";
-import {set} from "../../lib/jstls/src/core/objects/handlers/getset";
+} from "@/types/posts";
+import {KeyableObject} from "@jstls/types/core/objects";
+import {apply} from "@jstls/core/functions/apply";
+import {isEmpty} from "@jstls/core/extensions/shared/iterables";
+import {feedOptions} from "@/feeds/raw";
+import {builderFrom, paramsFrom} from "@/search";
+import {queryBuilder} from "@/search/query";
+import {all} from "@/feeds";
+import {freeze} from "@jstls/core/shortcuts/object";
+import {len} from "@jstls/core/shortcuts/indexable";
+import {BaseFeedOptions} from "@/types/feeds/options";
+import {set} from "@jstls/core/objects/handlers/getset";
 
 declare const Promise: PromiseConstructor;
 

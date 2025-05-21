@@ -1,26 +1,26 @@
-import {BaseFeedOptions, FeedRoute, FeedType,} from "../types/feeds/options";
-import {KeyableObject} from "../../lib/jstls/src/types/core/objects";
-import {getIf, requireObject} from "../../lib/jstls/src/core/objects/validators";
-import {isObject} from "../../lib/jstls/src/core/objects/types";
-import {builderFrom, paramsFrom} from "../search";
-import {all, get} from "../feeds";
-import {freeze} from "../../lib/jstls/src/core/shortcuts/object";
-import {assign2} from "../../lib/jstls/src/core/objects/factory";
+import {BaseFeedOptions, FeedRoute, FeedType,} from "@/types/feeds/options";
+import {KeyableObject} from "@jstls/types/core/objects";
+import {getIf, requireObject} from "@jstls/core/objects/validators";
+import {isObject} from "@jstls/core/objects/types";
+import {builderFrom, paramsFrom} from "@/search";
+import {all, get} from "@/feeds";
+import {freeze} from "@jstls/core/shortcuts/object";
+import {assign2} from "@jstls/core/objects/factory";
 import {
   EntriesHandler,
   EntriesHandlerExtra, EntriesHandlerSimpleExtra,
   EntriesOptions,
   EntriesOptionsSummary,
   EntriesSimpleOptions,
-} from "../types/entries";
-import {BaseBlog} from "../types/feeds/entry";
-import {_rawGet} from "../feeds/raw";
-import {rawBlogToBlog} from "../shared/converters";
-import {isComments} from "../shared";
-import {getty} from "../shared/shortnames";
-import {self} from "../../lib/jstls/src/core/definer/getters/builders";
-import {deletes} from "../../lib/jstls/src/core/objects/handlers/deletes";
-import {PostsHandler, PostsOptions, PostsOptionsSummary} from "../types/posts";
+} from "@/types/entries";
+import {BaseBlog} from "@/types/feeds/entry";
+import {_rawGet} from "@/feeds/raw";
+import {rawBlogToBlog} from "@/shared/converters";
+import {isComments} from "@/shared";
+import {getty} from "@/shared/shortnames";
+import {self} from "@jstls/core/definer/getters/builders";
+import {deletes} from "@jstls/core/objects/handlers/deletes";
+import {PostsHandler, PostsOptions, PostsOptionsSummary} from "@/types/posts";
 
 export function entries2<B extends BaseBlog, R = KeyableObject>(options: EntriesSimpleOptions,
                                                                 fn?: EntriesHandlerSimpleExtra<B, R>, id?: string): Promise<EntriesHandler & R> {

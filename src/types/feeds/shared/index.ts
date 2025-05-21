@@ -1,4 +1,4 @@
-import {ParseableSize} from "../../../../lib/jstls/src/types/core/size";
+import type {ParseableSize} from "@jstls/core/geometry/size/shared";
 
 export type ImageSize<U = string> = {
   /**

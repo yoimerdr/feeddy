@@ -1,10 +1,10 @@
-import {string} from "../../lib/jstls/src/core/objects/handlers";
-import {isObject} from "../../lib/jstls/src/core/objects/types";
-import {toInt} from "../../lib/jstls/src/core/extensions/string";
-import {apply} from "../../lib/jstls/src/core/functions/apply";
-import {isArray} from "../../lib/jstls/src/core/shortcuts/array";
-import {get, setTo} from "../../lib/jstls/src/core/objects/handlers/getset";
-import {self} from "../../lib/jstls/src/core/utils";
+import {string} from "@jstls/core/objects/handlers";
+import {isObject} from "@jstls/core/objects/types";
+import {toInt} from "@jstls/core/extensions/string";
+import {apply} from "@jstls/core/functions/apply";
+import {isArray} from "@jstls/core/shortcuts/array";
+import {get, setTo} from "@jstls/core/objects/handlers/getset";
+import {self} from "@jstls/core/utils";
 import {
   RawBaseBlog,
   RawBaseEntry,
@@ -12,13 +12,13 @@ import {
   RawBaseSimpleFeed,
   RawCategory,
   RawText
-} from "../types/feeds/raw/entry";
-import {BaseBlog, BaseEntry, BaseEntryBlog, BaseSimpleFeed, SimpleText} from "../types/feeds/entry";
-import {RawAuthor} from "../types/feeds/raw/author";
-import {Author} from "../types/feeds/author";
-import {PostThumbnail} from "../types/feeds/posts";
-import {KeyableObject} from "../../lib/jstls/src/types/core/objects";
-import {nullable} from "../../lib/jstls/src/core/utils/types";
+} from "@/types/feeds/raw/entry";
+import {BaseBlog, BaseEntry, BaseEntryBlog, BaseSimpleFeed, SimpleText} from "@/types/feeds/entry";
+import {RawAuthor} from "@/types/feeds/raw/author";
+import {Author} from "@/types/feeds/author";
+import {PostThumbnail} from "@/types/feeds/posts";
+import {KeyableObject} from "@jstls/types/core/objects";
+import {nullable} from "@jstls/core/utils/types";
 
 export function rawTextToText(text: RawText): SimpleText {
   return string(get(text, '$t'));

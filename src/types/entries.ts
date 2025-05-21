@@ -14,7 +14,7 @@ import {BasePostEntry, PostEntry, PostEntrySummary, PostsBlog, PostsBlogSummary}
 import {CommentEntry, CommentEntrySummary, CommentsBlog, CommentsBlogSummary} from "./feeds/comments";
 import {PageEntry, PageEntrySummary, PagesBlog, PagesBlogSummary} from "./feeds/pages";
 import {ByIdResult} from "./feeds";
-import {KeyableObject} from "../../lib/jstls/src/types/core/objects";
+import {KeyableObject} from "@jstls/types/core/objects";
 import {
   ByIdPostResult,
   ByIdPostResultSummary,

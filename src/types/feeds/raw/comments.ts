@@ -1,5 +1,5 @@
 import {RawBaseBlog, RawBaseEntry, RawBaseSimpleFeed, RawSourceLink, RawWithContent, RawWithSummary} from "./entry";
-import {Entry} from "../../../../lib/jstls/src/types/core";
+import {Entry} from "@jstls/types/core";
 
 /**
  * Represents a link to the comment being replied to.

@@ -1,11 +1,11 @@
-import {queryBuilder, QueryStringBuilder, QueryStringBuilderConstructor} from "../search/query";
+import {queryBuilder, QueryStringBuilder, QueryStringBuilderConstructor} from "@/search/query/builder";
 import {
   paramsBuilder,
   SearchParams,
   SearchParamsBuilder,
   SearchParamsBuilderConstructor,
   SearchParamsConstructor
-} from "../search";
+} from "@/search";
 
 export type {
   QueryStringBuilder,

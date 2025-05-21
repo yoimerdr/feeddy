@@ -1,23 +1,23 @@
-import {Keys, Maybe, MaybeString, Nullables} from "../../../lib/jstls/src/types/core";
-import {string} from "../../../lib/jstls/src/core/objects/handlers";
-import {isDefined} from "../../../lib/jstls/src/core/objects/types";
-import {assign2} from "../../../lib/jstls/src/core/objects/factory";
-import {ThisObjectKeys} from "../../../lib/jstls/src/types/core/objects";
-import {readonly2,} from "../../../lib/jstls/src/core/definer";
-import {call} from "../../../lib/jstls/src/core/functions/call";
-import {toInt} from "../../../lib/jstls/src/core/extensions/string";
-import {apply} from "../../../lib/jstls/src/core/functions/apply";
-import {coerceAtLeast} from "../../../lib/jstls/src/core/extensions/number";
-import {len} from "../../../lib/jstls/src/core/shortcuts/indexable";
-import {forEach} from "../../../lib/jstls/src/core/shortcuts/array";
-import {Alt, OrderBy, RequestFeedParams} from "../../types/feeds/shared/params";
-import {set} from "../../../lib/jstls/src/core/objects/handlers/getset";
-import {concat} from "../../../lib/jstls/src/core/shortcuts/string";
+import {Keys, Maybe, MaybeString, Nullables} from "@jstls/types/core";
+import {string} from "@jstls/core/objects/handlers";
+import {isDefined} from "@jstls/core/objects/types";
+import {assign2} from "@jstls/core/objects/factory";
+import {ThisObjectKeys} from "@jstls/types/core/objects";
+import {readonly2,} from "@jstls/core/definer";
+import {call} from "@jstls/core/functions/call";
+import {toInt} from "@jstls/core/extensions/string";
+import {apply} from "@jstls/core/functions/apply";
+import {coerceAtLeast} from "@jstls/core/extensions/number";
+import {len} from "@jstls/core/shortcuts/indexable";
+import {forEach} from "@jstls/core/shortcuts/array";
+import {Alt, OrderBy, RequestFeedParams} from "@/types/feeds/shared/params";
+import {set} from "@jstls/core/objects/handlers/getset";
+import {concat} from "@jstls/core/shortcuts/indexable";
 import {dateTypes} from "../shared";
-import {includes} from "../../../lib/jstls/src/core/polyfills/indexable/es2016";
-import {deletes} from "../../../lib/jstls/src/core/objects/handlers/deletes";
-import {funclass2} from "../../../lib/jstls/src/core/definer/classes/funclass";
-import {indefinite} from "../../../lib/jstls/src/core/utils/types";
+import {includes} from "@jstls/core/polyfills/indexable/es2016";
+import {deletes} from "@jstls/core/objects/handlers/deletes";
+import {funclass2} from "@jstls/core/definer/classes/funclass";
+import {indefinite} from "@jstls/core/utils/types";
 
 
 export interface SearchParams {

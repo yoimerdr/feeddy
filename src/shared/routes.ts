@@ -1,10 +1,10 @@
-import {FeedRoute, FeedType} from "../types/feeds/options";
-import {concat} from "../../lib/jstls/src/core/shortcuts/string";
-import {Maybe} from "../../lib/jstls/src/types/core";
-import {Routes} from "../types/feeds/shared";
-import {forEach} from "../../lib/jstls/src/core/shortcuts/array";
-import {readonly2} from "../../lib/jstls/src/core/definer";
-import {indefinite} from "../../lib/jstls/src/core/utils/types";
+import {FeedRoute, FeedType} from "@/types/feeds/options";
+import {concat} from "@jstls/core/shortcuts/indexable";
+import {Maybe} from "@jstls/types/core";
+import {Routes} from "@/types/feeds/shared";
+import {forEach} from "@jstls/core/shortcuts/array";
+import {readonly2} from "@jstls/core/definer";
+import {indefinite} from "@jstls/core/utils/types";
 
 export function createRoute(type: Maybe<FeedType>, route: Maybe<FeedRoute>, id?: string): string {
   let suffix = route === "full" ? "default" : "summary",
