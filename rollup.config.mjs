@@ -3,8 +3,10 @@ import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import terser from '@rollup/plugin-terser';
 import {dts} from 'rollup-plugin-dts'
+import alias from "@rollup/plugin-alias";
 
 import pkg from './package.json' with { type: 'json' };
+import path from 'path'
 
 const distFolder = `dist/v${pkg.version}`
 
@@ -47,6 +49,18 @@ export default [
   {
     input: `src/typing.ts`,
     plugins: [
+      alias({
+        entries: [
+          {
+            find: '@jstls',
+            replacement: path.resolve("./lib/jstls/src")
+          },
+          {
+            find: "@",
+            replacement: path.resolve("./src")
+          }
+        ]
+      }),
       dts()
     ],
     output: {
