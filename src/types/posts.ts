@@ -65,10 +65,88 @@ export interface WithCategoriesPostsResultSummary {
  */
 export interface PostsHandler<R extends FeedRoute = FeedRoute> extends EntriesHandler<"posts", R, PostsHandler<R>> {
   /**
-   * The categories with which the posts has been tagged.
+   * The categories with which the posts have been tagged.
    * @since 1.2
    */
   readonly categories: string[];
+}
+
+/**
+ * @since 1.3.0
+ */
+export type PostsSsrParameters = {
+
+  /**
+   * The exclusive max bound on the entry update date.
+   */
+  "updated-max": string;
+
+  /**
+   * The maximum number of results to be retrieved.
+   */
+  "max-results": number;
+
+  /**
+   * Whether to order the results by date.
+   */
+  "by-date": boolean;
+
+  /**
+   * The full-text query string.
+   */
+  q: string;
+
+  /**
+   * The 0-based index of the first result to be retrieved.
+   */
+  start: number;
+}
+
+/**
+ * @since 1.3.0
+ */
+export interface PostsSsrHandlerResult {
+  /**
+   * The parameters used in the url.
+   */
+  parameters: Partial<PostsSsrParameters>;
+  /**
+   * The relative url to the ssr page.
+   */
+  url: string;
+}
+
+/**
+ * Interface for handling paginated blog posts.
+ *
+ * It is not to get the data from the posts, but to build valid urls for blogger to build all the content by itself.
+ *
+ * @since 1.3.0
+ */
+export interface PostsSsrHandler extends Omit<PostsHandler<"summary">, "page"> {
+  /**
+   */
+  readonly categories: string[];
+
+  /**
+   * Creates an object containing a valid url for blogger ssr.
+   *
+   * @example
+   * // on query ssr
+   * handler.page(1) // { url: "/search?by-date=true&max-results=12&q=label:name" }
+   * handler.page(2) // { url: "/search?by-date=true&max-results=12&q=label:name&start=12" }
+   *
+   * // on label ssr
+   * handler.page(1) // { url: "/search/label/2dcg?max-results=12" }
+   * handler.page(2) // { url: "/search/label/2dcg?max-results=12&updated-max=YYYY-MM-DDThh:mm:ss-TH:TM" }
+   *
+   * // on default ssr
+   * handler.page(1) // { url: "/" }
+   * handler.page(2) // { url: "/search?max-results=12&updated-max=YYYY-MM-DDThh:mm:ss-TH:TM" }
+   *
+   * @param page - The 1-based page number to retrieve
+   */
+  page(this: PostsSsrHandler, page: number): Promise<PostsSsrHandlerResult>;
 }
 
 /**
@@ -92,9 +170,27 @@ export type PostsFeedOptionsSummary = Omit<PostsFeedOptions, "route">;
 
 /**
  * Options for configuring posts retrieval with route control.
- * @template T - The type of feed (posts, posts, or posts)
+ * @template T - The type of feed (summary, or default)
  */
 export type PostsOptions<R extends FeedRoute = FeedRoute> = InnerFeedOptions<PostsFeedOptions<R>>;
+
+export type SsrType = "label" | "query" | "default" | "default2";
+
+/**
+ * Options for configuring ssr retrieval.
+ */
+export interface PostsSsrOptions extends PostsOptionsSummary {
+  /**
+   * The ssr mode.
+   */
+  ssr?: SsrType;
+  /**
+   * The category to use on 'label' ssr.
+   *
+   * Ignored in other modes.
+   */
+  category?: string;
+}
 
 /**
  * Options for configuring posts retrieval using the summary route.
