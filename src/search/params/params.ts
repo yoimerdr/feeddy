@@ -13,9 +13,9 @@ import {forEach} from "@jstls/core/shortcuts/array";
 import {Alt, OrderBy, RequestFeedParams} from "@/types/feeds/shared/params";
 import {set} from "@jstls/core/objects/handlers/getset";
 import {concat} from "@jstls/core/shortcuts/indexable";
-import {dateTypes} from "../shared";
+import {dateTypes, parametersMap} from "../shared";
 import {includes} from "@jstls/core/polyfills/indexable/es2016";
-import {deletes} from "@jstls/core/objects/handlers/deletes";
+import {deletes, deletes2} from "@jstls/core/objects/handlers/deletes";
 import {funclass2} from "@jstls/core/definer/classes/funclass";
 import {indefinite} from "@jstls/core/utils/types";
 
@@ -302,7 +302,11 @@ forEach(dateTypes, (key) => {
 
 export const SearchParams: SearchParamsConstructor = funclass2({
   construct: function (source) {
-    readonly2(this, "source", source || {})
+    source = source || {}
+    for (const key in source) {
+      (!parametersMap[key as keyof RequestFeedParams] || !isDefined(source![key as keyof RequestFeedParams])) && deletes2(source, [key])
+    }
+    readonly2(this, "source", source)
   },
   statics: {
     from: paramsFrom

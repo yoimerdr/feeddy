@@ -10,7 +10,7 @@ import {get, set} from "@jstls/core/objects/handlers/getset";
 import {readonly2, writeable} from "@jstls/core/definer";
 import {Alt, OrderBy, RequestFeedParams} from "@/types/feeds/shared/params";
 import {ThisObjectKeys} from "@jstls/types/core/objects";
-import {dateTypes} from "../shared";
+import {dateTypes, parametersMap} from "../shared";
 import {forEach} from "@jstls/core/shortcuts/array";
 import {indefinite, nullable} from "@jstls/core/utils/types";
 import {funclass2} from "@jstls/core/definer/classes/funclass";
@@ -316,9 +316,14 @@ forEach(dateTypes, datePropertiesBuilder);
 
 export const SearchParamsBuilder: SearchParamsBuilderConstructor = funclass2({
   construct: function (source) {
-    if (source instanceof SearchParams)
+    if (source instanceof SearchParams) {
       writeable(this, searchParamsSymbol, source);
-    else return builderFrom(source)
+      source = source.source;
+      for (const key in source) {
+        const map = parametersMap[key as keyof RequestFeedParams] as keyof SearchParamsBuilder;
+        map && this[map](source[key as keyof RequestFeedParams] as never);
+      }
+    } else return builderFrom(source)
   },
   statics: {
     from: builderFrom,
