@@ -6,6 +6,7 @@ import {
   SearchParamsBuilderConstructor,
   SearchParamsConstructor
 } from "@/search";
+import {Maybe} from "@jstls/types/core";
 
 export type {
   QueryStringBuilder,
@@ -15,6 +16,33 @@ export type {
   QueryStringBuilderConstructor,
   SearchParams
 };
+
+export interface SplitQuery {
+  /**
+   * The exact query terms.
+   *
+   * @example
+   * ['"exact terms"', '"from a query"']
+   */
+  exact: string[];
+  /**
+   * The common query terms.
+   *
+   * @example
+   * ["common", "search", "terms"]
+   */
+  terms: string[];
+}
+
+export interface FullSplitQuery extends SplitQuery {
+  /**
+   * The named query terms.
+   *
+   * @example
+   * {label: {exact: ['"search terms for"'], terms: ["named", "label", ]}}
+   */
+  named: Record<string, Maybe<SplitQuery>> & Object;
+}
 
 /**
  * Interface for search functionality in the blog API.
