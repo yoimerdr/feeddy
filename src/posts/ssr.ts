@@ -1,11 +1,11 @@
-import {PostsSsrHandler, PostsSsrHandlerResult, PostsSsrOptions} from "@/types/posts";
+import {PostsSsrHandler, PostsSsrHandlerResult, PostsSsrOptions} from "@feeddy/types/posts";
 import {get, set} from "@jstls/core/objects/handlers/getset";
 import {firstOrNull, isEmpty, isNotEmpty} from "@jstls/core/extensions/shared/iterables";
-import {entriesBase} from "@/entries/base";
-import {basicHandler} from "@/entries/handler";
-import {BasePostEntry} from "@/types/feeds/posts";
+import {entriesBase} from "@feeddy/entries/base";
+import {basicHandler} from "@feeddy/entries/handler";
+import {BasePostEntry} from "@feeddy/types/feeds/posts";
 import {indefinite} from "@jstls/core/utils/types";
-import {queryBuilder} from "@/search/query";
+import {queryBuilder} from "@feeddy/search/query";
 import {concat} from "@jstls/core/shortcuts/indexable";
 import {KeyableObject} from "@jstls/types/core/objects";
 import {resolve} from "@jstls/core/polyfills/promise/fn";

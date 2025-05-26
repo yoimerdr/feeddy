@@ -1,10 +1,10 @@
-import {ImageSize, SimpleSize} from "@/types/feeds/shared";
+import {ImageSize, SimpleSize} from "@feeddy/types/feeds/shared";
 import {string} from "@jstls/core/objects/handlers";
 import {isObject} from "@jstls/core/objects/types";
 import {concat} from "@jstls/core/shortcuts/indexable";
 import {parseSize} from "@jstls/core/geometry/size/shared";
 import {round} from "@jstls/core/shortcuts/math";
-import {BasePostEntry} from "@/types/feeds/posts";
+import {BasePostEntry} from "@feeddy/types/feeds/posts";
 import {self} from "@jstls/core/definer/getters/builders";
 import {get} from "@jstls/core/objects/handlers/getset";
 

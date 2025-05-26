@@ -1,5 +1,5 @@
-import {buildUrl, isComments} from "@/shared";
-import {maxResults, paramsFrom} from "@/search";
+import {buildUrl, isComments} from "@feeddy/shared";
+import {maxResults, paramsFrom} from "@feeddy/search";
 import {assign2} from "@jstls/core/objects/factory";
 import {extend} from "@jstls/core/extensions/array";
 import {isNotEmpty} from "@jstls/core/extensions/shared/iterables";
@@ -13,9 +13,9 @@ import {
   FeedOptionsSummary,
   FeedRoute,
   FeedType
-} from "@/types/feeds/options";
-import {RawByIdResult, RawResult} from "@/types/feeds/raw";
-import {RawBaseBlog, RawBaseEntry} from "@/types/feeds/raw/entry";
+} from "@feeddy/types/feeds/options";
+import {RawByIdResult, RawResult} from "@feeddy/types/feeds/raw";
+import {RawBaseBlog, RawBaseEntry} from "@feeddy/types/feeds/raw/entry";
 import {IllegalAccessError,} from "@jstls/core/exceptions/illegal-access";
 import {get, set} from "@jstls/core/objects/handlers/getset";
 import {KeyableObject} from "@jstls/types/core/objects";
@@ -23,13 +23,13 @@ import {
   ByIdPostsOptions, ByIdPostsOptionsSummary,
   PostsFeedOptions,
   PostsFeedOptionsSummary,
-} from "@/types/posts";
+} from "@feeddy/types/posts";
 import {
   RawByIdPostResult,
   RawByIdPostResultSummary,
   RawPostsResult,
   RawPostsResultSummary
-} from "@/types/feeds/raw/posts";
+} from "@feeddy/types/feeds/raw/posts";
 
 
 export function _rawGet<T extends FeedType = FeedType, R extends FeedRoute = FeedRoute>(options: Partial<BaseFeedOptions<T, R>>,): Promise<RawResult>;

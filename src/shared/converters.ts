@@ -12,11 +12,11 @@ import {
   RawBaseSimpleFeed,
   RawCategory,
   RawText
-} from "@/types/feeds/raw/entry";
-import {BaseBlog, BaseEntry, BaseEntryBlog, BaseSimpleFeed, SimpleText} from "@/types/feeds/entry";
-import {RawAuthor} from "@/types/feeds/raw/author";
-import {Author} from "@/types/feeds/author";
-import {PostThumbnail} from "@/types/feeds/posts";
+} from "@feeddy/types/feeds/raw/entry";
+import {BaseBlog, BaseEntry, BaseEntryBlog, BaseSimpleFeed, SimpleText} from "@feeddy/types/feeds/entry";
+import {RawAuthor} from "@feeddy/types/feeds/raw/author";
+import {Author} from "@feeddy/types/feeds/author";
+import {PostThumbnail} from "@feeddy/types/feeds/posts";
 import {KeyableObject} from "@jstls/types/core/objects";
 import {nullable} from "@jstls/core/utils/types";
 

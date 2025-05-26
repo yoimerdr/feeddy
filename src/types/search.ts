@@ -1,11 +1,11 @@
-import {queryBuilder, QueryStringBuilder, QueryStringBuilderConstructor} from "@/search/query/builder";
+import {queryBuilder, QueryStringBuilder, QueryStringBuilderConstructor} from "@feeddy/search/query/builder";
 import {
   paramsBuilder,
   SearchParams,
   SearchParamsBuilder,
   SearchParamsBuilderConstructor,
   SearchParamsConstructor
-} from "@/search";
+} from "@feeddy/search";
 import {Maybe} from "@jstls/types/core";
 
 export type {

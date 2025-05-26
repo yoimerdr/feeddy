@@ -8,7 +8,7 @@ import {coerceAtLeast} from "@jstls/core/extensions/number";
 import {string} from "@jstls/core/objects/handlers";
 import {get, set} from "@jstls/core/objects/handlers/getset";
 import {readonly2, writeable} from "@jstls/core/definer";
-import {Alt, OrderBy, RequestFeedParams} from "@/types/feeds/shared/params";
+import {Alt, OrderBy, RequestFeedParams} from "@feeddy/types/feeds/shared/params";
 import {ThisObjectKeys} from "@jstls/types/core/objects";
 import {dateTypes, parametersMap} from "../shared";
 import {forEach} from "@jstls/core/shortcuts/array";

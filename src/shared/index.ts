@@ -1,4 +1,4 @@
-import {maxResults, paramsFrom} from "@/search";
+import {maxResults, paramsFrom} from "@feeddy/search";
 import {getIf} from "@jstls/core/objects/validators";
 import {isDefined, isObject} from "@jstls/core/objects/types";
 import {IllegalArgumentError} from "@jstls/core/exceptions/illegal-argument";
@@ -6,9 +6,9 @@ import {apply} from "@jstls/core/functions/apply";
 import {coerceIn} from "@jstls/core/extensions/number";
 import {keys} from "@jstls/core/shortcuts/object";
 import {forEach} from "@jstls/core/shortcuts/array";
-import {BaseFeedOptions} from "@/types/feeds/options";
+import {BaseFeedOptions} from "@feeddy/types/feeds/options";
 import {createRoute} from "./routes";
-import {RawText} from "@/types/feeds/raw/entry";
+import {RawText} from "@feeddy/types/feeds/raw/entry";
 import {hasOwn} from "@jstls/core/polyfills/objects/es2022";
 import {get} from "@jstls/core/objects/handlers/getset";
 import {includes} from "@jstls/core/polyfills/indexable/es2016";

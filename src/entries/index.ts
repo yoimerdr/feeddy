@@ -1,13 +1,13 @@
-import {FeedRoute, FeedType,} from "@/types/feeds/options";
+import {FeedRoute, FeedType,} from "@feeddy/types/feeds/options";
 import {KeyableObject} from "@jstls/types/core/objects";
 import {
   EntriesHandler,
   EntriesHandlerExtra, EntriesOptions,
   EntriesOptionsSummary,
-} from "@/types/entries";
-import {PostsHandler, PostsOptions, PostsOptionsSummary} from "@/types/posts";
-import {entriesBase} from "@/entries/base";
-import {basicHandler, basicHandlerPage} from "@/entries/handler";
+} from "@feeddy/types/entries";
+import {PostsHandler, PostsOptions, PostsOptionsSummary} from "@feeddy/types/posts";
+import {entriesBase} from "@feeddy/entries/base";
+import {basicHandler, basicHandlerPage} from "@feeddy/entries/handler";
 
 export function entries<T extends FeedType = FeedType, R extends FeedRoute = FeedRoute>(options: EntriesOptions<T, R>): Promise<EntriesHandler<T, R>>;
 export function entries<T extends FeedType = FeedType, R extends FeedRoute = FeedRoute, E = KeyableObject>(options: EntriesOptions<T, R>, extra: EntriesHandlerExtra<T, R, E>): Promise<EntriesHandler<T, R> & E>;

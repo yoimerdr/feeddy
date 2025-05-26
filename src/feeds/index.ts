@@ -1,5 +1,5 @@
-import {rawAll, rawById, rawGet} from "@/feeds/raw";
-import {rawBlogEntryToBlogEntry, rawBlogToBlog} from "@/shared/converters";
+import {rawAll, rawById, rawGet} from "@feeddy/feeds/raw";
+import {rawBlogEntryToBlogEntry, rawBlogToBlog} from "@feeddy/shared/converters";
 import {
   FeedByIdOptions,
   FeedByIdOptionsSummary,
@@ -7,10 +7,10 @@ import {
   FeedOptionsSummary,
   FeedRoute,
   FeedType
-} from "@/types/feeds/options";
-import {ByIdResult, Result} from "@/types/feeds";
+} from "@feeddy/types/feeds/options";
+import {ByIdResult, Result} from "@feeddy/types/feeds";
 import {KeyableObject} from "@jstls/types/core/objects";
-import {getty} from "@/shared/shortnames";
+import {getty} from "@feeddy/shared/shortnames";
 import {
   ByIdPostResult, ByIdPostResultSummary,
   ByIdPostsOptions,
@@ -18,7 +18,7 @@ import {
   PostsFeedOptions, PostsFeedOptionsSummary,
   PostsResult,
   PostsResultSummary
-} from "@/types/posts";
+} from "@feeddy/types/posts";
 
 export function all<T extends FeedType = FeedType, R extends FeedRoute = FeedRoute>(options: FeedOptions<T, R>): Promise<Result<T, R>>;
 export function all<T extends FeedType = FeedType>(options: FeedOptionsSummary<T>): Promise<Result<T, "summary">>;

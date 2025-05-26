@@ -9,7 +9,7 @@ import {toInt} from "@jstls/core/extensions/string";
 import {coerceAtLeast} from "@jstls/core/extensions/number";
 import {len} from "@jstls/core/shortcuts/indexable";
 import {forEach} from "@jstls/core/shortcuts/array";
-import {Alt, OrderBy, RequestFeedParams} from "@/types/feeds/shared/params";
+import {Alt, OrderBy, RequestFeedParams} from "@feeddy/types/feeds/shared/params";
 import {set} from "@jstls/core/objects/handlers/getset";
 import {concat} from "@jstls/core/shortcuts/indexable";
 import {dateTypes, parametersMap} from "../shared";

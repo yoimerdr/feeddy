@@ -1,4 +1,4 @@
-import {FullSplitQuery} from "@/types/search";
+import {FullSplitQuery} from "@feeddy/types/search";
 
 export * from "./builder";
 export * from "./representation";

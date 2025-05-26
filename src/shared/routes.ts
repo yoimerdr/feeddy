@@ -1,7 +1,7 @@
-import {FeedRoute, FeedType} from "@/types/feeds/options";
+import {FeedRoute, FeedType} from "@feeddy/types/feeds/options";
 import {concat} from "@jstls/core/shortcuts/indexable";
 import {Maybe} from "@jstls/types/core";
-import {Routes} from "@/types/feeds/shared";
+import {Routes} from "@feeddy/types/feeds/shared";
 import {forEach} from "@jstls/core/shortcuts/array";
 import {readonly2} from "@jstls/core/definer";
 import {indefinite} from "@jstls/core/utils/types";

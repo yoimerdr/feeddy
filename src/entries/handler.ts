@@ -1,13 +1,13 @@
-import {BaseFeedOptions} from "@/types/feeds/options";
-import {SearchParams, SearchParamsBuilder} from "@/search";
-import {BaseBlog} from "@/types/feeds/entry";
-import {EntriesHandlerSimpleExtra} from "@/types/entries";
+import {BaseFeedOptions} from "@feeddy/types/feeds/options";
+import {SearchParams, SearchParamsBuilder} from "@feeddy/search";
+import {BaseBlog} from "@feeddy/types/feeds/entry";
+import {EntriesHandlerSimpleExtra} from "@feeddy/types/entries";
 import {freeze} from "@jstls/core/shortcuts/object";
 import {assign2} from "@jstls/core/objects/factory";
 import {KeyableObject} from "@jstls/types/core/objects";
 import {deletes} from "@jstls/core/objects/handlers/deletes";
-import {EntriesHandlerBuilder} from "@/entries/base";
-import {getty} from "@/shared/shortnames";
+import {EntriesHandlerBuilder} from "@feeddy/entries/base";
+import {getty} from "@feeddy/shared/shortnames";
 
 export type EntriesHandlerRequest = (feed: BaseFeedOptions) => Promise<BaseBlog>;
 export type EntriesHandlerPageBuilder = (options: BaseFeedOptions, params: SearchParams, builder: SearchParamsBuilder, request: EntriesHandlerRequest) => (page: number) => Promise<any>;

@@ -1,15 +1,15 @@
-import {EntriesHandler, EntriesSimpleOptions} from "@/types/entries";
+import {EntriesHandler, EntriesSimpleOptions} from "@feeddy/types/entries";
 import {getIf} from "@jstls/core/objects/validators";
-import {BaseFeedOptions} from "@/types/feeds/options";
+import {BaseFeedOptions} from "@feeddy/types/feeds/options";
 import {isObject} from "@jstls/core/objects/types";
 import {self} from "@jstls/core/definer/getters/builders";
-import {builderFrom, paramsFrom, SearchParams, SearchParamsBuilder} from "@/search";
-import {isComments} from "@/shared";
-import {_rawGet} from "@/feeds/raw";
-import {rawBlogToBlog} from "@/shared/converters";
-import {all, get} from "@/feeds";
+import {builderFrom, paramsFrom, SearchParams, SearchParamsBuilder} from "@feeddy/search";
+import {isComments} from "@feeddy/shared";
+import {_rawGet} from "@feeddy/feeds/raw";
+import {rawBlogToBlog} from "@feeddy/shared/converters";
+import {all, get} from "@feeddy/feeds";
 import {KeyableObject} from "@jstls/types/core/objects";
-import {BaseBlog} from "@/types/feeds/entry";
+import {BaseBlog} from "@feeddy/types/feeds/entry";
 
 export type EntriesHandlerBuilder = (feed: BaseFeedOptions, params: SearchParams, builder: SearchParamsBuilder, request: (feed: BaseFeedOptions) => Promise<BaseBlog>) => (blog: BaseBlog) => EntriesHandler
 

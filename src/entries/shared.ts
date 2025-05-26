@@ -3,10 +3,10 @@ import {indefinite} from "@jstls/core/utils/types";
 import {isNotEmpty} from "@jstls/core/extensions/shared/iterables";
 import {apply} from "@jstls/core/functions/apply";
 import {findLast} from "@jstls/core/polyfills/indexable/es2023";
-import {RawEntryLink} from "@/types/feeds/raw/entry";
+import {RawEntryLink} from "@feeddy/types/feeds/raw/entry";
 import {reduceText} from "@jstls/core/utils";
 import {get} from "@jstls/core/objects/handlers/getset";
-import {BaseEntry} from "@/types/feeds/entry";
+import {BaseEntry} from "@feeddy/types/feeds/entry";
 
 
 export function entryPathname(source: Partial<BaseEntry> | string, length?: number): string {

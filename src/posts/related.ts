@@ -4,17 +4,17 @@ import {
   WithCategoriesPostsOptionsSummary,
   WithCategoriesPostsResult,
   WithCategoriesPostsResultSummary
-} from "@/types/posts";
+} from "@feeddy/types/posts";
 import {KeyableObject} from "@jstls/types/core/objects";
 import {apply} from "@jstls/core/functions/apply";
 import {isEmpty} from "@jstls/core/extensions/shared/iterables";
-import {feedOptions} from "@/feeds/raw";
-import {builderFrom, paramsFrom} from "@/search";
-import {queryBuilder} from "@/search/query";
-import {all} from "@/feeds";
+import {feedOptions} from "@feeddy/feeds/raw";
+import {builderFrom, paramsFrom} from "@feeddy/search";
+import {queryBuilder} from "@feeddy/search/query";
+import {all} from "@feeddy/feeds";
 import {freeze} from "@jstls/core/shortcuts/object";
 import {len} from "@jstls/core/shortcuts/indexable";
-import {BaseFeedOptions} from "@/types/feeds/options";
+import {BaseFeedOptions} from "@feeddy/types/feeds/options";
 import {set} from "@jstls/core/objects/handlers/getset";
 
 declare const Promise: PromiseConstructor;
