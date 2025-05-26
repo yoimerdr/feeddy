@@ -1,19 +1,19 @@
-import {uid} from "../../../lib/jstls/src/core/polyfills/symbol";
-import {string} from "../../../lib/jstls/src/core/objects/handlers";
-import {get, set} from "../../../lib/jstls/src/core/objects/handlers/getset";
-import {slice} from "../../../lib/jstls/src/core/iterable";
-import {apply} from "../../../lib/jstls/src/core/functions/apply";
-import {MaybeString} from "../../../lib/jstls/src/types/core";
-import {writeable} from "../../../lib/jstls/src/core/definer";
-import {isEmpty, isNotEmpty} from "../../../lib/jstls/src/core/extensions/shared/iterables";
+import {uid} from "@jstls/core/polyfills/symbol";
+import {string} from "@jstls/core/objects/handlers";
+import {get, set} from "@jstls/core/objects/handlers/getset";
+import {slice} from "@jstls/core/iterable";
+import {apply} from "@jstls/core/functions/apply";
+import {MaybeString} from "@jstls/types/core";
+import {writeable} from "@jstls/core/definer";
+import {isEmpty, isNotEmpty} from "@jstls/core/extensions/shared/iterables";
 import {exclude, operator, quote} from "./representation";
-import {isArray} from "../../../lib/jstls/src/core/shortcuts/array";
-import {concat} from "../../../lib/jstls/src/core/shortcuts/string";
-import {ThisObjectKeys} from "../../../lib/jstls/src/types/core/objects";
-import {funclass2} from "../../../lib/jstls/src/core/definer/classes/funclass";
-import {getDefined} from "../../../lib/jstls/src/core/objects/validators";
-import {returns} from "../../../lib/jstls/src/core/utils";
-import {indefinite} from "../../../lib/jstls/src/core/utils/types";
+import {isArray} from "@jstls/core/shortcuts/array";
+import {concat} from "@jstls/core/shortcuts/indexable";
+import {ThisObjectKeys} from "@jstls/types/core/objects";
+import {funclass2} from "@jstls/core/definer/classes/funclass";
+import {getDefined} from "@jstls/core/objects/validators";
+import {returns} from "@jstls/core/utils";
+import {indefinite} from "@jstls/core/utils/types";
 
 
 export interface QueryStringBuilder {
@@ -318,7 +318,7 @@ const named = ["label", "title", "author", "link"]
   .map(function (key) {
     const handler = function (this: QueryStringBuilder, ...values: string[]) {
       const $this = this;
-      return apply($this.named, $this, concat([key], slice(arguments)))
+      return apply($this.named, $this, <any> concat([key], slice(arguments)))
     }
     set(prototype, key, handler);
     return handler;
@@ -339,9 +339,6 @@ export const QueryStringBuilder: QueryStringBuilderConstructor = funclass2({
   prototype,
 })
 
-/**
- * Creates a new query string builder.
- */
 export function queryBuilder() {
   return new QueryStringBuilder();
 }

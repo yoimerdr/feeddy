@@ -1,4 +1,4 @@
-import {Maybe, MaybeString, Nullables} from "../../../lib/jstls/src/types/core";
+import {Maybe, MaybeString, Nullables} from "@jstls/types/core";
 
 /**
  * Gets the query operator representation.

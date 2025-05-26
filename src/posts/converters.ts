@@ -1,12 +1,12 @@
-import {ImageSize, SimpleSize} from "../types/feeds/shared";
-import {string} from "../../lib/jstls/src/core/objects/handlers";
-import {isObject} from "../../lib/jstls/src/core/objects/types";
-import {concat} from "../../lib/jstls/src/core/shortcuts/string";
-import {parseSize} from "../../lib/jstls/src/core/geometry/size/shared";
-import {round} from "../../lib/jstls/src/core/shortcuts/math";
-import {BasePostEntry} from "../types/feeds/posts";
-import {self} from "../../lib/jstls/src/core/definer/getters/builders";
-import {get} from "../../lib/jstls/src/core/objects/handlers/getset";
+import {ImageSize, SimpleSize} from "@feeddy/types/feeds/shared";
+import {string} from "@jstls/core/objects/handlers";
+import {isObject} from "@jstls/core/objects/types";
+import {concat} from "@jstls/core/shortcuts/indexable";
+import {parseSize} from "@jstls/core/geometry/size/shared";
+import {round} from "@jstls/core/shortcuts/math";
+import {BasePostEntry} from "@feeddy/types/feeds/posts";
+import {self} from "@jstls/core/definer/getters/builders";
+import {get} from "@jstls/core/objects/handlers/getset";
 
 export const thumbnailSizeExpression: string = 's72-c';
 

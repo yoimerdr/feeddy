@@ -1,21 +1,21 @@
-import {PromiseConstructor} from "../../lib/jstls/src/types/core/polyfills";
+import {PromiseConstructor} from "@jstls/types/core/polyfills";
 import {
   WithCategoriesPostsOptions,
   WithCategoriesPostsOptionsSummary,
   WithCategoriesPostsResult,
   WithCategoriesPostsResultSummary
-} from "../types/posts";
-import {KeyableObject} from "../../lib/jstls/src/types/core/objects";
-import {apply} from "../../lib/jstls/src/core/functions/apply";
-import {isEmpty} from "../../lib/jstls/src/core/extensions/shared/iterables";
-import {feedOptions} from "../feeds/raw";
-import {builderFrom, paramsFrom} from "../search";
-import {queryBuilder} from "../search/query";
-import {all} from "../feeds";
-import {freeze} from "../../lib/jstls/src/core/shortcuts/object";
-import {len} from "../../lib/jstls/src/core/shortcuts/indexable";
-import {BaseFeedOptions} from "../types/feeds/options";
-import {set} from "../../lib/jstls/src/core/objects/handlers/getset";
+} from "@feeddy/types/posts";
+import {KeyableObject} from "@jstls/types/core/objects";
+import {apply} from "@jstls/core/functions/apply";
+import {isEmpty} from "@jstls/core/extensions/shared/iterables";
+import {feedOptions} from "@feeddy/feeds/raw";
+import {builderFrom, paramsFrom} from "@feeddy/search";
+import {queryBuilder} from "@feeddy/search/query";
+import {all} from "@feeddy/feeds";
+import {freeze} from "@jstls/core/shortcuts/object";
+import {len} from "@jstls/core/shortcuts/indexable";
+import {BaseFeedOptions} from "@feeddy/types/feeds/options";
+import {set} from "@jstls/core/objects/handlers/getset";
 
 declare const Promise: PromiseConstructor;
 
@@ -27,18 +27,17 @@ export function withCategories(options: KeyableObject): Promise<KeyableObject | 
   if (apply(isEmpty, categories))
     return new Promise((_, reject) => reject("The categories are empty."));
 
-  const feed = feedOptions(options.feed) as BaseFeedOptions<"posts">;
-  set(feed, "type", "posts");
-
-  const params = paramsFrom(feed.params),
+  const feed = feedOptions(options.feed) as BaseFeedOptions<"posts">,
+    params = paramsFrom(feed.params),
     builder = queryBuilder()
       .exact();
 
+  set(feed, "type", "posts");
   apply(options.every ? builder.and : builder.or, builder);
 
   builderFrom(params)
     .query(
-      apply(builder.categories, builder, categories as any)
+      apply(builder.categories, builder, <any> categories)
         .build()
     );
 

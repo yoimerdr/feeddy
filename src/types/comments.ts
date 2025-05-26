@@ -46,12 +46,15 @@ export type CommentsOptions<R extends FeedRoute = FeedRoute> = InnerFeedOptions<
  */
 export type CommentsOptionsSummary = InnerFeedOptions<CommentsFeedOptionsSummary>;
 
+/** @deprecated*/
+export type Comments = CommentsNamespace;
+
 /**
  * Interface for retrieving blog comments.
  *
  * Provides methods for paginated access and individual entry retrieval.
  */
-export interface Comments {
+export interface CommentsNamespace {
   /**
    * Creates a handler for paginated access to blog comments.
    * @template R - The route type (summary or full)

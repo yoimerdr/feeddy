@@ -1,1 +1,1 @@
-export {get as getty} from "../../lib/jstls/src/core/objects/handlers/getset";
+export {get as getty} from "@jstls/core/objects/handlers/getset";

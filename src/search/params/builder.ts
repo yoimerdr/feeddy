@@ -1,21 +1,20 @@
 import {paramsFrom, SearchParams} from "./params";
-import {Keys, Maybe, MaybeString} from "../../../lib/jstls/src/types/core";
-import {isDefined} from "../../../lib/jstls/src/core/objects/types";
-import {call} from "../../../lib/jstls/src/core/functions/call";
-import {uid} from "../../../lib/jstls/src/core/polyfills/symbol";
-import {apply} from "../../../lib/jstls/src/core/functions/apply";
-import {toInt} from "../../../lib/jstls/src/core/extensions/string";
-import {coerceAtLeast} from "../../../lib/jstls/src/core/extensions/number";
-import {string} from "../../../lib/jstls/src/core/objects/handlers";
-import {get, set} from "../../../lib/jstls/src/core/objects/handlers/getset";
-import {readonly2, writeable} from "../../../lib/jstls/src/core/definer";
-import {Alt, OrderBy, RequestFeedParams} from "../../types/feeds/shared/params";
-import {ThisObjectKeys} from "../../../lib/jstls/src/types/core/objects";
-import {dateTypes} from "../shared";
-import {forEach} from "../../../lib/jstls/src/core/shortcuts/array";
-import {indefinite, nullable} from "../../../lib/jstls/src/core/utils/types";
-import {funclass2} from "../../../lib/jstls/src/core/definer/classes/funclass";
-import {deletesAll} from "../../../lib/jstls/src/core/objects/handlers/deletes";
+import {Keys, Maybe, MaybeString} from "@jstls/types/core";
+import {isDefined} from "@jstls/core/objects/types";
+import {uid} from "@jstls/core/polyfills/symbol";
+import {apply} from "@jstls/core/functions/apply";
+import {toInt} from "@jstls/core/extensions/string";
+import {coerceAtLeast} from "@jstls/core/extensions/number";
+import {string} from "@jstls/core/objects/handlers";
+import {get, set} from "@jstls/core/objects/handlers/getset";
+import {readonly2, writeable} from "@jstls/core/definer";
+import {Alt, OrderBy, RequestFeedParams} from "@feeddy/types/feeds/shared/params";
+import {ThisObjectKeys} from "@jstls/types/core/objects";
+import {dateTypes, parametersMap} from "../shared";
+import {forEach} from "@jstls/core/shortcuts/array";
+import {indefinite, nullable} from "@jstls/core/utils/types";
+import {funclass2} from "@jstls/core/definer/classes/funclass";
+import {deletesAll} from "@jstls/core/objects/handlers/deletes";
 
 export interface SearchParamsBuilder {
   /**
@@ -230,7 +229,7 @@ export interface SearchParamsBuilderConstructor {
 function paramIndex($this: SearchParamsBuilder, index: Maybe<number | string>, action: 'place' | 'plus' | 'minus') {
   const params = get($this, searchParamsSymbol) as SearchParams;
   let current = params.start();
-  index = call(toInt, string(index))! >> 0;
+  index = toInt(indefinite, string(index))! >> 0;
 
   current = action === 'plus' ? current + index : (action === 'minus' ? current - index : index);
   params.start(current);
@@ -241,10 +240,8 @@ function paramDate($this: SearchParamsBuilder,
                    min: MaybeString, max: MaybeString, type: "published" | "updated",
                    keepAtLeast?: boolean, keepAtMost?: boolean) {
   const params = get($this, searchParamsSymbol) as SearchParams;
-  if (isDefined(min) || !keepAtLeast)
-    apply(get(params, type + "AtLeast"), params, [min]);
-  if (isDefined(max) || !keepAtMost)
-    apply(get(params, type + "AtMost"), params, [max]);
+  (isDefined(min) || !keepAtLeast) && apply(get(params, type + "AtLeast"), params, [min]);
+  (isDefined(max) || !keepAtMost) && apply(get(params, type + "AtMost"), params, [max]);
 
   return $this;
 }
@@ -260,18 +257,6 @@ function simpleProperty(key: Keys<SearchParams>) {
     apply(get(params, key), params, [value]);
     return $this;
   }
-}
-
-function datePropertiesBuilder(type: "published" | "updated") {
-  set(prototype, type, function (this: SearchParamsBuilder, min: MaybeString, max?: MaybeString): SearchParamsBuilder {
-    return paramDate(this, min, max, type);
-  });
-  set(prototype, type + "AtLeast", function (this: SearchParamsBuilder, min: MaybeString): SearchParamsBuilder {
-    return paramDate(this, min, indefinite, type, false, true);
-  });
-  set(prototype, type + "AtMost", function (this: SearchParamsBuilder, max: MaybeString): SearchParamsBuilder {
-    return paramDate(this, indefinite, max, type, true)
-  })
 }
 
 const source = ['place', 'plus', 'minus']
@@ -315,13 +300,28 @@ const max = simpleProperty("max"),
     }
   };
 
-forEach(dateTypes, datePropertiesBuilder);
+forEach(dateTypes, (type: "published" | "updated") => {
+  set(prototype, type, function (this: SearchParamsBuilder, min: MaybeString, max?: MaybeString): SearchParamsBuilder {
+    return paramDate(this, min, max, type);
+  });
+  set(prototype, type + "AtLeast", function (this: SearchParamsBuilder, min: MaybeString): SearchParamsBuilder {
+    return paramDate(this, min, indefinite, type, false, true);
+  });
+  set(prototype, type + "AtMost", function (this: SearchParamsBuilder, max: MaybeString): SearchParamsBuilder {
+    return paramDate(this, indefinite, max, type, true)
+  })
+});
 
 export const SearchParamsBuilder: SearchParamsBuilderConstructor = funclass2({
   construct: function (source) {
-    if (source instanceof SearchParams)
+    if (source instanceof SearchParams) {
       writeable(this, searchParamsSymbol, source);
-    else return builderFrom(source)
+      source = source.source;
+      for (const key in source) {
+        const map = parametersMap[key as keyof RequestFeedParams] as keyof SearchParamsBuilder;
+        map && this[map](source[key as keyof RequestFeedParams] as never);
+      }
+    } else return builderFrom(source)
   },
   statics: {
     from: builderFrom,

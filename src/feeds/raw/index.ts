@@ -1,10 +1,10 @@
-import {buildUrl, isComments} from "../../shared";
-import {maxResults, paramsFrom} from "../../search";
-import {assign2} from "../../../lib/jstls/src/core/objects/factory";
-import {extend} from "../../../lib/jstls/src/core/extensions/array";
-import {isNotEmpty} from "../../../lib/jstls/src/core/extensions/shared/iterables";
-import {string} from "../../../lib/jstls/src/core/objects/handlers";
-import {len} from "../../../lib/jstls/src/core/shortcuts/indexable";
+import {buildUrl, isComments} from "@feeddy/shared";
+import {maxResults, paramsFrom} from "@feeddy/search";
+import {assign2} from "@jstls/core/objects/factory";
+import {extend} from "@jstls/core/extensions/array";
+import {isNotEmpty} from "@jstls/core/extensions/shared/iterables";
+import {string} from "@jstls/core/objects/handlers";
+import {len} from "@jstls/core/shortcuts/indexable";
 import {
   BaseFeedOptions,
   FeedByIdOptions,
@@ -13,23 +13,23 @@ import {
   FeedOptionsSummary,
   FeedRoute,
   FeedType
-} from "../../types/feeds/options";
-import {RawByIdResult, RawResult} from "../../types/feeds/raw";
-import {RawBaseBlog, RawBaseEntry} from "../../types/feeds/raw/entry";
-import {IllegalAccessError,} from "../../../lib/jstls/src/core/exceptions";
-import {get, set} from "../../../lib/jstls/src/core/objects/handlers/getset";
-import {KeyableObject} from "../../../lib/jstls/src/types/core/objects";
+} from "@feeddy/types/feeds/options";
+import {RawByIdResult, RawResult} from "@feeddy/types/feeds/raw";
+import {RawBaseBlog, RawBaseEntry} from "@feeddy/types/feeds/raw/entry";
+import {IllegalAccessError,} from "@jstls/core/exceptions/illegal-access";
+import {get, set} from "@jstls/core/objects/handlers/getset";
+import {KeyableObject} from "@jstls/types/core/objects";
 import {
   ByIdPostsOptions, ByIdPostsOptionsSummary,
   PostsFeedOptions,
   PostsFeedOptionsSummary,
-} from "../../types/posts";
+} from "@feeddy/types/posts";
 import {
   RawByIdPostResult,
   RawByIdPostResultSummary,
   RawPostsResult,
   RawPostsResultSummary
-} from "../../types/feeds/raw/posts";
+} from "@feeddy/types/feeds/raw/posts";
 
 
 export function _rawGet<T extends FeedType = FeedType, R extends FeedRoute = FeedRoute>(options: Partial<BaseFeedOptions<T, R>>,): Promise<RawResult>;
@@ -46,7 +46,7 @@ export function _rawGet(options: Partial<BaseFeedOptions>, all?: boolean, id?: s
 
   const entries: RawBaseEntry[] = [],
     url = buildUrl(options, id),
-    startIndex = params.start();
+    startIndex = params.start() || 1;
 
   function request(url: string | URL, max: number): Promise<RawBaseBlog> {
     return fetch(string(url))
@@ -67,13 +67,12 @@ export function _rawGet(options: Partial<BaseFeedOptions>, all?: boolean, id?: s
           extend(entry, entries);
 
           const length = len(entry);
-
-          if (isNotEmpty(entry) && length >= maxResults && ((all && length >= maxResults) || (!all && length < max))) {
-            if (!all)
-              max -= length;
+          if (isNotEmpty(entry) && (all || (!all && length < max))) {
+            !all && (max -= length);
             params.start(params.start() + length)
             params.max(max);
-            return request(buildUrl(options), max);
+            if (max > 0)
+              return request(buildUrl(options), max);
           }
           feed.entry = entries;
           if (params.max() !== len(entries))

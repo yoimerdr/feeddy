@@ -1,11 +1,11 @@
 import {buildUrl, getId} from "./shared";
 import {Routes} from "./types/feeds/shared";
-import {Feed} from "./types/feeds";
-import {Search} from "./types/search";
-import {Posts} from "./types/posts";
-import {Entries} from "./types/entries";
-import {Comments} from "./types/comments";
-import {Pages} from "./types/pages";
+import {FeedNamespace} from "./types/feeds";
+import {SearchNamespace} from "./types/search";
+import {PostsNamespace} from "./types/posts";
+import {EntriesNamespace} from "./types/entries";
+import {CommentsNamespace} from "./types/comments";
+import {PagesNamespace} from "./types/pages";
 
 interface Feeddy {
   /**
@@ -26,36 +26,36 @@ interface Feeddy {
    * The handler to make mapped requests to the blogger feed API.
    * @func
    */
-  feed: Feed;
+  feed: FeedNamespace;
   /**
    * Utility for building search queries and parameters for blog feed requests.
    * Includes builders for constructing query strings and search parameter objects.
    */
-  search: Search;
+  search: SearchNamespace;
   /**
    * Handler for paginated access to blog posts.
    * @func
    */
-  posts: Posts;
+  posts: PostsNamespace;
   /**
    * Generic handler for paginated access to blog entries.
    * Supports posts, comments and pages with configurable route types.
    * @since 1.2
    * @func
    */
-  entries: Entries;
+  entries: EntriesNamespace;
   /**
    * Handler for paginated access to blog comments.
    * @since 1.2
    * @func
    */
-  comments: Comments,
+  comments: CommentsNamespace,
   /**
    * Handler for paginated access to blog pages.
    * @since 1.2
    * @func
    */
-  pages: Pages
+  pages: PagesNamespace
 }
 
 declare const feeddy: Feeddy;

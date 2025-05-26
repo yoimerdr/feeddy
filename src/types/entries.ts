@@ -14,7 +14,7 @@ import {BasePostEntry, PostEntry, PostEntrySummary, PostsBlog, PostsBlogSummary}
 import {CommentEntry, CommentEntrySummary, CommentsBlog, CommentsBlogSummary} from "./feeds/comments";
 import {PageEntry, PageEntrySummary, PagesBlog, PagesBlogSummary} from "./feeds/pages";
 import {ByIdResult} from "./feeds";
-import {KeyableObject} from "../../lib/jstls/src/types/core/objects";
+import {KeyableObject} from "@jstls/types/core/objects";
 import {
   ByIdPostResult,
   ByIdPostResultSummary,
@@ -118,14 +118,17 @@ export type EntriesHandlerExtra<T extends FeedType = FeedType, R extends FeedRou
     EntriesHandlerSimpleExtra<PagesBlogSummary, E>,
     EntriesHandlerSimpleExtra<PostsBlog, E>,
     EntriesHandlerSimpleExtra<CommentsBlog, E>,
-    EntriesHandlerSimpleExtra<PagesBlog, E>>
+    EntriesHandlerSimpleExtra<PagesBlog, E>>;
+
+/** @deprecated*/
+export type Entries = EntriesNamespace;
 
 /**
  * Interface for retrieving blog entries.
  *
  * Provides methods for paginated access and individual entry retrieval.
  */
-export interface Entries {
+export interface EntriesNamespace {
   /**
    * Creates a handler for paginated access to blog entries.
    * @template T - The type of feed (posts, comments, or pages)

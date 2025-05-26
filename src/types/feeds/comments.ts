@@ -1,5 +1,5 @@
 import {RawCommentReply} from "./raw/comments";
-import {Entry} from "../../../lib/jstls/src/types/core";
+import {Entry} from "@jstls/types/core";
 import {BaseBlog, BaseEntry, BaseSimpleFeed, WithContent, WithSummary} from "./entry";
 
 /**

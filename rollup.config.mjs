@@ -3,6 +3,9 @@ import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import terser from '@rollup/plugin-terser';
 import {dts} from 'rollup-plugin-dts'
+import alias from "@rollup/plugin-alias";
+import prettier from "rollup-plugin-prettier";
+import path from 'path'
 
 import pkg from './package.json' with { type: 'json' };
 
@@ -27,6 +30,13 @@ function varConfig(input, path, name, external, globals) {
         file: path,
         format: 'iife',
         name,
+        plugins: [
+          prettier({
+            tabWidth: 2,
+            singleQuote: true,
+            parser: "babel",
+          })
+        ]
       },
       {
         globals,
@@ -47,6 +57,18 @@ export default [
   {
     input: `src/typing.ts`,
     plugins: [
+      alias({
+        entries: [
+          {
+            find: '@jstls',
+            replacement: path.resolve("./lib/jstls/src")
+          },
+          {
+            find: "@feeddy",
+            replacement: path.resolve("./src")
+          }
+        ]
+      }),
       dts()
     ],
     output: {

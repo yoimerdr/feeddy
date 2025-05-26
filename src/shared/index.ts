@@ -1,18 +1,19 @@
-import {maxResults, paramsFrom} from "../search";
-import {requireDefined, requireObject} from "../../lib/jstls/src/core/objects/validators";
-import {isDefined, isObject} from "../../lib/jstls/src/core/objects/types";
-import {IllegalArgumentError} from "../../lib/jstls/src/core/exceptions";
-import {apply} from "../../lib/jstls/src/core/functions/apply";
-import {coerceIn} from "../../lib/jstls/src/core/extensions/number";
-import {keys} from "../../lib/jstls/src/core/shortcuts/object";
-import {forEach} from "../../lib/jstls/src/core/shortcuts/array";
-import {BaseFeedOptions} from "../types/feeds/options";
+import {maxResults, paramsFrom} from "@feeddy/search";
+import {getIf} from "@jstls/core/objects/validators";
+import {isDefined, isObject} from "@jstls/core/objects/types";
+import {IllegalArgumentError} from "@jstls/core/exceptions/illegal-argument";
+import {apply} from "@jstls/core/functions/apply";
+import {coerceIn} from "@jstls/core/extensions/number";
+import {keys} from "@jstls/core/shortcuts/object";
+import {forEach} from "@jstls/core/shortcuts/array";
+import {BaseFeedOptions} from "@feeddy/types/feeds/options";
 import {createRoute} from "./routes";
-import {RawText} from "../types/feeds/raw/entry";
-import {hasOwn} from "../../lib/jstls/src/core/polyfills/objects/es2022";
-import {get} from "../../lib/jstls/src/core/objects/handlers/getset";
-import {includes} from "../../lib/jstls/src/core/polyfills/indexable/es2016";
-import {concat} from "../../lib/jstls/src/core/shortcuts/string";
+import {RawText} from "@feeddy/types/feeds/raw/entry";
+import {hasOwn} from "@jstls/core/polyfills/objects/es2022";
+import {get} from "@jstls/core/objects/handlers/getset";
+import {includes} from "@jstls/core/polyfills/indexable/es2016";
+import {concat} from "@jstls/core/shortcuts/indexable";
+import {self} from "@jstls/core/definer/getters/builders";
 
 
 /**
@@ -25,7 +26,7 @@ import {concat} from "../../lib/jstls/src/core/shortcuts/string";
  * @remarks The id parameter is supported since 1.2
  */
 export function buildUrl(options: Partial<BaseFeedOptions>, id?: string): URL {
-  requireObject(options, "options")
+  options = getIf(options, isObject, self, {})
 
   let href: string;
   if (isDefined(options.blogUrl))
@@ -70,8 +71,8 @@ export function getId(source: string | RawText | Record<"id", RawText | string>,
     throw new IllegalArgumentError(concat("'", type, "' is an unknown type id."));
 
   const expr = new RegExp(concat(type, "-([0-9]+)"), "g"),
-    res = requireDefined(expr.exec(source as string))
-  return res[1];
+    res = expr.exec(source as string)
+  return res ? res[1] : "";
 }
 
 /**

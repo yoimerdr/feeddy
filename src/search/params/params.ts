@@ -1,23 +1,22 @@
-import {Keys, Maybe, MaybeString, Nullables} from "../../../lib/jstls/src/types/core";
-import {string} from "../../../lib/jstls/src/core/objects/handlers";
-import {isDefined} from "../../../lib/jstls/src/core/objects/types";
-import {assign2} from "../../../lib/jstls/src/core/objects/factory";
-import {ThisObjectKeys} from "../../../lib/jstls/src/types/core/objects";
-import {readonly2,} from "../../../lib/jstls/src/core/definer";
-import {call} from "../../../lib/jstls/src/core/functions/call";
-import {toInt} from "../../../lib/jstls/src/core/extensions/string";
-import {apply} from "../../../lib/jstls/src/core/functions/apply";
-import {coerceAtLeast} from "../../../lib/jstls/src/core/extensions/number";
-import {len} from "../../../lib/jstls/src/core/shortcuts/indexable";
-import {forEach} from "../../../lib/jstls/src/core/shortcuts/array";
-import {Alt, OrderBy, RequestFeedParams} from "../../types/feeds/shared/params";
-import {set} from "../../../lib/jstls/src/core/objects/handlers/getset";
-import {concat} from "../../../lib/jstls/src/core/shortcuts/string";
-import {dateTypes} from "../shared";
-import {includes} from "../../../lib/jstls/src/core/polyfills/indexable/es2016";
-import {deletes} from "../../../lib/jstls/src/core/objects/handlers/deletes";
-import {funclass2} from "../../../lib/jstls/src/core/definer/classes/funclass";
-import {indefinite} from "../../../lib/jstls/src/core/utils/types";
+import {Keys, Maybe, MaybeString, Nullables} from "@jstls/types/core";
+import {string} from "@jstls/core/objects/handlers";
+import {isDefined} from "@jstls/core/objects/types";
+import {assign2} from "@jstls/core/objects/factory";
+import {ThisObjectKeys} from "@jstls/types/core/objects";
+import {readonly2,} from "@jstls/core/definer";
+import {call} from "@jstls/core/functions/call";
+import {toInt} from "@jstls/core/extensions/string";
+import {coerceAtLeast} from "@jstls/core/extensions/number";
+import {len} from "@jstls/core/shortcuts/indexable";
+import {forEach} from "@jstls/core/shortcuts/array";
+import {Alt, OrderBy, RequestFeedParams} from "@feeddy/types/feeds/shared/params";
+import {set} from "@jstls/core/objects/handlers/getset";
+import {concat} from "@jstls/core/shortcuts/indexable";
+import {dateTypes, parametersMap} from "../shared";
+import {includes} from "@jstls/core/polyfills/indexable/es2016";
+import {deletes, deletes2} from "@jstls/core/objects/handlers/deletes";
+import {funclass2} from "@jstls/core/definer/classes/funclass";
+import {indefinite, nullable} from "@jstls/core/utils/types";
 
 
 export interface SearchParams {
@@ -243,8 +242,8 @@ export interface SearchParamsConstructor {
 
 
 function minimumsOne(max: Maybe<string | number>): number {
-  max = call(toInt, string(max));
-  return isDefined(max) ? apply(coerceAtLeast, max!, [1]) : 1;
+  max = toInt(nullable, string(max));
+  return isDefined(max) ? coerceAtLeast(1, max!) : 1;
 }
 
 function validDate(date: MaybeString): string {
@@ -302,7 +301,11 @@ forEach(dateTypes, (key) => {
 
 export const SearchParams: SearchParamsConstructor = funclass2({
   construct: function (source) {
-    readonly2(this, "source", source || {})
+    source = source || {}
+    for (const key in source) {
+      (!parametersMap[key as keyof RequestFeedParams] || !isDefined(source![key as keyof RequestFeedParams])) && deletes2(source, [key])
+    }
+    readonly2(this, "source", source)
   },
   statics: {
     from: paramsFrom
