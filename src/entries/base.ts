@@ -1,5 +1,5 @@
 import {EntriesHandler, EntriesSimpleOptions} from "@/types/entries";
-import {getIf, requireObject} from "@jstls/core/objects/validators";
+import {getIf} from "@jstls/core/objects/validators";
 import {BaseFeedOptions} from "@/types/feeds/options";
 import {isObject} from "@jstls/core/objects/types";
 import {self} from "@jstls/core/definer/getters/builders";
@@ -16,9 +16,9 @@ export type EntriesHandlerBuilder = (feed: BaseFeedOptions, params: SearchParams
 export function entriesBase<R = KeyableObject>(options: EntriesSimpleOptions,
                                                builder: EntriesHandlerBuilder, id?: string): Promise<EntriesHandler & R> {
 
-  requireObject(options, "options");
+  options = getIf(options, isObject, self, {},);
   let feed: BaseFeedOptions;
-  options.feed = feed = getIf(options.feed as BaseFeedOptions, isObject, self, {}) as BaseFeedOptions;
+  options.feed = feed = getIf(options.feed, isObject, self, {}) as BaseFeedOptions;
   const params = paramsFrom(feed.params),
     paramsBuilder = builderFrom(params);
 

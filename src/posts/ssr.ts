@@ -1,4 +1,4 @@
-import {PostsSsrHandler, PostsSsrOptions} from "@/types/posts";
+import {PostsSsrHandler, PostsSsrHandlerResult, PostsSsrOptions} from "@/types/posts";
 import {get, set} from "@jstls/core/objects/handlers/getset";
 import {firstOrNull, isEmpty, isNotEmpty} from "@jstls/core/extensions/shared/iterables";
 import {entriesBase} from "@/entries/base";
@@ -13,16 +13,20 @@ import {apply} from "@jstls/core/functions/apply";
 import {includes} from "@jstls/core/polyfills/indexable/es2016";
 import {keys} from "@jstls/core/shortcuts/object";
 
-function createUrl(base: string, parameters: Record<string, string>): string {
+function createResult(base: string, parameters: Record<string, string>): PostsSsrHandlerResult {
   const values = keys(parameters);
-
-  return isEmpty(values) ? base : concat(
+  base = isEmpty(values) ? base : concat(
     base, "?",
     values
       .sort((a, b) => a.localeCompare(b))
       .map(key => concat(key, '=', parameters[key]))
       .join("&")
   );
+
+  return {
+    parameters,
+    url: base
+  }
 }
 
 export function ssrPosts(options: PostsSsrOptions): Promise<PostsSsrHandler> {
@@ -44,6 +48,7 @@ export function ssrPosts(options: PostsSsrOptions): Promise<PostsSsrHandler> {
     query = indefinite!;
 
   set(sourceParams, "q", query);
+
   return entriesBase(options, basicHandler((feed, params, builder, request) => {
     const max = params.max(),
       query = params.query();
@@ -55,12 +60,10 @@ export function ssrPosts(options: PostsSsrOptions): Promise<PostsSsrHandler> {
         },
         early = indefinite! as boolean;
 
-
       builder
         .max(max)
         .paginated(page)
         .minusIndex(1)
-
 
       if (ssr === "query" && query) {
         parameters['q'] = query;
@@ -75,19 +78,13 @@ export function ssrPosts(options: PostsSsrOptions): Promise<PostsSsrHandler> {
         early = true;
       } else if (apply(includes, ["query", "default2"], [ssr])) {
         parameters["start"] = params.start();
-        parameters["by-date"] = true;
-        if (ssr === "default2") {
+        parameters["by-date"] = early = true;
+        if (ssr === "default2")
           parameters["q"] = "*";
-        }
-        parameters["by-date"] = true;
-        early = true;
       }
 
       if (early)
-        return resolve({
-          parameters,
-          url: createUrl(baseUrl, parameters)
-        })
+        return resolve(createResult(baseUrl, parameters));
 
       feed.params = builder
         .max(1)
@@ -97,20 +94,14 @@ export function ssrPosts(options: PostsSsrOptions): Promise<PostsSsrHandler> {
         .then(result => {
           const entry = firstOrNull(get(result, "feed", "entry") || []) as BasePostEntry;
           if (!entry)
-            return {
-              parameters: {},
-              url: '/'
-            };
+            return createResult("/", {});
 
           let date = entry.published;
           date = date.substring(0, 19) + date.substring(23, 29)
 
           parameters["updated-max"] = date;
 
-          return {
-            parameters,
-            url: createUrl(baseUrl, parameters),
-          }
+          return createResult(baseUrl, parameters)
         });
     }
   }),)

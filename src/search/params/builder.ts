@@ -259,18 +259,6 @@ function simpleProperty(key: Keys<SearchParams>) {
   }
 }
 
-function datePropertiesBuilder(type: "published" | "updated") {
-  set(prototype, type, function (this: SearchParamsBuilder, min: MaybeString, max?: MaybeString): SearchParamsBuilder {
-    return paramDate(this, min, max, type);
-  });
-  set(prototype, type + "AtLeast", function (this: SearchParamsBuilder, min: MaybeString): SearchParamsBuilder {
-    return paramDate(this, min, indefinite, type, false, true);
-  });
-  set(prototype, type + "AtMost", function (this: SearchParamsBuilder, max: MaybeString): SearchParamsBuilder {
-    return paramDate(this, indefinite, max, type, true)
-  })
-}
-
 const source = ['place', 'plus', 'minus']
   .map((mode: any) => {
     return function (this: SearchParamsBuilder, index: Maybe<number | string>): SearchParamsBuilder {
@@ -312,7 +300,17 @@ const max = simpleProperty("max"),
     }
   };
 
-forEach(dateTypes, datePropertiesBuilder);
+forEach(dateTypes, (type: "published" | "updated") => {
+  set(prototype, type, function (this: SearchParamsBuilder, min: MaybeString, max?: MaybeString): SearchParamsBuilder {
+    return paramDate(this, min, max, type);
+  });
+  set(prototype, type + "AtLeast", function (this: SearchParamsBuilder, min: MaybeString): SearchParamsBuilder {
+    return paramDate(this, min, indefinite, type, false, true);
+  });
+  set(prototype, type + "AtMost", function (this: SearchParamsBuilder, max: MaybeString): SearchParamsBuilder {
+    return paramDate(this, indefinite, max, type, true)
+  })
+});
 
 export const SearchParamsBuilder: SearchParamsBuilderConstructor = funclass2({
   construct: function (source) {
