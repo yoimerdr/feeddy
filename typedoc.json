@@ -10,7 +10,7 @@
     "./src/types/comments.ts",
     "./src/types/entries.ts",
     "./src/types/pages.ts",
-    "./src/types/search.ts"
+    "./src/types/search/**/*"
   ],
   "categorizeByGroup": false,
   "searchCategoryBoosts": {

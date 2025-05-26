@@ -7,7 +7,8 @@
     "clean": "tsc -b --clean",
     "dev:ts": "npm run build:ts -- -w",
     "run": "npx ts-node src/index.ts",
-    "test": "npx ts-node src/tests/main.ts"
+    "test": "npx ts-node src/tests/main.ts",
+    "docs": "npx typedoc --favicon favicon.ico"
   },
   "devDependencies": {
     "@rollup/plugin-alias": "^5.1.1",
@@ -19,6 +20,10 @@
     "rollup-plugin-dts": "^6.1.1",
     "rollup-plugin-prettier": "^4.1.2",
     "tsconfig-paths": "^4.2.0",
-    "tslib": "^2.6.3"
+    "tslib": "^2.6.3",
+    "typedoc": "^0.26.7",
+    "typedoc-plugin-extras": "^3.1.0",
+    "@shipgirl/typedoc-plugin-versions": "^0.3.0",
+    "@mxssfd/typedoc-theme": "^1.1.6"
   }
 }
