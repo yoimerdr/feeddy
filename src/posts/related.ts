@@ -27,18 +27,17 @@ export function withCategories(options: KeyableObject): Promise<KeyableObject | 
   if (apply(isEmpty, categories))
     return new Promise((_, reject) => reject("The categories are empty."));
 
-  const feed = feedOptions(options.feed) as BaseFeedOptions<"posts">;
-  set(feed, "type", "posts");
-
-  const params = paramsFrom(feed.params),
+  const feed = feedOptions(options.feed) as BaseFeedOptions<"posts">,
+    params = paramsFrom(feed.params),
     builder = queryBuilder()
       .exact();
 
+  set(feed, "type", "posts");
   apply(options.every ? builder.and : builder.or, builder);
 
   builderFrom(params)
     .query(
-      apply(builder.categories, builder, categories as any)
+      apply(builder.categories, builder, <any> categories)
         .build()
     );
 

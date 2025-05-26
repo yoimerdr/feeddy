@@ -6,7 +6,6 @@ import {ThisObjectKeys} from "@jstls/types/core/objects";
 import {readonly2,} from "@jstls/core/definer";
 import {call} from "@jstls/core/functions/call";
 import {toInt} from "@jstls/core/extensions/string";
-import {apply} from "@jstls/core/functions/apply";
 import {coerceAtLeast} from "@jstls/core/extensions/number";
 import {len} from "@jstls/core/shortcuts/indexable";
 import {forEach} from "@jstls/core/shortcuts/array";
@@ -17,7 +16,7 @@ import {dateTypes, parametersMap} from "../shared";
 import {includes} from "@jstls/core/polyfills/indexable/es2016";
 import {deletes, deletes2} from "@jstls/core/objects/handlers/deletes";
 import {funclass2} from "@jstls/core/definer/classes/funclass";
-import {indefinite} from "@jstls/core/utils/types";
+import {indefinite, nullable} from "@jstls/core/utils/types";
 
 
 export interface SearchParams {
@@ -243,8 +242,8 @@ export interface SearchParamsConstructor {
 
 
 function minimumsOne(max: Maybe<string | number>): number {
-  max = call(toInt, string(max));
-  return isDefined(max) ? apply(coerceAtLeast, max!, [1]) : 1;
+  max = toInt(nullable, string(max));
+  return isDefined(max) ? coerceAtLeast(1, max!) : 1;
 }
 
 function validDate(date: MaybeString): string {

@@ -318,7 +318,7 @@ const named = ["label", "title", "author", "link"]
   .map(function (key) {
     const handler = function (this: QueryStringBuilder, ...values: string[]) {
       const $this = this;
-      return apply($this.named, $this, concat([key], slice(arguments)))
+      return apply($this.named, $this, <any> concat([key], slice(arguments)))
     }
     set(prototype, key, handler);
     return handler;
