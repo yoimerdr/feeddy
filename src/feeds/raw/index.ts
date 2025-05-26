@@ -16,7 +16,7 @@ import {
 } from "@/types/feeds/options";
 import {RawByIdResult, RawResult} from "@/types/feeds/raw";
 import {RawBaseBlog, RawBaseEntry} from "@/types/feeds/raw/entry";
-import {IllegalAccessError,} from "@jstls/core/exceptions";
+import {IllegalAccessError,} from "@jstls/core/exceptions/illegal-access";
 import {get, set} from "@jstls/core/objects/handlers/getset";
 import {KeyableObject} from "@jstls/types/core/objects";
 import {
@@ -46,7 +46,7 @@ export function _rawGet(options: Partial<BaseFeedOptions>, all?: boolean, id?: s
 
   const entries: RawBaseEntry[] = [],
     url = buildUrl(options, id),
-    startIndex = params.start();
+    startIndex = params.start() || 1;
 
   function request(url: string | URL, max: number): Promise<RawBaseBlog> {
     return fetch(string(url))
@@ -67,13 +67,12 @@ export function _rawGet(options: Partial<BaseFeedOptions>, all?: boolean, id?: s
           extend(entry, entries);
 
           const length = len(entry);
-
-          if (isNotEmpty(entry) && length >= maxResults && ((all && length >= maxResults) || (!all && length < max))) {
-            if (!all)
-              max -= length;
+          if (isNotEmpty(entry) && (all || (!all && length < max))) {
+            !all && (max -= length);
             params.start(params.start() + length)
             params.max(max);
-            return request(buildUrl(options), max);
+            if (max > 0)
+              return request(buildUrl(options), max);
           }
           feed.entry = entries;
           if (params.max() !== len(entries))
