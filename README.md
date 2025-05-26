@@ -19,6 +19,8 @@ or you can use
 
 ### Paginate entries
 
+If you want to get the paginated entries and do something with them dynamically, you could do something like this
+
 ```javascript
 // you can also use .comments or .pages instead .posts.
 feeddy.posts({
@@ -36,7 +38,9 @@ feeddy.posts({
   })
 ```
 
-### Search posts
+#### Search posts
+
+You could also paginate the entries by combining with some search parameters.
 
 ```javascript
 feeddy.posts({
@@ -57,7 +61,29 @@ feeddy.posts({
   })
 ```
 
+### Paginate entries (SSR)
+
+If you don't want to load the entries dynamically, but have the blogger generator itself return the entries (like cards at home),
+you could do the following to get the valid URLs for it.
+
+```javascript
+feeddy.posts.ssr({
+  feed: {
+    blogUrl: '', // The blog url, or nothing if the current origin is the blogger blog. 
+    params: feeddy.search.params()
+      .limit(12)
+      .build()
+  },
+  ssr: 'default2' // the ssr mode, the default value is 'default'.
+}).then(handler => handler.page(2))
+  .then(result => {
+    console.log(result.url);
+  })
+```
+
 ### Posts with the given categories only
+
+If you want to search for entries related to some categories, you may use:
 
 ```javascript
 feeddy.posts.withCategories({

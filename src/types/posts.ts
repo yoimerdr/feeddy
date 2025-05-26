@@ -244,7 +244,9 @@ export interface PostsNamespace {
   /**
    * Retrieves the posts from the <b>summary</b> with the given categories.
    *
-   * All posts are retrieved, but it is sliced by the value of the `max-results` parameter.
+   * <b>Notes</b>
+   * * All posts are retrieved, but it is sliced by the value of the `max-results` parameter.
+   * * The `q` parameter will be replaced.
    * @param options The request options.
    */
   withCategories(options: WithCategoriesPostsOptionsSummary): Promise<WithCategoriesPostsResultSummary>;
@@ -273,6 +275,9 @@ export interface PostsNamespace {
   /**
    * Creates a handler for paginated access from SSR urls.
    *
+   * <b>Notes</b>
+   * * In any ssr mode, the `q` parameter is ignored, except in `query` mode.
+   * * For the search by tags, you can use the `label` mode and you must also pass the category name (only is available for 1).
    * @param options - Configuration options for the ssr mode.
    * */
   ssr(options: PostsSsrOptions): Promise<PostsSsrHandler>;
