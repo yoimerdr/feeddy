@@ -1,12 +1,13 @@
-import {queryBuilder, QueryStringBuilder, QueryStringBuilderConstructor} from "@feeddy/search/query/builder";
+import {QueryStringBuilder, QueryStringBuilderConstructor} from "@feeddy/search/query/builder";
 import {
-  paramsBuilder,
   SearchParams,
   SearchParamsBuilder,
   SearchParamsBuilderConstructor,
   SearchParamsConstructor
 } from "@feeddy/search";
 import {Maybe} from "@jstls/types/core";
+import {QueryNamespace} from "@feeddy/types/search/query";
+import {ParamsNamespace} from "@feeddy/types/search/params";
 
 export type {
   QueryStringBuilder,
@@ -50,23 +51,29 @@ export interface FullSplitQuery extends SplitQuery {
  * Provides methods and types for building and manage search queries and parameters.
  */
 export interface Search {
-  query: typeof queryBuilder;
-  params: typeof paramsBuilder;
+  /**
+   * The handler for
+   */
+  query: QueryNamespace;
+  params: ParamsNamespace;
 
   /**
    * Constructor for query string builder instances.
+   * @deprecated Use `.query.Builder` instead.
    * @class
    */
   QueryStringBuilder: QueryStringBuilderConstructor;
 
   /**
    * Constructor for search parameter builder instances.
+   * @deprecated Use `.params.Builder` instead.
    * @class
    */
   SearchParamsBuilder: SearchParamsBuilderConstructor;
 
   /**
    * Constructor for search parameters handler.
+   * @deprecated Use `.params.Params` instead.
    * @class
    */
   SearchParams: SearchParamsConstructor;

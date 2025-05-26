@@ -339,9 +339,6 @@ export const QueryStringBuilder: QueryStringBuilderConstructor = funclass2({
   prototype,
 })
 
-/**
- * Creates a new query string builder.
- */
 export function queryBuilder() {
   return new QueryStringBuilder();
 }

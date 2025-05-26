@@ -3,21 +3,6 @@ import {FullSplitQuery} from "@feeddy/types/search";
 export * from "./builder";
 export * from "./representation";
 
-/**
- * Splits the query into an object.
- *
- * @example
- * const splitted = splitQuery('label:this label:are label:label|label:terms "this is exact" this are terms author:"exact terms"')
- * //{
- * //  named: {
- * //    label: { exact: [], terms: [ 'this', 'are', 'label', 'terms' ] },
- * //    author: { exact: [ 'exact terms' ], terms: [] }
- * //  },
- * //  exact: [ 'this is exact' ],
- * //  terms: [ 'this', 'are', 'terms' ]
- * //}
- * @param query The search query
- */
 export function splitQuery(query: string): FullSplitQuery {
   const result: FullSplitQuery = {
     named: {},
