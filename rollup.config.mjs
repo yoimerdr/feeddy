@@ -4,9 +4,10 @@ import commonjs from '@rollup/plugin-commonjs';
 import terser from '@rollup/plugin-terser';
 import {dts} from 'rollup-plugin-dts'
 import alias from "@rollup/plugin-alias";
+import prettier from "rollup-plugin-prettier";
+import path from 'path'
 
 import pkg from './package.json' with { type: 'json' };
-import path from 'path'
 
 const distFolder = `dist/v${pkg.version}`
 
@@ -29,6 +30,13 @@ function varConfig(input, path, name, external, globals) {
         file: path,
         format: 'iife',
         name,
+        plugins: [
+          prettier({
+            tabWidth: 2,
+            singleQuote: true,
+            parser: "babel",
+          })
+        ]
       },
       {
         globals,
@@ -56,7 +64,7 @@ export default [
             replacement: path.resolve("./lib/jstls/src")
           },
           {
-            find: "@",
+            find: "@feeddy",
             replacement: path.resolve("./src")
           }
         ]
