@@ -1,22 +1,22 @@
-import {Posts} from "./types/posts";
-import {Search} from "./types/search";
+import {PostsNamespace} from "./types/posts";
+import {SearchNamespace} from "./types/search";
 import {Routes} from "./types/feeds/shared";
-import {Entries} from "./types/entries";
-import {Pages} from "./types/pages";
-import {Comments} from "./types/comments";
+import {EntriesNamespace} from "./types/entries";
+import {PagesNamespace} from "./types/pages";
+import {CommentsNamespace} from "./types/comments";
 
 export * from "./module";
 
 /**
  * Handler for paginated access to blog posts.
  */
-export declare const posts: Posts;
+export declare const posts: PostsNamespace;
 
 /**
  * Utility for building search queries and parameters for blog feed requests.
  * Includes builders for constructing query strings and search parameter objects.
  */
-export declare const search: Search;
+export declare const search: SearchNamespace;
 
 /**
  * Helper containing relative sub-routes for the blog feed API.
@@ -29,16 +29,16 @@ export declare const routes: Routes;
  * Supports posts, comments and pages with configurable route types.
  * @since 1.2
  */
-export declare const entries: Entries;
+export declare const entries: EntriesNamespace;
 
 /**
  * Handler for paginated access to blog pages.
  * @since 1.2
  */
-export declare const pages: Pages;
+export declare const pages: PagesNamespace;
 
 /**
  * Handler for paginated access to blog comments.
  * @since 1.2
  */
-export declare const comments: Comments;
+export declare const comments: CommentsNamespace;

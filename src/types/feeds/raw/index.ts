@@ -52,7 +52,7 @@ export type RawByIdResult<T extends FeedType = FeedType, R extends FeedRoute = F
  * Provides functionality to fetch both summary and full content feeds,
  * with options for single entries or complete feed retrieval.
  */
-export interface RawFeed {
+export interface RawFeedNamespace {
 
   /**
    * Fetches a summary feed.

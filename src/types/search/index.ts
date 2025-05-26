@@ -44,13 +44,15 @@ export interface FullSplitQuery extends SplitQuery {
    */
   named: Record<string, Maybe<SplitQuery>> & Object;
 }
+/** @deprecated*/
+export type Search = SearchNamespace;
 
 /**
  * Interface for search functionality in the blog API.
  *
  * Provides methods and types for building and manage search queries and parameters.
  */
-export interface Search {
+export interface SearchNamespace {
   /**
    * The handler for
    */

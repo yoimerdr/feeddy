@@ -7,7 +7,7 @@ import {
   FeedRoute,
   FeedType
 } from "./options";
-import {RawFeed} from "./raw";
+import {RawFeedNamespace} from "./raw";
 import {PostsBlog, PostsBlogSummary, PostsEntryBlog, PostsEntryBlogSummary} from "./posts";
 import {CommentsBlog, CommentsBlogSummary} from "./comments";
 import {PagesBlogSummary, PagesEntryBlog, PagesEntryBlogSummary} from "./pages";
@@ -40,7 +40,10 @@ export type Result<T extends FeedType = FeedType, R extends FeedRoute = FeedRout
 export type ByIdResult<T extends FeedType = FeedType, R extends FeedRoute = FeedRoute> =
   FeedResult<T, R,
     PostsEntryBlogSummary, CommentsBlogSummary, PagesEntryBlogSummary,
-    PostsEntryBlog, CommentsBlog, PagesEntryBlog>
+    PostsEntryBlog, CommentsBlog, PagesEntryBlog>;
+
+/** @deprecated*/
+export type Feed = FeedNamespace;
 
 /**
  * Interface defining methods for interacting with mapped Blogger feeds.
@@ -48,7 +51,7 @@ export type ByIdResult<T extends FeedType = FeedType, R extends FeedRoute = Feed
  * Provides functionality to fetch both summary and full content feeds,
  * with options for single entries or complete feed retrieval.
  */
-export interface Feed {
+export interface FeedNamespace {
   /**
    * Fetches a summary feed.
    *
@@ -167,5 +170,5 @@ export interface Feed {
   /**
    * The handler to make requests to the blogger feed API directly.
    */
-  readonly raw: RawFeed
+  readonly raw: RawFeedNamespace
 }

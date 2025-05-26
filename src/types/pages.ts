@@ -51,12 +51,15 @@ export type ByIdPageResult<R extends FeedRoute = FeedRoute> = ByIdResult<"pages"
 
 export type ByIdPageResultSummary = ByIdPageResult<"summary">;
 
+/** @deprecated*/
+export type Pages = PagesNamespace;
+
 /**
  * Interface for retrieving blog pages.
  *
  * Provides methods for paginated access and individual entry retrieval.
  */
-export interface Pages {
+export interface PagesNamespace {
   /**
    * Creates a handler for paginated access to blog pages.
    * @template R - The route type (summary or full)

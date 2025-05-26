@@ -208,12 +208,15 @@ export type ByIdPostsOptions<R extends FeedRoute = FeedRoute> = PostsOptions<R> 
  */
 export type ByIdPostsOptionsSummary = PostsOptionsSummary & WithId;
 
+/** @deprecated*/
+export type Posts = PostsNamespace;
+
 /**
  * Interface for retrieving blog posts.
  *
  * Provides methods for paginated access and individual entry retrieval.
  */
-export interface Posts {
+export interface PostsNamespace {
 
   /**
    * Creates a handler for paginated access to blog posts using the summary route.
