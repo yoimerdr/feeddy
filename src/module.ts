@@ -1,46 +1,49 @@
-import {rawAll, rawById, rawGet} from "@/feeds/raw";
-import {all, byId, get} from "@/feeds";
-import {paramsBuilder, SearchParams, SearchParamsBuilder} from "@/search";
-import {buildUrl, getId} from "@/shared";
-import {Routes} from "@/types/feeds/shared";
-import {posts,} from "@/posts";
+import {rawAll, rawById, rawGet} from "@feeddy/feeds/raw";
+import {all, byId, get} from "@feeddy/feeds";
+import {paramsBuilder, SearchParams, SearchParamsBuilder} from "@feeddy/search";
+import {buildUrl, getId} from "@feeddy/shared";
+import {Routes} from "@feeddy/types/feeds/shared";
+import {posts,} from "@feeddy/posts";
 import {readonlys2} from "@jstls/core/definer";
-import {Feed} from "./types/feeds";
-import {Posts} from "./types/posts";
-import {queryBuilder, QueryStringBuilder} from "./search/query";
-import {Search} from "./types/search";
+import {FeedNamespace} from "./types/feeds";
+import {PostsNamespace} from "./types/posts";
+import {queryBuilder, QueryStringBuilder, splitQuery} from "./search/query";
+import {SearchNamespace} from "./types/search";
 import {postThumbnail} from "./posts/converters";
 import {withCategories} from "./posts/related";
 import {entries} from "./entries";
-import {Entries, EntriesOptions} from "./types/entries";
+import {EntriesNamespace, EntriesOptions} from "./types/entries";
 import {routes} from "./shared/routes";
 import {KeyableObject} from "@jstls/types/core/objects";
 import {set} from "@jstls/core/objects/handlers/getset";
 import {FeedByIdOptions} from "./types/feeds/options";
 import {forEach} from "@jstls/core/shortcuts/array";
 import {assign2} from "@jstls/core/objects/factory";
-import {Comments} from "./types/comments";
-import {Pages} from "./types/pages";
+import {CommentsNamespace} from "./types/comments";
+import {PagesNamespace} from "./types/pages";
 import {commentsById} from "./comments";
-import {RawFeed} from "./types/feeds/raw";
+import {RawFeedNamespace} from "./types/feeds/raw";
 import {entryPathname} from "./entries/shared";
+import {ssrPosts} from "@feeddy/posts/ssr";
+import {QueryNamespace} from "@feeddy/types/search/query";
+import {ParamsNamespace} from "@feeddy/types/search/params";
 
 interface Feeddy {
   buildUrl: typeof buildUrl;
   getId: typeof getId;
   routes: Routes;
-  feed: Feed;
-  search: Search;
-  posts: Posts;
-  entries: Entries;
-  comments: Comments,
-  pages: Pages
+  feed: FeedNamespace;
+  search: SearchNamespace;
+  posts: PostsNamespace;
+  entries: EntriesNamespace;
+  comments: CommentsNamespace,
+  pages: PagesNamespace
 }
 
 /**
  * Define the sub handler for the raw feed.
  */
-readonlys2(rawGet as RawFeed, {
+readonlys2(rawGet as RawFeedNamespace, {
   all: rawAll,
   byId: rawById,
 })
@@ -48,7 +51,7 @@ readonlys2(rawGet as RawFeed, {
 /**
  * The handler to make mapped requests to the blogger feed API.
  */
-const feed: Feed = get as any;
+const feed: FeedNamespace = get as any;
 
 /**
  * Define the sub handler for the mapped feed.
@@ -62,18 +65,29 @@ readonlys2(feed, {
 /**
  * The handler for search on blogger feed.
  */
-const search = <Search>{
+const search = <SearchNamespace>{};
+readonlys2(search, {
   query: queryBuilder,
   QueryStringBuilder,
   params: paramsBuilder,
   SearchParamsBuilder,
-  SearchParams
-}
+  SearchParams,
+})
+
+readonlys2(queryBuilder as QueryNamespace, {
+  split: splitQuery,
+  Builder: QueryStringBuilder,
+})
+
+readonlys2(paramsBuilder as ParamsNamespace, {
+  Params: SearchParams,
+  Builder: SearchParamsBuilder,
+})
 
 /**
  * Define the sub handlers for entries.
  */
-readonlys2(entries as Entries, {
+readonlys2(entries as EntriesNamespace, {
   byId,
   createsPathname: entryPathname,
 })
@@ -81,9 +95,10 @@ readonlys2(entries as Entries, {
 /**
  * Define the sub handlers for posts.
  */
-readonlys2(posts as Posts, {
+readonlys2(posts as PostsNamespace, {
   createsThumbnail: postThumbnail,
-  withCategories
+  withCategories,
+  ssr: ssrPosts
 })
 
 /**

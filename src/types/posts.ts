@@ -269,4 +269,11 @@ export interface PostsNamespace {
    * @param options - Configuration options including the page ID
    */
   byId(options: ByIdPostsOptionsSummary): Promise<ByIdPostResultSummary>;
+
+  /**
+   * Creates a handler for paginated access from SSR urls.
+   *
+   * @param options - Configuration options for the ssr mode.
+   * */
+  ssr(options: PostsSsrOptions): Promise<PostsSsrHandler>;
 }
