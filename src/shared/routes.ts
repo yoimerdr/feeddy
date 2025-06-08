@@ -7,7 +7,7 @@ import {readonly2} from "@jstls/core/definer";
 import {indefinite} from "@jstls/core/utils/types";
 
 export function createRoute(type: Maybe<FeedType>, route: Maybe<FeedRoute>, id?: string): string {
-  let suffix = route === "full" ? "default" : "summary",
+  let suffix = route === "full" ? "full" : "summary",
     mid = "posts",
     prefix = "/";
 

@@ -1,4 +1,3 @@
-import {PromiseConstructor} from "@jstls/types/core/polyfills";
 import {
   WithCategoriesPostsOptions,
   WithCategoriesPostsOptionsSummary,
@@ -16,8 +15,7 @@ import {freeze} from "@jstls/core/shortcuts/object";
 import {len} from "@jstls/core/shortcuts/indexable";
 import {BaseFeedOptions} from "@feeddy/types/feeds/options";
 import {set} from "@jstls/core/objects/handlers/getset";
-
-declare const Promise: PromiseConstructor;
+import {reject} from "@jstls/core/polyfills/promise/fn";
 
 export function withCategories(options: WithCategoriesPostsOptions): Promise<WithCategoriesPostsResult>;
 export function withCategories(options: WithCategoriesPostsOptionsSummary): Promise<WithCategoriesPostsResultSummary>;
@@ -25,7 +23,7 @@ export function withCategories(options: KeyableObject): Promise<KeyableObject | 
   const categories: string[] = options.categories;
 
   if (apply(isEmpty, categories))
-    return new Promise((_, reject) => reject("The categories are empty."));
+    return reject<any>("The categories are empty.");
 
   const feed = feedOptions(options.feed) as BaseFeedOptions<"posts">,
     params = paramsFrom(feed.params),
@@ -37,7 +35,7 @@ export function withCategories(options: KeyableObject): Promise<KeyableObject | 
 
   builderFrom(params)
     .query(
-      apply(builder.categories, builder, <any> categories)
+      apply(builder.categories, builder, <any>categories)
         .build()
     );
 
