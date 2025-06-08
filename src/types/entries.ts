@@ -76,8 +76,9 @@ export interface EntriesHandler<T extends FeedType = FeedType, R extends FeedRou
   /**
    * Retrieves entries from a specific page of the blog feed.
    * @param page - The 1-based page number to retrieve
+   * @param reverse - Whether the page is in reverse order
    */
-  page(this: H, page: number): Promise<EntriesHandlerResult<T, R>>;
+  page(this: H, page: number, reverse?: boolean): Promise<EntriesHandlerResult<T, R>>;
 }
 
 /**
