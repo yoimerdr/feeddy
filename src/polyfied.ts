@@ -4,5 +4,5 @@ import {Promise} from "@jstls/core/polyfills/promise";
 
 export * from "./module";
 writeable(window, "fetch", fetch);
-writeable(window, "Promise", Promise);
+writeable(window, "Promise", Promise as PromiseConstructor);
 writeable(window, "SimplePromise", Promise);
