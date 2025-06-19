@@ -18,6 +18,10 @@ function varConfig(input: string, filepath: string, name?: string, external?: Ex
   return {
     external,
     input,
+    treeshake: {
+      preset: 'smallest',
+      annotations: true,
+    },
     plugins: [
       resolve(),
       commonjs(),
