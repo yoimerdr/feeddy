@@ -62,7 +62,7 @@ export function ssrPosts(options: PostsSsrOptions): Promise<PostsSsrHandler> {
 
       builder
         .max(max)
-        .paginated(page)
+        .page(page)
         .minusIndex(1)
 
       if (ssr === "query" && query) {

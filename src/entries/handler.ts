@@ -29,9 +29,9 @@ export function basicHandler<R = KeyableObject>(changePage: EntriesHandlerPageBu
   }
 }
 
-export function basicHandlerPage(feed: BaseFeedOptions, params: SearchParams, builder: SearchParamsBuilder, request: EntriesHandlerRequest): (page: number, reverse?: boolean) => Promise<any> {
+export function basicHandlerPage(feed: BaseFeedOptions, _: SearchParams, builder: SearchParamsBuilder, request: EntriesHandlerRequest): (page: number, reverse?: boolean) => Promise<any> {
   return function (this: EntriesHandler, page, reverse) {
-    reverse ? builder.repaginated(this.total, page) : builder.paginated(page);
+    reverse ? builder.repage(this.total, page) : builder.page(page);
 
     feed.params = builder
       .build();
