@@ -86,15 +86,30 @@ export interface SearchParamsBuilder {
   /**
    * Changes the 1-based index of the first result to be retrieved
    * according to the {@link max} value.
+   * @deprecated use {@link page} instead.
    *
    * @example
    * builder.max(10)
-   *  .paginated(2) // .start(11)
+   *  .page(2) // .start(11)
    *
    * @param page The page value. The minimum is 0.
    * @see {max}
    */
   paginated(page: Maybe<number | string>): this;
+
+  /**
+   * Changes the 1-based index of the first result to be retrieved
+   * according to the {@link max} value.
+   *
+   * @example
+   * builder.max(10)
+   *  .page(2) // .start(11)
+   *
+   * @param page The page value. The minimum value is 0.
+   * @see {max}
+   * @since 1.4.0
+   */
+  page(page: Maybe<number | string>): this;
 
   /**
    * Changes the 1-based index of the first result to be retrieved
@@ -105,22 +120,23 @@ export interface SearchParamsBuilder {
    *
    * @example
    * builder.max(10)
-   *    .repaginated(50, 1) // .start(40)
+   *    .repage(50, 1) // .start(40)
    *
    * @example
    *
    * builder.max(10)
-   *  .repaginated(24, 3)
+   *  .repage(24, 3)
    *  .build(true) // { 'max-results': 3, 'start-index': 1 }
    *
    * builder.max(10)
-   *  .repaginated(24, 2) // .start(4)
+   *  .repage(24, 2) // .start(4)
    *  .build() // { 'max-results': 10, 'start-index': 4 }
    *
    * @param total
    * @param page
+   * @since 1.4.0
    */
-  repaginated(total: number | string, page: Maybe<number | string>): this;
+  repage(total: number | string, page: Maybe<number | string>): this;
 
   /**
    * Changes the bounds on the entry publication date.
@@ -272,11 +288,6 @@ function paramDate($this: SearchParamsBuilder,
   return $this;
 }
 
-const searchParamsSymbol = uid("p"),
-  realMax = uid("m");
-
-export const maxResults: number = 500;
-
 
 function simpleProperty(key: Keys<SearchParams>) {
   return function (this: SearchParamsBuilder, value: any): SearchParamsBuilder {
@@ -287,17 +298,27 @@ function simpleProperty(key: Keys<SearchParams>) {
   }
 }
 
-const source = ['place', 'plus', 'minus']
-  .map((mode: any) => {
-    return function (this: SearchParamsBuilder, index: Maybe<number | string>): SearchParamsBuilder {
-      return paramIndex(this, index, mode)
-    }
-  });
-
-const max = function (this: SearchParamsBuilder, value: Maybe<string | number>): SearchParamsBuilder {
+const searchParamsSymbol = uid("p"),
+  realMax = uid("m"),
+  maxResults: number = 500,
+  source = ['place', 'plus', 'minus']
+    .map((mode: any) => {
+      return function (this: SearchParamsBuilder, index: Maybe<number | string>): SearchParamsBuilder {
+        return paramIndex(this, index, mode)
+      }
+    }),
+  max = function (this: SearchParamsBuilder, value: Maybe<string | number>): SearchParamsBuilder {
     const $this = this;
     value = (get($this, searchParamsSymbol) as SearchParams).max(value!);
     set($this, realMax, value);
+    return $this;
+  },
+  page = function (this: SearchParamsBuilder, page: Maybe<number | string>) {
+    const $this = this;
+    if (isDefined(page)) {
+      const max = get($this, searchParamsSymbol).max();
+      $this.start(coerceAtLeast(0, toInt(nullable, string(page))! - 1) * max + 1);
+    }
     return $this;
   },
   prototype: Partial<ThisObjectKeys<SearchParamsBuilder>> = {
@@ -309,15 +330,9 @@ const max = function (this: SearchParamsBuilder, value: Maybe<string | number>):
     index: source[0],
     plusIndex: source[1],
     minusIndex: source[2],
-    paginated(page: Maybe<number | string>) {
-      const $this = this;
-      if (isDefined(page)) {
-        const max = get($this, searchParamsSymbol).max();
-        $this.start(coerceAtLeast(0, toInt(nullable, string(page))! - 1) * max + 1);
-      }
-      return $this;
-    },
-    repaginated(total: number | string, page: Maybe<number | string>) {
+    paginated: page,
+    page,
+    repage(total: number | string, page: Maybe<number | string>) {
       const $this = this;
       if (isDefined(total) && isDefined(page)) {
         total = toInt(nullable!, total as string)!;
@@ -328,7 +343,7 @@ const max = function (this: SearchParamsBuilder, value: Maybe<string | number>):
           params = get($this, searchParamsSymbol) as SearchParams,
           prevIndex = mx;
 
-        if(page > 1)
+        if (page > 1)
           prevIndex = coerceAtLeast(1, (total - ((page - 1) * mx) + 1 - index))
 
         params.max(prevIndex);
@@ -398,4 +413,8 @@ export function builderFrom(params?: Partial<RequestFeedParams> | SearchParams, 
  */
 export function paramsBuilder(): SearchParamsBuilder {
   return new SearchParamsBuilder({});
+}
+
+export {
+  maxResults
 }

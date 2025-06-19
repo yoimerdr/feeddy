@@ -27,7 +27,7 @@ export function createRoute(type: Maybe<FeedType>, route: Maybe<FeedRoute>, id?:
  */
 export const routes: Routes = {} as Routes;
 
-forEach(<any>["posts", "pages", "comments"], (key: FeedType) => {
+forEach<FeedType>(["posts", "pages", "comments"], key => {
   readonly2(routes, key, createRoute(key, "full"));
   readonly2(routes, key + "Summary", createRoute(key, indefinite!));
 });

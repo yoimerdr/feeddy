@@ -1,6 +1,6 @@
 import {Keys, Maybe, MaybeString, Nullables} from "@jstls/types/core";
 import {string} from "@jstls/core/objects/handlers";
-import {isDefined} from "@jstls/core/objects/types";
+import {isDefined, isinstance} from "@jstls/core/objects/types";
 import {assign2} from "@jstls/core/objects/factory";
 import {ThisObjectKeys} from "@jstls/types/core/objects";
 import {readonly2,} from "@jstls/core/definer";
@@ -17,6 +17,7 @@ import {includes} from "@jstls/core/polyfills/indexable/es2016";
 import {deletes, deletes2} from "@jstls/core/objects/handlers/deletes";
 import {funclass2} from "@jstls/core/definer/classes/funclass";
 import {indefinite, nullable} from "@jstls/core/utils/types";
+import {simple} from "@jstls/core/definer/getters/builders";
 
 
 export interface SearchParams {
@@ -289,9 +290,7 @@ const prototype: Partial<ThisObjectKeys<SearchParams>> = {
   query: propertyFn("q"),
   alt: propertyFn("alt", (it) => call(includes, ["json", "rss", "atom"], it) ? it : 'json', true),
   orderby: propertyFn("orderby", (order) => call(includes, dateTypes, order) ? order : 'updated', true),
-  toDefined(): Partial<RequestFeedParams> {
-    return this.source;
-  }
+  toDefined: simple('source')
 };
 
 forEach(dateTypes, (key) => {
@@ -314,8 +313,8 @@ export const SearchParams: SearchParamsConstructor = funclass2({
 })
 
 export function paramsFrom(source?: Partial<RequestFeedParams> | SearchParams, copy?: boolean): SearchParams {
-  if (source instanceof SearchParams)
-    return copy ? paramsFrom(source.source, copy) : source as SearchParams;
-  return new SearchParams(copy ? assign2(<RequestFeedParams>{}, source!) : source);
+  if (isinstance(source, SearchParams))
+    return copy ? paramsFrom((source as SearchParams).source, copy) : source as SearchParams;
+  return new SearchParams(copy ? assign2(<RequestFeedParams>{}, source as any) : source as any);
 }
 
