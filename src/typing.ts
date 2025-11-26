@@ -6,6 +6,7 @@ import {PostsNamespace} from "./types/posts";
 import {EntriesNamespace} from "./types/entries";
 import {CommentsNamespace} from "./types/comments";
 import {PagesNamespace} from "./types/pages";
+import {ConvertersNamespace} from "@feeddy/types/converters";
 
 interface Feeddy {
   /**
@@ -55,7 +56,12 @@ interface Feeddy {
    * @since 1.2
    * @func
    */
-  pages: PagesNamespace
+  pages: PagesNamespace,
+  /**
+   * Handler for converters values from raw responses.
+   * @since 1.4.0
+   * */
+  converters: ConvertersNamespace,
 }
 
 declare const feeddy: Feeddy;
