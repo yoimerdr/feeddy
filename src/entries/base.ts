@@ -16,7 +16,7 @@ export type EntriesHandlerBuilder = (feed: BaseFeedOptions, params: SearchParams
 export function entriesBase<R = KeyableObject>(options: EntriesSimpleOptions,
                                                builder: EntriesHandlerBuilder, id?: string): Promise<EntriesHandler & R> {
 
-  options = getIf(options, isObject, self, {},);
+  options = getIf(options, isObject, self, {} as EntriesSimpleOptions,);
   let feed: BaseFeedOptions;
   options.feed = feed = getIf(options.feed, isObject, self, {}) as BaseFeedOptions;
   const params = paramsFrom(feed.params),

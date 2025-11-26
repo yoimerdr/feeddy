@@ -1,6 +1,6 @@
 import {paramsFrom, SearchParams} from "./params";
 import {Keys, Maybe, MaybeString} from "@jstls/types/core";
-import {isDefined} from "@jstls/core/objects/types";
+import {isDefined, isinstance} from "@jstls/core/objects/types";
 import {uid} from "@jstls/core/polyfills/symbol";
 import {apply} from "@jstls/core/functions/apply";
 import {toInt} from "@jstls/core/extensions/string";
@@ -15,6 +15,7 @@ import {forEach} from "@jstls/core/shortcuts/array";
 import {indefinite, nullable} from "@jstls/core/utils/types";
 import {funclass2} from "@jstls/core/definer/classes/funclass";
 import {deletesAll} from "@jstls/core/objects/handlers/deletes";
+import {partial} from "@jstls/core/functions/partial";
 
 export interface SearchParamsBuilder {
   /**
@@ -268,12 +269,16 @@ export interface SearchParamsBuilderConstructor {
   readonly maxResults: number;
 }
 
-function paramIndex($this: SearchParamsBuilder, index: Maybe<number | string>, action: 'place' | 'plus' | 'minus') {
-  const params = get($this, searchParamsSymbol) as SearchParams;
-  let current = params.start();
-  index = toInt(indefinite, string(index))! >> 0;
+function paramIndex(this: SearchParamsBuilder, action: 'place' | 'plus' | 'minus', index: Maybe<number | string>,) {
+  const $this = this,
+    params = get($this, searchParamsSymbol) as SearchParams;
 
-  current = action === 'plus' ? current + index : (action === 'minus' ? current - index : index);
+  let current = params.start();
+  if(isDefined(index)) {
+    index = toInt(indefinite, string(index))!;
+    current = action === 'plus' ? current + index : (action === 'minus' ? current - index : index);
+  } else current = index! as number;
+
   params.start(current);
   return $this;
 }
@@ -303,9 +308,7 @@ const searchParamsSymbol = uid("p"),
   maxResults: number = 500,
   source = ['place', 'plus', 'minus']
     .map((mode: any) => {
-      return function (this: SearchParamsBuilder, index: Maybe<number | string>): SearchParamsBuilder {
-        return paramIndex(this, index, mode)
-      }
+      return partial(paramIndex, mode)
     }),
   max = function (this: SearchParamsBuilder, value: Maybe<string | number>): SearchParamsBuilder {
     const $this = this;
@@ -381,12 +384,13 @@ forEach(dateTypes, (type: "published" | "updated") => {
 
 export const SearchParamsBuilder: SearchParamsBuilderConstructor = funclass2({
   construct: function (source) {
-    if (source instanceof SearchParams) {
-      writeable(this, searchParamsSymbol, source);
-      source = source.source;
+    if (isinstance(source, SearchParams)) {
+      const $this = this;
+      writeable($this, searchParamsSymbol, source);
+      source = (source as SearchParams).source;
       for (const key in source) {
         const map = parametersMap[key as keyof RequestFeedParams] as keyof SearchParamsBuilder;
-        map && (this as KeyableObject)[map](source[key as keyof RequestFeedParams] as never);
+        map && ($this as KeyableObject)[map](source[key as keyof RequestFeedParams] as never);
       }
     } else return builderFrom(source)
   },

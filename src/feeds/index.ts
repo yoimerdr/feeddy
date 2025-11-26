@@ -10,7 +10,6 @@ import {
 } from "@feeddy/types/feeds/options";
 import {ByIdResult, Result} from "@feeddy/types/feeds";
 import {KeyableObject} from "@jstls/types/core/objects";
-import {getty} from "@feeddy/shared/shortnames";
 import {
   ByIdPostResult, ByIdPostResultSummary,
   ByIdPostsOptions,
@@ -19,6 +18,8 @@ import {
   PostsResult,
   PostsResultSummary
 } from "@feeddy/types/posts";
+import {isComments} from "@feeddy/shared";
+import {get2} from "@jstls/core/objects/handlers/getset";
 
 export function all<T extends FeedType = FeedType, R extends FeedRoute = FeedRoute>(options: FeedOptions<T, R>): Promise<Result<T, R>>;
 export function all<T extends FeedType = FeedType>(options: FeedOptionsSummary<T>): Promise<Result<T, "summary">>;
@@ -43,7 +44,7 @@ export function byId<T extends FeedType = FeedType, R extends FeedRoute = FeedRo
 export function byId<R extends FeedRoute = FeedRoute>(options: ByIdPostsOptions<R>): Promise<ByIdPostResult<R>>;
 export function byId(options: ByIdPostsOptionsSummary): Promise<ByIdPostResultSummary>;
 export function byId(options: any): Promise<KeyableObject> {
-  const mapper: any = getty(options, "feed", "type") === "comments" ? rawBlogToBlog : rawBlogEntryToBlogEntry;
+  const mapper: any = isComments(get2(options, 'feed')) ? rawBlogToBlog : rawBlogEntryToBlogEntry;
   return rawById(options)
     .then(mapper)
 }

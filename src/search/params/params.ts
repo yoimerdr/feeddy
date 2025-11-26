@@ -18,6 +18,7 @@ import {deletes, deletes2} from "@jstls/core/objects/handlers/deletes";
 import {funclass2} from "@jstls/core/definer/classes/funclass";
 import {indefinite, nullable} from "@jstls/core/utils/types";
 import {simple} from "@jstls/core/definer/getters/builders";
+import {partial} from "@jstls/core/functions/partial";
 
 
 export interface SearchParams {
@@ -290,7 +291,7 @@ const prototype: Partial<ThisObjectKeys<SearchParams>> = {
   query: propertyFn("q"),
   alt: propertyFn("alt", (it) => call(includes, ["json", "rss", "atom"], it) ? it : 'json', true),
   orderby: propertyFn("orderby", (order) => call(includes, dateTypes, order) ? order : 'updated', true),
-  toDefined: simple('source')
+  toDefined: partial(simple<SearchParams>, 'source')
 };
 
 forEach(dateTypes, (key) => {

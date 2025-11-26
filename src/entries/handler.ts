@@ -6,8 +6,8 @@ import {assign2} from "@jstls/core/objects/factory";
 import {KeyableObject} from "@jstls/types/core/objects";
 import {deletes} from "@jstls/core/objects/handlers/deletes";
 import {EntriesHandlerBuilder} from "@feeddy/entries/base";
-import {getty} from "@feeddy/shared/shortnames";
 import {BaseFeedOptions} from "@feeddy/types/feeds/options";
+import {get} from "@jstls/core/objects/handlers/getset";
 
 export type EntriesHandlerRequest = (feed: BaseFeedOptions) => Promise<BaseBlog>;
 export type EntriesHandlerPageBuilder = (options: BaseFeedOptions, params: SearchParams, builder: SearchParamsBuilder, request: EntriesHandlerRequest) => (page: number) => Promise<any>;
@@ -38,7 +38,7 @@ export function basicHandlerPage(feed: BaseFeedOptions, _: SearchParams, builder
 
     return request(feed)
       .then(blog => {
-        const entries: any[] = getty(blog, "feed", "entry") || [];
+        const entries: any[] = get(blog, "feed", "entry") || [];
 
         reverse && entries.reverse();
         return freeze({

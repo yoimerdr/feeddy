@@ -19,7 +19,7 @@ export function postThumbnail(source: BasePostEntry | string, size: ImageSize<nu
     const $this = this;
     $this.height = round(height);
     $this.width = round(width);
-    $this.adjust = self();
+    $this.adjust = self;
     $this.ratio = function () {
       return $this.height === 0 ? 0 : $this.width / $this.height;
     }
