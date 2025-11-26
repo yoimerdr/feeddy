@@ -1,50 +1,75 @@
+import {ExternalOption, GlobalsOption, RollupOptions} from "rollup";
+
 import typescript from '@rollup/plugin-typescript';
 import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import terser from '@rollup/plugin-terser';
 import {dts} from 'rollup-plugin-dts'
 import alias from "@rollup/plugin-alias";
-import prettier from "rollup-plugin-prettier";
+import licence from "rollup-plugin-license"
 import path from 'path'
 
-import pkg from './package.json' with { type: 'json' };
+import pkg from './package.json';
 
-const distFolder = `dist/v${pkg.version}`
 
-function varConfig(input, path, name, external, globals) {
+const distFolder = `dist/v${pkg.version}`;
+
+function varConfig(input: string, filepath: string, name?: string, external?: ExternalOption, globals?: GlobalsOption): RollupOptions {
   return {
     external,
     input,
+    treeshake: {
+      preset: 'smallest',
+      annotations: true,
+    },
     plugins: [
       resolve(),
       commonjs(),
       typescript({
         module: "esnext",
         target: "es5",
-        removeComments: true,
-      }),
+      })
     ],
     output: [
       {
         globals,
-        file: path,
+        file: filepath,
         format: 'iife',
         name,
         plugins: [
-          prettier({
-            tabWidth: 2,
-            singleQuote: true,
-            parser: "babel",
+          terser({
+            format: {
+              comments: false,
+              beautify: true,
+            },
+            compress: false,
+            mangle: false
+          }),
+          licence({
+            banner: {
+              commentStyle: "ignored",
+              content: {
+                file: path.join(__dirname, ".banner")
+              }
+            }
           })
         ]
       },
       {
         globals,
-        file: path.replace(".js", ".min.js"),
+        file: filepath.replace(".js", ".min.js"),
         format: 'iife',
         name,
         plugins: [
-          terser()
+          terser(),
+          licence({
+            banner: {
+              commentStyle: "ignored",
+              content: {
+                file: path.join(__dirname, ".banner")
+              }
+            }
+          })
         ]
       }
     ]

@@ -19,6 +19,7 @@ import {Author} from "@feeddy/types/feeds/author";
 import {PostThumbnail} from "@feeddy/types/feeds/posts";
 import {KeyableObject} from "@jstls/types/core/objects";
 import {nullable} from "@jstls/core/utils/types";
+import {Maybe} from "@jstls/types/core";
 
 export function rawTextToText(text: RawText): SimpleText {
   return string(get(text, '$t'));
@@ -32,18 +33,26 @@ export function rawTextToBoolean(text: RawText): boolean {
   return Boolean(rawTextToText(text))
 }
 
-export function rawCategoryToCategory(category: RawCategory[]): string[] {
-  return isArray(category) ? category.map(it => it.term) : [];
+export function rawCategoryToCategory(text: RawCategory): SimpleText {
+  return string(get(text, 'term'));
 }
 
-export function rawAuthorToAuthor(author: RawAuthor[]): Author[] {
+export function rawCategoriesToCategories(category: RawCategory[]): string[] {
+  return isArray(category) ? category.map(rawCategoryToCategory) : [];
+}
+
+export function rawAuthorToAuthor(author: RawAuthor): Author {
+  return setTo<RawAuthor, Author>(author, {
+    email: rawTextToText,
+    name: rawTextToText,
+    uri: rawTextToText,
+    gd$image: self
+  }, {})
+}
+
+export function rawAuthorsToAuthors(author: RawAuthor[]): Author[] {
   return isArray(author) ? author
-    .map(value => setTo<RawAuthor, Author>(value, {
-      email: rawTextToText,
-      name: rawTextToText,
-      uri: rawTextToText,
-      gd$image: self
-    }, {})) : [];
+    .map(rawAuthorToAuthor) : [];
 }
 
 export function rawEntryToEntry<T extends RawBaseEntry, R extends BaseEntry>(post: T): R {
@@ -51,13 +60,13 @@ export function rawEntryToEntry<T extends RawBaseEntry, R extends BaseEntry>(pos
     return {} as R;
   return setTo<T & KeyableObject, R>(post, {
     id: rawTextToText,
-    author: rawAuthorToAuthor,
+    author: rawAuthorsToAuthors,
     title: rawTextToText,
     link: self,
     updated: rawTextToText,
     published: rawTextToText,
     /*post property*/
-    category: rawCategoryToCategory,
+    category: rawCategoriesToCategories,
     media$thumbnail: (value: PostThumbnail) => ({
       width: apply(toInt, value.width),
       height: apply(toInt, value.height),
@@ -80,22 +89,23 @@ export function rawBlogEntryToBlogEntry<T extends RawBaseEntryBlog, R extends Ba
   }, {});
 }
 
+export function rawFeedToFeed<T extends RawBaseSimpleFeed, R extends BaseSimpleFeed>(feed: T): R {
+  const res: any = rawEntryToEntry(feed as any);
+  setTo<RawBaseSimpleFeed & KeyableObject, BaseSimpleFeed>(feed, {
+    blogger$adultContent: rawTextToBoolean,
+    subtitle: rawTextToText,
+    openSearch$itemsPerPage: rawTextToNumber,
+    openSearch$startIndex: rawTextToNumber,
+    openSearch$totalResults: rawTextToNumber,
+    entry: (value: Maybe<RawBaseEntry[]>) => isArray(value) ? value.map(rawEntryToEntry) : [],
+  }, res)
+  return res;
+}
+
 export function rawBlogToBlog<T extends RawBaseBlog, R extends BaseBlog>(blog: T): R {
   return setTo<T & KeyableObject, R>(blog, {
     version: self,
     encoding: self,
-    feed: (feed: RawBaseSimpleFeed) => {
-      const res: any = rawEntryToEntry(feed as any);
-      setTo<RawBaseSimpleFeed & KeyableObject, BaseSimpleFeed>(feed, {
-        blogger$adultContent: rawTextToBoolean,
-        subtitle: rawTextToText,
-        openSearch$itemsPerPage: rawTextToNumber,
-        openSearch$startIndex: rawTextToNumber,
-        openSearch$totalResults: rawTextToNumber,
-        entry: (value) => isArray(value) ? value.map(rawEntryToEntry) : [],
-      }, res)
-
-      return res;
-    }
+    feed: rawFeedToFeed
   }, {})
 }

@@ -7,7 +7,7 @@ import {readonly2} from "@jstls/core/definer";
 import {indefinite} from "@jstls/core/utils/types";
 
 export function createRoute(type: Maybe<FeedType>, route: Maybe<FeedRoute>, id?: string): string {
-  let suffix = route === "full" ? "default" : "summary",
+  let suffix = route === "full" ? "full" : "summary",
     mid = "posts",
     prefix = "/";
 
@@ -27,7 +27,7 @@ export function createRoute(type: Maybe<FeedType>, route: Maybe<FeedRoute>, id?:
  */
 export const routes: Routes = {} as Routes;
 
-forEach(<any>["posts", "pages", "comments"], (key: FeedType) => {
+forEach<FeedType>(["posts", "pages", "comments"], key => {
   readonly2(routes, key, createRoute(key, "full"));
   readonly2(routes, key + "Summary", createRoute(key, indefinite!));
 });

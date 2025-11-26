@@ -1,13 +1,13 @@
-import {BaseFeedOptions} from "@feeddy/types/feeds/options";
 import {SearchParams, SearchParamsBuilder} from "@feeddy/search";
 import {BaseBlog} from "@feeddy/types/feeds/entry";
-import {EntriesHandlerSimpleExtra} from "@feeddy/types/entries";
+import {EntriesHandler, EntriesHandlerSimpleExtra} from "@feeddy/types/entries";
 import {freeze} from "@jstls/core/shortcuts/object";
 import {assign2} from "@jstls/core/objects/factory";
 import {KeyableObject} from "@jstls/types/core/objects";
 import {deletes} from "@jstls/core/objects/handlers/deletes";
 import {EntriesHandlerBuilder} from "@feeddy/entries/base";
-import {getty} from "@feeddy/shared/shortnames";
+import {BaseFeedOptions} from "@feeddy/types/feeds/options";
+import {get} from "@jstls/core/objects/handlers/getset";
 
 export type EntriesHandlerRequest = (feed: BaseFeedOptions) => Promise<BaseBlog>;
 export type EntriesHandlerPageBuilder = (options: BaseFeedOptions, params: SearchParams, builder: SearchParamsBuilder, request: EntriesHandlerRequest) => (page: number) => Promise<any>;
@@ -29,16 +29,22 @@ export function basicHandler<R = KeyableObject>(changePage: EntriesHandlerPageBu
   }
 }
 
-export function basicHandlerPage(feed: BaseFeedOptions, params: SearchParams, builder: SearchParamsBuilder, request: EntriesHandlerRequest): (page: number) => Promise<any> {
-  return (page) => {
+export function basicHandlerPage(feed: BaseFeedOptions, _: SearchParams, builder: SearchParamsBuilder, request: EntriesHandlerRequest): (page: number, reverse?: boolean) => Promise<any> {
+  return function (this: EntriesHandler, page, reverse) {
+    reverse ? builder.repage(this.total, page) : builder.page(page);
+
     feed.params = builder
-      .paginated(page)
       .build();
 
     return request(feed)
-      .then(blog => freeze({
-        entries: getty(blog, "feed", "entry") || [],
-        blog
-      }));
+      .then(blog => {
+        const entries: any[] = get(blog, "feed", "entry") || [];
+
+        reverse && entries.reverse();
+        return freeze({
+          entries,
+          blog
+        })
+      });
   }
 }

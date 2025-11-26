@@ -27,6 +27,14 @@ import {entryPathname} from "./entries/shared";
 import {ssrPosts} from "@feeddy/posts/ssr";
 import {QueryNamespace} from "@feeddy/types/search/query";
 import {ParamsNamespace} from "@feeddy/types/search/params";
+import {ConvertersNamespace} from "@feeddy/types/converters";
+import {
+  rawAuthorsToAuthors, rawAuthorToAuthor, rawBlogEntryToBlogEntry, rawBlogToBlog,
+  rawCategoriesToCategories, rawCategoryToCategory, rawEntryToEntry, rawFeedToFeed,
+  rawTextToBoolean,
+  rawTextToNumber,
+  rawTextToText
+} from "@feeddy/shared/converters";
 
 interface Feeddy {
   buildUrl: typeof buildUrl;
@@ -36,8 +44,9 @@ interface Feeddy {
   search: SearchNamespace;
   posts: PostsNamespace;
   entries: EntriesNamespace;
-  comments: CommentsNamespace,
-  pages: PagesNamespace
+  comments: CommentsNamespace;
+  pages: PagesNamespace;
+  converters: ConvertersNamespace;
 }
 
 /**
@@ -102,6 +111,25 @@ readonlys2(posts as PostsNamespace, {
 })
 
 /**
+ * The handler for utils converters
+ * */
+const converters = <ConvertersNamespace>{};
+
+readonlys2(converters, {
+  toText: rawTextToText,
+  toNumber: rawTextToNumber,
+  toBool: rawTextToBoolean,
+  toCategory: rawCategoryToCategory,
+  toCategories: rawCategoriesToCategories,
+  toAuthor: rawAuthorToAuthor,
+  toAuthors: rawAuthorsToAuthors,
+  toEntry: rawEntryToEntry,
+  toFeed: rawFeedToFeed,
+  toBlogEntry: rawBlogEntryToBlogEntry,
+  toBlog: rawBlogToBlog
+})
+
+/**
  * The exports object.
  */
 const module: Feeddy = {
@@ -112,6 +140,7 @@ const module: Feeddy = {
   routes,
   buildUrl,
   getId,
+  converters
 } as Feeddy;
 
 /**

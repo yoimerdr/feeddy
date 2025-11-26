@@ -2,7 +2,6 @@ import {uid} from "@jstls/core/polyfills/symbol";
 import {string} from "@jstls/core/objects/handlers";
 import {get, set} from "@jstls/core/objects/handlers/getset";
 import {slice} from "@jstls/core/iterable";
-import {apply} from "@jstls/core/functions/apply";
 import {MaybeString} from "@jstls/types/core";
 import {writeable} from "@jstls/core/definer";
 import {isEmpty, isNotEmpty} from "@jstls/core/extensions/shared/iterables";
@@ -14,6 +13,7 @@ import {funclass2} from "@jstls/core/definer/classes/funclass";
 import {getDefined} from "@jstls/core/objects/validators";
 import {returns} from "@jstls/core/utils";
 import {indefinite} from "@jstls/core/utils/types";
+import {partial} from "@jstls/core/functions/partial";
 
 
 export interface QueryStringBuilder {
@@ -255,20 +255,22 @@ function buildQuery(terms: string | string[], sep: string, startQuote: string, e
   return isEmpty(terms) ? '' : concat(startQuote, terms.join(sep), endQuote);
 }
 
-function appendQuery($this: QueryStringBuilder, args: ArrayLike<any>, name?: string): QueryStringBuilder {
+function appendQuery(this: QueryStringBuilder, name: string, ...names: string[]): QueryStringBuilder;
+function appendQuery(this: QueryStringBuilder, name: MaybeString,): QueryStringBuilder {
+  const $this = this,
+    qt = quote(get($this, exactSymbol)),
+    op = operator(get($this, operatorSymbol)),
+    xc = get($this, excludeSymbol) ? exclude() : '',
+    args = slice<string>(arguments, 1);
+
   if (isEmpty(args))
     return $this;
-
-  const qt = quote(get($this, exactSymbol)),
-    op = operator(get($this, operatorSymbol)),
-    xc = get($this, excludeSymbol) ? exclude() : '';
 
   name = string(name);
   name = isNotEmpty(name) ? concat(name, ':') : '';
 
-  let current: string = get($this, querySymbol);
-
-  const query = buildQuery(slice(args), concat(qt, op, xc, name, qt), concat(xc, name, qt), qt);
+  let current: string = get($this, querySymbol),
+    query = buildQuery(args, concat(qt, op, xc, name, qt), concat(xc, name, qt), qt);
 
   isNotEmpty(current) && (current += op);
 
@@ -276,34 +278,28 @@ function appendQuery($this: QueryStringBuilder, args: ArrayLike<any>, name?: str
   return $this;
 }
 
-function setFn(symbol: string, value: any) {
-  return function (this: QueryStringBuilder,): QueryStringBuilder {
-    const $this = this;
-    set($this, symbol, value);
-    return $this;
-  }
+function setFn(this: QueryStringBuilder, symbol: string, value: any) {
+  const $this = this;
+  set($this, symbol, value);
+  return $this;
 }
 
 const prototype: Partial<ThisObjectKeys<QueryStringBuilder>> = {
-  and: setFn(operatorSymbol, "AND"),
-  or: setFn(operatorSymbol, 'OR'),
-  exact: setFn(exactSymbol, true),
-  noExact: setFn(exactSymbol, false),
-  exclude: setFn(excludeSymbol, true),
-  noExclude: setFn(excludeSymbol, false),
-  terms(...term) {
-    return appendQuery(this, arguments);
-  },
-  named(name, ...term) {
-    return appendQuery(this, slice(arguments, 1), name);
-  },
+  and: partial(setFn, operatorSymbol, "AND"),
+  or: partial(setFn, operatorSymbol, 'OR'),
+  exact: partial(setFn, exactSymbol, true),
+  noExact: partial(setFn, exactSymbol, false),
+  exclude: partial(setFn, excludeSymbol, true),
+  noExclude: partial(setFn, excludeSymbol, false),
+  terms: partial(appendQuery, ''),
+  named: partial(appendQuery,),
   build(): MaybeString {
     const query: string = get(this, querySymbol);
     return isEmpty(query) ? indefinite : query;
   },
   clear(reset) {
     const $this = this;
-    if(reset) {
+    if (reset) {
       set($this, querySymbol, "");
       set($this, operatorSymbol, "OR");
       set($this, excludeSymbol, false);
@@ -316,10 +312,7 @@ const prototype: Partial<ThisObjectKeys<QueryStringBuilder>> = {
 
 const named = ["label", "title", "author", "link"]
   .map(function (key) {
-    const handler = function (this: QueryStringBuilder, ...values: string[]) {
-      const $this = this;
-      return apply($this.named, $this, <any> concat([key], slice(arguments)))
-    }
+    const handler = partial(appendQuery, key);
     set(prototype, key, handler);
     return handler;
   });
