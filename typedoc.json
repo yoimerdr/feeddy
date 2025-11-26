@@ -8,6 +8,7 @@
     "./src/types/feeds/**/*",
     "./src/types/posts.ts",
     "./src/types/comments.ts",
+    "./src/types/converters.ts",
     "./src/types/entries.ts",
     "./src/types/pages.ts",
     "./src/types/search/**/*"

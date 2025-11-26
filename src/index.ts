@@ -4,6 +4,7 @@ import {Routes} from "./types/feeds/shared";
 import {EntriesNamespace} from "./types/entries";
 import {PagesNamespace} from "./types/pages";
 import {CommentsNamespace} from "./types/comments";
+import {ConvertersNamespace} from "@feeddy/types/converters";
 
 export * from "./module";
 
@@ -42,3 +43,8 @@ export declare const pages: PagesNamespace;
  * @since 1.2
  */
 export declare const comments: CommentsNamespace;
+
+/**
+ * Handler access to converters.
+ * */
+export declare const converters: ConvertersNamespace

@@ -9,8 +9,7 @@
     "dev:ts": "npm run build:ts -- -w",
     "run": "npx ts-node src/index.ts",
     "test": "vitest",
-    "test:coverage": "vitest run --coverage"
-    "test": "npx ts-node src/tests/main.ts",
+    "test:coverage": "vitest run --coverage",
     "docs": "npx typedoc --favicon favicon.ico"
   },
   "devDependencies": {
@@ -27,8 +26,7 @@
     "rollup-plugin-license": "^3.6.0",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
-    "tslib": "^2.6.3",
-    "vitest": "^1.6.0"
+    "vitest": "^1.6.0",
     "tslib": "^2.6.3",
     "typedoc": "^0.26.7",
     "typedoc-plugin-extras": "^3.1.0",

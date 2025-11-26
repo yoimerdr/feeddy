@@ -13,7 +13,7 @@ Download the [feeddy](https://github.com/yoimerdr/feeddy/releases/latest) script
 or you can use
 
 ```html
-<script src="https://yoimerdr.github.io/feeddy/dist/v1.2.1/feeddy.min.js"></script>
+<script src="https://yoimerdr.github.io/feeddy/dist/vx.x.x/feeddy.min.js"></script>
 ```
 ## How to
 
