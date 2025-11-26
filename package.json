@@ -8,7 +8,8 @@
     "clean": "tsc -b --clean",
     "dev:ts": "npm run build:ts -- -w",
     "run": "npx ts-node src/index.ts",
-    "test": "npx ts-node src/tests/main.ts"
+    "test": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "devDependencies": {
     "@rollup/plugin-alias": "^5.1.1",
@@ -18,11 +19,13 @@
     "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-typescript": "^11.1.6",
     "@types/node": "^24.0.1",
+    "@vitest/coverage-v8": "^1.6.0",
     "rollup": "^4.43.0",
     "rollup-plugin-dts": "^6.1.1",
     "rollup-plugin-license": "^3.6.0",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
-    "tslib": "^2.6.3"
+    "tslib": "^2.6.3",
+    "vitest": "^1.6.0"
   }
 }
