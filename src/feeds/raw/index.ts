@@ -56,35 +56,37 @@ export function _rawGet(options: Partial<BaseFeedOptions>, all?: boolean, id?: s
         return res.text();
       })
       .then(body => {
+        let blog: RawBaseBlog
         try {
-          const blog: RawBaseBlog = JSON.parse(body);
-          if (id && !isComments(options)) {
-            return blog;
-          }
-          const {feed} = blog,
-            entry = feed.entry || [];
-
-          extend(entry, entries);
-
-          const length = len(entry);
-          if (isNotEmpty(entry) && (all || (!all && length < max))) {
-            !all && (max -= length);
-            params.start(params.start() + length)
-            params.max(max);
-            if (max > 0)
-              return request(buildUrl(options), max);
-          }
-          feed.entry = entries;
-          if (params.max() !== len(entries))
-            feed.openSearch$itemsPerPage.$t = feed.openSearch$totalResults.$t = string(len(entries));
-          feed.openSearch$startIndex.$t = string(startIndex);
-          return blog;
+          blog = JSON.parse(body);
         } catch (e) {
           throw {
             message: "Parse failed. The response is not a JSON.",
             body,
           };
         }
+
+        if (id && !isComments(options)) {
+          return blog;
+        }
+        const {feed} = blog,
+          entry = feed.entry || [];
+
+        extend(entry, entries);
+
+        const length = len(entry);
+        if (isNotEmpty(entry) && (all || (!all && length < max))) {
+          !all && (max -= length);
+          params.start(params.start() + length)
+          params.max(max);
+          if (max > 0)
+            return request(buildUrl(options), max);
+        }
+        feed.entry = entries;
+        if (params.max() !== len(entries))
+          feed.openSearch$itemsPerPage.$t = feed.openSearch$totalResults.$t = string(len(entries));
+        feed.openSearch$startIndex.$t = string(startIndex);
+        return blog;
       });
   }
 
